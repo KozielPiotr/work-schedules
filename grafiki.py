@@ -5,3 +5,4 @@ from app.models import User
 def make_shell_context():
     return {"db": db, "Użytkownik": User}
 
+
