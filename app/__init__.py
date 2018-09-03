@@ -18,3 +18,5 @@ login.login_message = "Zaloguj się, aby wyświetlić zawartość"
 
 
 from app import routes, models
+
+db.create_all()
