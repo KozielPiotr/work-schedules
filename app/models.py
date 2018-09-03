@@ -14,7 +14,7 @@ class User(UserMixin, db.Model):
     base_user = db.Column(db.Boolean, default=True, nullable=False)
 
     def __repr__(self):
-        return '<User {}>'.format(self.username)
+        return '{}'.format(self.username)
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
