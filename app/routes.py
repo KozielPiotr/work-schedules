@@ -5,6 +5,7 @@ from app import app, db
 from app.forms import LoginForm, RegistrationForm
 from app.models import User
 
+
 # welcome page
 @app.route("/")
 @app.route("/index")
@@ -40,14 +41,18 @@ def logout():
 
 
 #  New user
-@app.route('/register', methods=['GET', 'POST'])
-def register():
+@app.route("/new-user", methods=["GET", "POST"])
+#@login_required
+def new_user():
+    #if current_user.access_level != "a":
+        #flash("Użytkownik nie ma uprawnień do wyświetlenia tej strony")
+        #return redirect(url_for("index"))
     form = RegistrationForm()
     if form.validate_on_submit():
-        user = User(username=form.username.data, email=form.email.data)
+        user = User(username=form.username.data, email=form.email.data, access_level=form.access_level.data)
         user.set_password(form.password.data)
         db.session.add(user)
         db.session.commit()
         flash("Nowy użytkownik zarejestrowany")
-        return redirect(url_for('login'))
-    return render_template('register.html', title='Register', form=form)
+        return redirect(url_for("index"))
+    return render_template("new_user.html", title="Register", form=form)

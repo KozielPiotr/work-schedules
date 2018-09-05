@@ -2,6 +2,23 @@
 
 {% block content %}
     <div>
-        <h1 >POWITALNA</h1>
+        <h1>POWITALNA</h1>
     </div>
+
+    <table class="options_table">
+        <thead>
+            <tr>
+                {% if current_user.access_level=="a" %}
+                    <th>Administrator:</th>
+                {% endif %}
+                <th>Kierownik:</th>
+                <th>Użytkownik:</th>
+            </tr>
+        </thead>
+        <tbody class="options_rows">
+            <tr>
+                <td><a href="{{ url_for('new_user') }}">Nowy użytkownik</a></td>
+            </tr>
+        </tbody>
+    </table>
 {% endblock %}

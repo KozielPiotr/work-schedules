@@ -2,7 +2,7 @@
 
 {% block content %}
 <div style="text-align: center">
-    <h1>Zarejestruj</h1>
+    <h1>Zarejestruj nowego użytkownika</h1>
     <form action="" method="post">
         {{ form.hidden_tag() }}
         <p>
@@ -33,6 +33,17 @@
             <span style="color: red;">[{{ error }}]</span>
             {% endfor %}
         </p>
+        <p>
+            {{ form.access_level.label }}<br>
+            {{ form.access_level }}<br>
+            {% for error in form.access_level.errors %}
+            <span style="color: red;">[{{ error }}]</span>
+            {% endfor %}
+        </p>
+
+<!-- LISTA SKLEPÓW I NADANIE DO NICH UPRAWNIEŃ -->
+            <!-- DO ZROBIENIA -->
+
         <p>{{ form.submit() }}</p>
     </form>
 </div>
