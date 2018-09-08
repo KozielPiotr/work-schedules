@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div style="text-align: center">
+    <h1>Przypisz użytkownika do sklepu</h1>
+    <form action="" method="post">
+        {{ form.hidden_tag() }}
+        <br>
+        <br>
+        <br>
+        <p>
+            {{ form.shop.label }} {{ form.shop }}<br>
+        </p>
+        <p>
+            {{ form.user.label }} {{ form.user }}<br>
+        </p>
+        <p>
+            <br>{{ form.submit }}
+        </p>
+    </form>
+</div>
+{% endblock %}

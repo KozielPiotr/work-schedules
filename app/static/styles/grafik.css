@@ -1,0 +1,48 @@
+ul, ul li {
+	display: block;
+	list-style: none;
+	margin: 0;
+	padding: 5;
+	margin-right: 30px;
+}
+
+ul li {
+	display: inline;
+	white-space: nowrap;
+}
+
+body {
+  background: #EEE;
+  margin: 0;
+  padding: 0;
+}
+
+.table {
+    text-align: center;
+    width: 100%;
+    border-spacing: 1px;
+}
+
+tr {
+background: #f4f7f8;
+}
+
+td,
+ th{
+border: 1px solid #000000;
+}
+
+.headers {
+background: #A0A0A0;
+}
+
+input {
+text-align: center;
+font-size: 8px;
+}
+
+.tfooter {
+font-size: 12px;
+}
+
+tr:hover {background-color: #99CCFF;}

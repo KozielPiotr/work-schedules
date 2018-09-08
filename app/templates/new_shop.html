@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div style="text-align: center">
+    <h1>Stwórz nowy sklep</h1>
+    <form action="" method="post">
+        {{ form.hidden_tag() }}
+        <br>
+        <br>
+        <br>
+        <p>
+            {{ form.shopname.label }}<br>
+            {{ form.shopname(size=32) }}<br>
+            {% for error in form.shopname.errors %}
+            <span style="color: red;">[{{ error }}]</span>
+            {% endfor %}
+        </p>
+        <p>
+            <br>{{ form.submit }}
+        </p>
+    </form>
+</div>
+{% endblock %}

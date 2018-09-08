@@ -2,8 +2,8 @@ from flask import render_template, flash, redirect, url_for, request
 from flask_login import login_user, logout_user, current_user, login_required
 from werkzeug.urls import url_parse
 from app import app, db
-from app.forms import LoginForm, RegistrationForm
-from app.models import User
+from app.forms import LoginForm, NewUserForm, NewShopForm, UserToShopForm
+from app.models import User, Shop
 
 
 # welcome page
@@ -47,7 +47,7 @@ def new_user():
     #if current_user.access_level != "a":
         #flash("Użytkownik nie ma uprawnień do wyświetlenia tej strony")
         #return redirect(url_for("index"))
-    form = RegistrationForm()
+    form = NewUserForm()
     if form.validate_on_submit():
         user = User(username=form.username.data, email=form.email.data, access_level=form.access_level.data)
         user.set_password(form.password.data)
@@ -55,4 +55,38 @@ def new_user():
         db.session.commit()
         flash("Nowy użytkownik zarejestrowany")
         return redirect(url_for("index"))
-    return render_template("new_user.html", title="Register", form=form)
+    return render_template("new_user.html", title="Grafiki - nowy użytkownik", form=form)
+
+
+# New shop
+@app.route("/new-shop", methods=["GET", "POST"])
+def new_shop():
+    # if current_user.access_level != "a":
+        # flash("Użytkownik nie ma uprawnień do wyświetlenia tej strony")
+        # return redirect(url_for("index"))
+    form = NewShopForm()
+    if form.validate_on_submit():
+        shop = Shop(shopname=form.shopname.data)
+        db.session.add(shop)
+        db.session.commit()
+        flash("Stworzono nowy sklep")
+        return redirect(url_for("index"))
+    return render_template("new_shop.html", title="Grafiki - nowy sklep", form=form)
+
+
+# Assigns user to the shop
+@app.route("/shop-user-connect", methods=["GET", "POST"])
+def user_to_shop():
+    # if current_user.access_level != "a":
+        # flash("Użytkownik nie ma uprawnień do wyświetlenia tej strony")
+        # return redirect(url_for("index"))
+    form = UserToShopForm()
+    if form.validate_on_submit():
+        u = form.user.data
+        s = form.shop.data
+        s.works.append(u)
+        db.session.commit()
+        flash("%s przypisany do %s" %(u, s))
+        return redirect(url_for("index"))
+    return render_template("user_to_shop.html", title="Grafiki - przydzielanie użytkownika do sklepu", form=form)
+

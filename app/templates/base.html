@@ -30,7 +30,7 @@
                 {% for message in messages %}
                 <li>{{ message }}
                     {% if current_user.is_anonymous %}
-                        <a href="{{ url_for('new-user') }}"> Zaloguj</a></li>
+                        <a href="{{ url_for('new_user') }}"> Zaloguj</a></li>
                     {% endif %}
                 {% endfor %}
             </ul>
