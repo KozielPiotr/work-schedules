@@ -9,22 +9,18 @@
         <thead>
             <tr>
                 {% if current_user.access_level=="a" %}
-                    <th>Administrator:</th>
+                    <th>
+                        Administrator<br>
+                        <div>
+                            <a href="{{ url_for('new_user') }}">Nowy użytkownik</a><br>
+                            <a href="{{ url_for('new_shop') }}">Nowy sklep</a><br>
+                            <a href="{{ url_for('user_to_shop') }}">Powiązania użytkownik - sklep</a><br>
+                        </div>
+                    </th>
                 {% endif %}
                 <th>Kierownik:</th>
                 <th>Użytkownik:</th>
             </tr>
         </thead>
-        <tbody class="options_rows">
-            <tr>
-                <td><a href="{{ url_for('new_user') }}">Nowy użytkownik</a></td>
-            </tr>
-            <tr>
-                <td><a href="{{ url_for('new_shop') }}">Nowy sklep</a></td>
-            </tr>
-            <tr>
-                <td><a href="{{ url_for('user_to_shop') }}">Przypisz użytkownika do sklepu</a></td>
-            </tr>
-        </tbody>
     </table>
 {% endblock %}

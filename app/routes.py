@@ -81,12 +81,32 @@ def user_to_shop():
         # flash("Użytkownik nie ma uprawnień do wyświetlenia tej strony")
         # return redirect(url_for("index"))
     form = UserToShopForm()
+    shop = Shop.query.order_by(Shop.shopname).all()
+    user = User.query.order_by(User.username).all()
+    users_number = len(user)
     if form.validate_on_submit():
         u = form.user.data
         s = form.shop.data
-        s.works.append(u)
-        db.session.commit()
-        flash("%s przypisany do %s" %(u, s))
-        return redirect(url_for("index"))
-    return render_template("user_to_shop.html", title="Grafiki - przydzielanie użytkownika do sklepu", form=form)
+        already_assigned = s.works
+        if u not in already_assigned:
+            s.works.append(u)
+            db.session.commit()
+            flash("Przypisano %s do %s" %(u, s))
+        else:
+            flash("%s był już przypisany do %s" %(u, s))
+        return redirect(url_for("user_to_shop"))
+    return render_template("user_to_shop.html", title="Grafiki - przydzielanie użytkownika do sklepu", form=form,
+                           user=user, shop=shop, users_number=users_number)
 
+
+# removes connection between user and shop
+@app.route("/remove_user_from_shop", methods=["GET", "POST"])
+def remove_from_shop():
+    user = request.args.get("user")
+    shop = request.args.get("shop")
+    u = User.query.filter_by(username=user).first()
+    s = Shop.query.filter_by(shopname=shop).first()
+    s.works.remove(u)
+    db.session.commit()
+    flash("Usunięto %s z %s"%(user, shop))
+    return redirect(url_for("user_to_shop"))

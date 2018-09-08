@@ -24,25 +24,26 @@ body {
 }
 
 tr {
-background: #f4f7f8;
-}
+    background: #f4f7f8;
+    }
 
 td,
  th{
-border: 1px solid #000000;
-}
+    border: 1px solid #000000;
+    border-collapse: collapse;
+    }
 
 .headers {
-background: #A0A0A0;
-}
+    background: #A0A0A0;
+    }
 
 input {
-text-align: center;
-font-size: 8px;
-}
+    text-align: center;
+    font-size: 8px;
+    }
 
 .tfooter {
-font-size: 12px;
-}
+    font-size: 12px;
+    }
 
 tr:hover {background-color: #99CCFF;}

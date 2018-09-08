@@ -21,13 +21,18 @@ ul li {
 
 th {
     background: #A0A0A0;
-}
+    }
 
-td {
+.user_options {
     background: #C6C6C6;
-}
+    }
 
-td, th {
-    border: 2px solid black;
-    padding:0 15px 0 15px;
-}
+.table_shop_to_users {
+    border-collapse: collapse;
+    text-align: left;
+    margin: 8px;
+    padding: 5px;
+    width: 80%;
+    }
+
+tr:hover {background-color: #99CCFF;}
