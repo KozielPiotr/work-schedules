@@ -138,13 +138,13 @@ def new_schedule():
         y = form.year.data
         m = form.month.data
         flash("Tworzenie grafiku dla sklepu %s na rok %s, miesiąc %s" %(s, y, m))
-        return redirect(url_for("create_schedule"))
+        return redirect(url_for("create_schedule", year=y, month=m, shop=s))
     return render_template("new_schedule.html", title="Grafiki - nowy grafik", form=form)
 
 
-@app.route("/create-schedule", methods=["GET", "POST"])
+@app.route("/create-schedule/<year>/<month>/<shop>", methods=["GET", "POST"])
 @login_required
-def create_schedule():
+def create_schedule(year, month, shop):
     return render_template("empty_schedule.html", title="Grafiki - nowy grafik")
 
 """

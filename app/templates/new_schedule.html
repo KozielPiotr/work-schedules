@@ -9,11 +9,6 @@
             {{ form.month.label }} {{ form.month }}<br><br>
             {{ form.submit }}
         </form>
-    <p>
-        <a href="{{ url_for('create_schedule') }}">CCC</a>
-        {% if error!= Null %}
-        {{ error }}
-        {% endif %}
-    </p>
+
 </div>
 {% endblock %}
