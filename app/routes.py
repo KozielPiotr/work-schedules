@@ -2,14 +2,15 @@ from flask import render_template, flash, redirect, url_for, request
 from flask_login import login_user, logout_user, current_user, login_required
 from werkzeug.urls import url_parse
 from app import app, db
-from app.forms import LoginForm, NewUserForm, NewShopForm, UserToShopForm
+from app.forms import LoginForm, NewUserForm, NewShopForm, UserToShopForm, NewScheduleChoice
 from app.models import User, Shop
+import calendar
 
 
 # welcome page
 @app.route("/")
 @app.route("/index")
-@login_required
+#@login_required
 def index():
     return render_template("index.html", title="Grafiki")
 
@@ -35,6 +36,7 @@ def login():
 
 #  Logging out user
 @app.route("/logout")
+#@login_required
 def logout():
     logout_user()
     return redirect(url_for("index"))
@@ -60,6 +62,7 @@ def new_user():
 
 # New shop
 @app.route("/new-shop", methods=["GET", "POST"])
+#@login_required
 def new_shop():
     # if current_user.access_level != "a":
         # flash("Użytkownik nie ma uprawnień do wyświetlenia tej strony")
@@ -76,6 +79,7 @@ def new_shop():
 
 # Assigns user to the shop
 @app.route("/shop-user-connect", methods=["GET", "POST"])
+#@login_required
 def user_to_shop():
     # if current_user.access_level != "a":
         # flash("Użytkownik nie ma uprawnień do wyświetlenia tej strony")
@@ -100,8 +104,12 @@ def user_to_shop():
 
 
 # removes connection between user and shop
-@app.route("/remove_user_from_shop", methods=["GET", "POST"])
+@app.route("/remove-user-from-shop", methods=["GET", "POST"])
+#@login_required
 def remove_from_shop():
+    #if current_user.access_level != "a":
+        #flash("Użytkownik nie ma uprawnień do wyświetlenia tej strony")
+        #return redirect(url_for("index"))
     user = request.args.get("user")
     shop = request.args.get("shop")
     u = User.query.filter_by(username=user).first()
@@ -110,3 +118,39 @@ def remove_from_shop():
     db.session.commit()
     flash("Usunięto %s z %s"%(user, shop))
     return redirect(url_for("user_to_shop"))
+
+
+@app.route("/new-schedule", methods=["GET", "POST"])
+@login_required
+def new_schedule():
+    if (current_user.access_level != "a") and (current_user.access_level != "m"):
+        flash("Użytkownik nie ma uprawnień do wyświetlenia tej strony")
+        return redirect(url_for("index"))
+    form = NewScheduleChoice()
+    u = current_user.workers_shop
+    users_shops = []
+    for i in u:
+        users_shops.append((str(i), str(i)))
+
+    form.shop.choices = users_shops
+    if form.validate_on_submit():
+        s = form.shop.data
+        y = form.year.data
+        m = form.month.data
+        flash("Tworzenie grafiku dla sklepu %s na rok %s, miesiąc %s" %(s, y, m))
+        return redirect(url_for("create_schedule"))
+    return render_template("new_schedule.html", title="Grafiki - nowy grafik", form=form)
+
+
+@app.route("/create-schedule", methods=["GET", "POST"])
+@login_required
+def create_schedule():
+    return render_template("empty_schedule.html", title="Grafiki - nowy grafik")
+
+"""
+@app.route("/test-fields", methods=["GET", "POST"])
+def test_fields():
+    users = User.query.all()
+    form = Test()
+    return render_template("test_fields.html", title="Grafiki - test", form=form, users=users)
+"""

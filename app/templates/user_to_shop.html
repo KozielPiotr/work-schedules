@@ -24,16 +24,18 @@
                 </th>
                 <th colspan="{{ users_number }}" style="border: 1px solid #000000;">
                     użytkownicy
-                </th style="border: 1px solid #000000;">
+                </th>
                 </thead>
                 <tbody>
                 {% for i in shop  %}
                 <tr>
                     <td style="border: 3px solid #000000;">
+                        <!-- List of shops -->
                         {{ i }}:
                     </td>
                     {% for j in i.works %}
                     <td style="border: 1px solid #000000; padding: 3px;">
+                        <!-- List of users assigned to the shop -->
                         <a href="{{ url_for('remove_from_shop', user=j, shop=i) }}">{{ j }}</a>
                     </td>
                     {% endfor %}<br>

@@ -4,23 +4,35 @@
     <div>
         <h1>POWITALNA</h1>
     </div>
-
-    <table class="options_table">
-        <thead>
-            <tr>
-                {% if current_user.access_level=="a" %}
-                    <th>
-                        Administrator<br>
+    <form action="" method="post">
+        <table class="options_table">
+            <thead>
+                <tr>
+                    {% if current_user.access_level=="a" %}
+                        <th>
+                            Administrator<br>
+                            <div>
+                                <a href="{{ url_for('new_user') }}">Nowy użytkownik</a><br>
+                                <a href="{{ url_for('new_shop') }}">Nowy sklep</a><br>
+                                <a href="{{ url_for('user_to_shop') }}">Powiązania użytkownik - sklep</a><br>
+                            </div>
+                        </th>
+                    {% endif %}
+                    {% if current_user.access_level=="a" or current_user.access_level=="m" %}
+                        <th>Kierownik:
+                            <div>
+                                <a href="{{ url_for('new_schedule') }}">Nowy grafik</a><br>
+                            </div>
+                        </th>
+                    {% endif %}
+                        <th>
+                        Użytkownik:
                         <div>
-                            <a href="{{ url_for('new_user') }}">Nowy użytkownik</a><br>
-                            <a href="{{ url_for('new_shop') }}">Nowy sklep</a><br>
-                            <a href="{{ url_for('user_to_shop') }}">Powiązania użytkownik - sklep</a><br>
+
                         </div>
                     </th>
-                {% endif %}
-                <th>Kierownik:</th>
-                <th>Użytkownik:</th>
-            </tr>
-        </thead>
-    </table>
+                </tr>
+            </thead>
+        </table>
+    </form>
 {% endblock %}
