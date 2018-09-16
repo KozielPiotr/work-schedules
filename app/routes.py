@@ -46,9 +46,10 @@ def logout():
 @app.route("/new-user", methods=["GET", "POST"])
 #@login_required
 def new_user():
-    #if current_user.access_level != "a":
+    #if current_user.access_level != "0":
         #flash("Użytkownik nie ma uprawnień do wyświetlenia tej strony")
         #return redirect(url_for("index"))
+
     form = NewUserForm()
     if form.validate_on_submit():
         user = User(username=form.username.data, email=form.email.data, access_level=form.access_level.data)
@@ -64,9 +65,10 @@ def new_user():
 @app.route("/new-shop", methods=["GET", "POST"])
 #@login_required
 def new_shop():
-    # if current_user.access_level != "a":
+    # if current_user.access_level != "0":
         # flash("Użytkownik nie ma uprawnień do wyświetlenia tej strony")
         # return redirect(url_for("index"))
+
     form = NewShopForm()
     if form.validate_on_submit():
         shop = Shop(shopname=form.shopname.data)
@@ -81,9 +83,10 @@ def new_shop():
 @app.route("/shop-user-connect", methods=["GET", "POST"])
 #@login_required
 def user_to_shop():
-    # if current_user.access_level != "a":
+    # if current_user.access_level != "0":
         # flash("Użytkownik nie ma uprawnień do wyświetlenia tej strony")
         # return redirect(url_for("index"))
+
     form = UserToShopForm()
     shop = Shop.query.order_by(Shop.shopname).all()
     user = User.query.order_by(User.username).all()
@@ -107,9 +110,10 @@ def user_to_shop():
 @app.route("/remove-user-from-shop", methods=["GET", "POST"])
 #@login_required
 def remove_from_shop():
-    #if current_user.access_level != "a":
+    #if current_user.access_level != "0":
         #flash("Użytkownik nie ma uprawnień do wyświetlenia tej strony")
         #return redirect(url_for("index"))
+
     user = request.args.get("user")
     shop = request.args.get("shop")
     u = User.query.filter_by(username=user).first()
@@ -123,9 +127,10 @@ def remove_from_shop():
 @app.route("/new-schedule", methods=["GET", "POST"])
 @login_required
 def new_schedule():
-    if (current_user.access_level != "a") and (current_user.access_level != "m"):
+    if (current_user.access_level != "0") and (current_user.access_level != "1"):
         flash("Użytkownik nie ma uprawnień do wyświetlenia tej strony")
         return redirect(url_for("index"))
+
     form = NewScheduleChoice()
     u = current_user.workers_shop
     users_shops = []
@@ -142,10 +147,39 @@ def new_schedule():
     return render_template("new_schedule.html", title="Grafiki - nowy grafik", form=form)
 
 
+"""
+I'm not using calendar module's names for months and days because whole app has to be in polish,
+    so the code is little more complicated.
+"""
 @app.route("/create-schedule/<year>/<month>/<shop>", methods=["GET", "POST"])
 @login_required
 def create_schedule(year, month, shop):
-    return render_template("empty_schedule.html", title="Grafiki - nowy grafik")
+    if (current_user.access_level != "0") and (current_user.access_level != "1"):
+        flash("Użytkownik nie ma uprawnień do wyświetlenia tej strony")
+        return redirect(url_for("index"))
+
+    s = Shop.query.filter_by(shopname=shop).first()
+    sw = s.works.order_by(User.access_level.asc())
+    users = []
+    for i in sw:
+        users.append(i)
+    numer_of_users = len(users)
+
+    yearn = int(year)
+    monthn = int(month)
+    month_names = ["Styczeń", "luty", "Marzec", "Kwiecień", "Maj", "Czerwiec", "Lipiec", "Sierpień", "Wrzesień",
+                   "Październik", "Listopad", "Grudzień"]
+    month_name = month_names[(monthn)-1]
+
+
+    cal = calendar.Calendar()
+    weekday_names = ["Poniedziałek", "Wtorek", "Środa", "Czwartek", "Piątek", "Sobota", "Niedziela"]
+
+
+
+    return render_template("empty_schedule.html", title="Grafiki - nowy grafik", users=users, nou=numer_of_users,
+                           sw=sw, shop=shop, month=month, year=year, mn=month_name, cal=cal, wdn = weekday_names,
+                           monthn=monthn, yearn=yearn)
 
 """
 @app.route("/test-fields", methods=["GET", "POST"])

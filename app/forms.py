@@ -18,7 +18,7 @@ class NewUserForm(FlaskForm):
     email = StringField("E-mail", validators=[DataRequired(message="Pole wymagane"), Email("Nieprawidłowy adres e-mail")])
     password = PasswordField("Hasło", validators=[DataRequired(message="Pole wymagane")])
     password2 = PasswordField("Powtórz hasło", validators=[DataRequired(message="Pole wymagane"), EqualTo("password")])
-    access_level = SelectField("Poziom uprawnień", validators=[DataRequired(message="Pole wymagane")], choices=[("u","podstawowy"), ("m" ,"kierownik"), ("a", "admin")])
+    access_level = SelectField("Poziom uprawnień", validators=[DataRequired(message="Pole wymagane")], choices=[("2","podstawowy"), ("1" ,"kierownik"), ("0", "admin")])
     submit = SubmitField("Załóż konto")
 
     def validate_username(self, username):

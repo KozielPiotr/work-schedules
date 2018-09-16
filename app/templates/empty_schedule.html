@@ -1,9 +1,78 @@
-{% extends "base.html" %}
+{% extends "base_schedule.html" %}
 
 {% block content %}
-</div>
+<div>
+    <!-- Legend of events -->
+    <table>
+        <caption>Legenda zdarzeń:</caption>
+        <tr>
+            <th>
+                <ul>
+                    <li>UW - urlop wypoczynkowy</li><br>
+                    <li>UNŻ - urlop na żądanie</li>
+                </ul>
+            </th>
+            <th>
+                <ul>
+                    <li>L4 - zwolnienie L4</li><br>
+                    <li>UO - urlop okolicznościowy</li>
+                </ul>
+            </th>
+            <th>
+                <ul>
+                    <li>UOJ - urlop ojcowski</li><br>
+                    <li>UR - urlop rodzicielski</li>
+                </ul>
+            </th>
+        </tr>
+    </table>
+    <br><br>
+
+    <!-- Schedule -->
     <form action="" method="post">
-        <p> tu będzie tworzony grafik</p>
+        <table class="table">
+            <caption>Tworzenie grafiku dla sklepu {{ shop }} na rok {{ year }}, miesiąc {{ mn }}</caption>
+    <!-- headers with shop, month, workers -->
+            <thead>
+            <tr>
+                <th>{{ shop }}</th>
+                <th rowspan="3">D</th>
+                {% for i in sw %}
+                    <th rowspan="2" colspan="4">{{ i }}</th>
+                {% endfor %}
+            </tr>
+            <tr>
+                <th>{{ mn }}</th>
+            </tr>
+            <tr>
+                <th>{{ year }}</th>
+                {% for i in sw %}
+                    <th>Od</th>
+                    <th>Do</th>
+                    <th>H</th>
+                    <th>Podpis</th>
+                {% endfor %}
+            </tr>
+            </thead>
+    <!-- body with days and according data -->
+            <tbody>
+            {% for i in cal.itermonthdays2(yearn, monthn) %}
+                {% if i[0] > 0 %}
+                    <tr>
+                        <th>{{ wdn[i[1]] }}</th>  <!-- day of the week (name) -->
+                        <th>{{ i[0] }}</th>  <!-- day of the week (number) -->
+                        {% for j in sw %}
+                            <th>fod</th>
+                            <th>fdo</th>
+                            <th>fH</th>
+                            <th>fpodpis</th>
+                        {% endfor %}
+                    </tr>
+                {% endif %}
+            {% endfor %}
+
+            </tbody>
+        </table>
     </form>
 </div>
 {% endblock %}

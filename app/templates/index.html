@@ -8,7 +8,7 @@
         <table class="options_table">
             <thead>
                 <tr>
-                    {% if current_user.access_level=="a" %}
+                    {% if current_user.access_level=="0" %}
                         <th>
                             Administrator<br>
                             <div>
@@ -18,7 +18,7 @@
                             </div>
                         </th>
                     {% endif %}
-                    {% if current_user.access_level=="a" or current_user.access_level=="m" %}
+                    {% if current_user.access_level=="0" or current_user.access_level=="1" %}
                         <th>Kierownik:
                             <div>
                                 <a href="{{ url_for('new_schedule') }}">Nowy grafik</a><br>
