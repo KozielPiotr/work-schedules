@@ -59,19 +59,39 @@
             {% for i in cal.itermonthdays2(yearn, monthn) %}
                 {% if i[0] > 0 %}
                     <tr>
-                        <th>{{ wdn[i[1]] }}</th>  <!-- day of the week (name) -->
-                        <th>{{ i[0] }}</th>  <!-- day of the week (number) -->
+                        <td>{{ wdn[i[1]] }}</td>  <!-- day of the week (name) -->
+                        <td>{{ i[0] }}</td>  <!-- day of the week (number) -->
                         {% for j in sw %}
-                            <th>fod</th>
-                            <th>fdo</th>
-                            <th>fH</th>
-                            <th>fpodpis</th>
+                            <td>fod</td>  <!-- form for begin hour -->
+                            <td>fdo</td>  <!-- form for end hour -->
+                            <td>fH</td>  <!-- form for sum of worked hours -->
+                            <td>fpodpis</td>  <!-- form for signature field or event mark -->
                         {% endfor %}
                     </tr>
                 {% endif %}
             {% endfor %}
-
             </tbody>
+    <!-- footer with amount of hours to work and hours worked by each of workers -->
+            <tfoot>
+            <tr>
+                <td colspan="2">H/mc</td>
+                {% for i in sw %}
+                    <td colspan="4">Suma H:</td>
+                {% endfor %}
+            </tr>
+            <tr>
+                <td colspan="2">'godz/mc'</td>  <!-- amount of hours to work in exact month -->
+                {% for i in sw %}
+                    <td colspan="4">'suma przepracowanych godzin'</td> <!-- sum of hours worked by iterated worker -->
+                {% endfor %}
+            </tr>
+            <tr>
+                <td colspan="2">Pozostało H:</td>
+                {% for i in sw %}
+                    <td colspan="4">'nadgodziny lub niedogodziny'</td> <!-- hours left to assign or overtime -->
+                {% endfor %}
+            </tr>
+            </tfoot>
         </table>
     </form>
 </div>
