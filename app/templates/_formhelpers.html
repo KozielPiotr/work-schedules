@@ -1,0 +1,11 @@
+{% macro render_field1(_field, i, j) %}
+    {{ _field(label="%s_%s" %(i, j), id="od", **kwargs) }}
+{% endmacro %}
+
+{% macro render_field2(_field, i, j) %}
+    {{ _field(label="%s_%s" %(i, j), id="do", **kwargs) }}
+{% endmacro %}
+
+{% macro render_field3(_field, i, j) %}
+    {{ _field(label="%s_%s" %(i, j), id="h", **kwargs) }}
+{% endmacro %}

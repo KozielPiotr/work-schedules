@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm, Form
-from wtforms import StringField, PasswordField, BooleanField, SubmitField, SelectField, FieldList, FormField
+from wtforms import StringField, PasswordField, BooleanField, SubmitField, SelectField, IntegerField,TextAreaField
 from wtforms.validators import DataRequired, ValidationError, Email, EqualTo
 from app.models import User, Shop
 from wtforms.ext.sqlalchemy.fields import QuerySelectField
@@ -73,8 +73,11 @@ class NewScheduleChoice(FlaskForm):
 
 
 #Test fieldlists
-class Test1(Form):
-    company_name = StringField('company_name')
+class Test1(FlaskForm):
+    od = IntegerField()
+    do = IntegerField()
+    h = IntegerField()
+    OK = SubmitField("OK")
 
-class Test(Form):
-    locations = FieldList(FormField(Test1), min_entries=1)
+class Test(Test1):
+    pass

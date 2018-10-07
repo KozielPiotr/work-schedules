@@ -3,6 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/grafiki.iml" filepath="$PROJECT_DIR$/.idea/grafiki.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../jquery-form-master/.idea/jquery-form-master.iml" filepath="$PROJECT_DIR$/../jquery-form-master/.idea/jquery-form-master.iml" />
     </modules>
   </component>
 </project>

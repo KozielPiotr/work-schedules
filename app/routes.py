@@ -2,7 +2,7 @@ from flask import render_template, flash, redirect, url_for, request
 from flask_login import login_user, logout_user, current_user, login_required
 from werkzeug.urls import url_parse
 from app import app, db
-from app.forms import LoginForm, NewUserForm, NewShopForm, UserToShopForm, NewScheduleChoice
+from app.forms import LoginForm, NewUserForm, NewShopForm, UserToShopForm, NewScheduleChoice, Test
 from app.models import User, Shop
 import calendar
 
@@ -171,15 +171,17 @@ def create_schedule(year, month, shop):
                    "Październik", "Listopad", "Grudzień"]
     month_name = month_names[(monthn)-1]
 
-
     cal = calendar.Calendar()
     weekday_names = ["Poniedziałek", "Wtorek", "Środa", "Czwartek", "Piątek", "Sobota", "Niedziela"]
 
-
+    form = Test()
+    if form.validate_on_submit():
+        flash("dupa")
+        return redirect(url_for("index"))
 
     return render_template("empty_schedule.html", title="Grafiki - nowy grafik", users=users, nou=numer_of_users,
                            sw=sw, shop=shop, month=month, year=year, mn=month_name, cal=cal, wdn = weekday_names,
-                           monthn=monthn, yearn=yearn)
+                           monthn=monthn, yearn=yearn, form=form)
 
 """
 @app.route("/test-fields", methods=["GET", "POST"])

@@ -1,9 +1,11 @@
 {% extends "base_schedule.html" %}
 
 {% block content %}
+{% from "_formhelpers.html" import render_field1, render_field2, render_field3 %}
+
 <div>
     <!-- Legend of events -->
-    <table>
+    <table style="font-size: 12px">
         <caption>Legenda zdarzeń:</caption>
         <tr>
             <th>
@@ -62,10 +64,14 @@
                         <td>{{ wdn[i[1]] }}</td>  <!-- day of the week (name) -->
                         <td>{{ i[0] }}</td>  <!-- day of the week (number) -->
                         {% for j in sw %}
-                            <td>fod</td>  <!-- form for begin hour -->
-                            <td>fdo</td>  <!-- form for end hour -->
-                            <td>fH</td>  <!-- form for sum of worked hours -->
-                            <td>fpodpis</td>  <!-- form for signature field or event mark -->
+                            <!-- form for begin hour -->
+                            <td>{{ render_field1(form.od, i, j) }}</td>
+                            <!-- form for end hour -->
+                            <td>{{ render_field2(form.do, i, j) }}</td>
+                            <!-- form for sum of worked hours -->
+                            <td>{{ render_field3(form.h, i, j) }}</td>
+                             <!-- form for signature field or event mark -->
+                            <td>.......</td>
                         {% endfor %}
                     </tr>
                 {% endif %}
@@ -93,6 +99,7 @@
             </tr>
             </tfoot>
         </table>
+        {{ form.OK }}
     </form>
 </div>
 {% endblock %}
