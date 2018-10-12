@@ -4,7 +4,7 @@
 	<head>
 		<title>{{ title }}</title>
 		<meta charset="utf-8">
-        <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='styles/grafik.css') }}">
+        {% block styles %}{% endblock %}
 	</head>
 
     <body>

@@ -163,7 +163,8 @@ def create_schedule(year, month, shop):
     users = []
     for i in sw:
         users.append(i)
-    numer_of_users = len(users)
+    number_of_users = len(users)
+    colwidth = 100 / number_of_users / 4
 
     yearn = int(year)
     monthn = int(month)
@@ -179,9 +180,9 @@ def create_schedule(year, month, shop):
         flash("dupa")
         return redirect(url_for("index"))
 
-    return render_template("empty_schedule.html", title="Grafiki - nowy grafik", users=users, nou=numer_of_users,
-                           sw=sw, shop=shop, month=month, year=year, mn=month_name, cal=cal, wdn = weekday_names,
-                           monthn=monthn, yearn=yearn, form=form)
+    return render_template("empty_schedule.html", title="Grafiki - nowy grafik", users=users, sw=sw,
+                           colwidth=colwidth, shop=shop, month=month, year=year, mn=month_name, cal=cal,
+                           wdn = weekday_names, monthn=monthn, yearn=yearn, form=form)
 
 """
 @app.route("/test-fields", methods=["GET", "POST"])
