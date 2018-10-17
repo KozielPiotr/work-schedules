@@ -2,12 +2,13 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="3d1609e3-dc01-4bb1-831a-4c1ecd6bc426" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/app/static/css/table.css" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app.db" beforeDir="false" afterPath="$PROJECT_DIR$/app.db" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/routes.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/routes.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/static/styles/base.css" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/static/styles/grafik.css" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/templates/base_schedule.html" beforeDir="false" afterPath="$PROJECT_DIR$/app/templates/base_schedule.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/static/css/app.css" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/static/css/table.css" beforeDir="false" afterPath="$PROJECT_DIR$/app/static/css/table.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/static/js/table.js" beforeDir="false" afterPath="$PROJECT_DIR$/app/static/js/table.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/templates/empty_schedule (kopia).html" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/app/templates/empty_schedule.html" beforeDir="false" afterPath="$PROJECT_DIR$/app/templates/empty_schedule.html" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -20,10 +21,10 @@
     <session id="-1829249600">
       <usages-collector id="statistics.lifecycle.project">
         <counts>
-          <entry key="project.closed" value="37" />
+          <entry key="project.closed" value="41" />
           <entry key="project.open.time.0" value="6" />
-          <entry key="project.open.time.1" value="3" />
-          <entry key="project.open.time.10" value="11" />
+          <entry key="project.open.time.1" value="4" />
+          <entry key="project.open.time.10" value="12" />
           <entry key="project.open.time.11" value="2" />
           <entry key="project.open.time.12" value="1" />
           <entry key="project.open.time.13" value="1" />
@@ -31,16 +32,17 @@
           <entry key="project.open.time.2" value="1" />
           <entry key="project.open.time.3" value="1" />
           <entry key="project.open.time.4" value="2" />
+          <entry key="project.open.time.5" value="1" />
           <entry key="project.open.time.8" value="2" />
-          <entry key="project.open.time.9" value="8" />
-          <entry key="project.opened" value="39" />
+          <entry key="project.open.time.9" value="9" />
+          <entry key="project.opened" value="43" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.extensions.open">
         <counts>
           <entry key="TODO" value="1" />
-          <entry key="css" value="22" />
-          <entry key="html" value="62" />
+          <entry key="css" value="24" />
+          <entry key="html" value="63" />
           <entry key="js" value="3" />
           <entry key="py" value="65" />
           <entry key="rnc" value="1" />
@@ -49,8 +51,8 @@
       </usages-collector>
       <usages-collector id="statistics.file.types.open">
         <counts>
-          <entry key="CSS" value="22" />
-          <entry key="HTML" value="62" />
+          <entry key="CSS" value="24" />
+          <entry key="HTML" value="63" />
           <entry key="JavaScript" value="3" />
           <entry key="PLAIN_TEXT" value="1" />
           <entry key="Python" value="65" />
@@ -60,21 +62,21 @@
       </usages-collector>
       <usages-collector id="statistics.file.extensions.edit">
         <counts>
-          <entry key="css" value="922" />
+          <entry key="css" value="990" />
           <entry key="dummy" value="19" />
-          <entry key="html" value="9705" />
-          <entry key="js" value="11" />
-          <entry key="py" value="17429" />
+          <entry key="html" value="11168" />
+          <entry key="js" value="820" />
+          <entry key="py" value="17493" />
           <entry key="txt" value="97" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.edit">
         <counts>
-          <entry key="CSS" value="922" />
-          <entry key="HTML" value="9705" />
-          <entry key="JavaScript" value="11" />
+          <entry key="CSS" value="990" />
+          <entry key="HTML" value="11168" />
+          <entry key="JavaScript" value="820" />
           <entry key="PLAIN_TEXT" value="116" />
-          <entry key="Python" value="17429" />
+          <entry key="Python" value="17493" />
         </counts>
       </usages-collector>
     </session>
@@ -95,27 +97,23 @@
       </file>
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/app/static/css/table.css">
-          <provider selected="true" editor-type-id="text-editor">
-            <state>
-              <caret selection-end-line="7" selection-end-column="1" />
-            </state>
-          </provider>
+          <provider selected="true" editor-type-id="text-editor" />
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/app/static/css/bootstrap.css">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="55727">
-              <caret line="2933" column="8" selection-start-line="2933" selection-start-column="8" selection-end-line="2933" selection-end-column="8" />
+            <state relative-caret-position="210">
+              <caret line="5648" column="44" selection-start-line="5648" selection-start-column="41" selection-end-line="5648" selection-end-column="44" />
             </state>
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="false">
+      <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/app/static/js/table.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="817">
-              <caret line="43" column="35" selection-start-line="43" selection-start-column="35" selection-end-line="43" selection-end-column="35" />
+            <state relative-caret-position="1003">
+              <caret line="116" column="26" lean-forward="true" selection-start-line="116" selection-start-column="26" selection-end-line="116" selection-end-column="26" />
             </state>
           </provider>
         </entry>
@@ -123,8 +121,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/app/templates/base_schedule.html">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="266">
-              <caret line="14" column="50" selection-start-line="14" selection-start-column="50" selection-end-line="14" selection-end-column="50" />
+            <state relative-caret-position="95">
+              <caret line="5" column="30" lean-forward="true" selection-start-line="5" selection-start-column="30" selection-end-line="5" selection-end-column="30" />
             </state>
           </provider>
         </entry>
@@ -132,27 +130,40 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/app/routes.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="3382">
-              <caret line="184" column="42" selection-start-line="184" selection-start-column="42" selection-end-line="184" selection-end-column="42" />
+            <state relative-caret-position="484">
+              <caret line="182" column="27" selection-start-line="182" selection-start-column="27" selection-end-line="182" selection-end-column="27" />
               <folding>
                 <element signature="e#0#68#0" expanded="true" />
-                <marker date="1539289938799" expanded="true" signature="2272:2273" ph="..." />
-                <marker date="1539289938799" expanded="true" signature="2272:2277" ph="..." />
-                <marker date="1539289938799" expanded="true" signature="2765:2767" ph="..." />
-                <marker date="1539289938799" expanded="true" signature="2888:2889" ph="..." />
-                <marker date="1539289938799" expanded="true" signature="2888:2893" ph="..." />
-                <marker date="1539289938799" expanded="true" signature="3211:3216" ph="..." />
-                <marker date="1539289938799" expanded="true" signature="4172:4177" ph="..." />
+                <marker date="1539727194487" expanded="true" signature="2272:2273" ph="..." />
+                <marker date="1539727194487" expanded="true" signature="2272:2277" ph="..." />
+                <marker date="1539727194487" expanded="true" signature="2765:2767" ph="..." />
+                <marker date="1539727194487" expanded="true" signature="2888:2889" ph="..." />
+                <marker date="1539727194487" expanded="true" signature="2888:2893" ph="..." />
+                <marker date="1539727194487" expanded="true" signature="3211:3216" ph="..." />
+                <marker date="1539727194487" expanded="true" signature="4172:4177" ph="..." />
               </folding>
             </state>
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="true">
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/app/templates/empty_schedule.html">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="285">
-              <caret line="15" column="22" lean-forward="true" selection-start-line="15" selection-start-column="22" selection-end-line="15" selection-end-column="22" />
+            <state relative-caret-position="323">
+              <caret line="119" column="68" lean-forward="true" selection-start-line="119" selection-start-column="68" selection-end-line="119" selection-end-column="68" />
+              <folding>
+                <element signature="n#style#0;n#td#0;n#tr#0;n#table#0;n#td#2;n#tr#0;n#tbody#0;n#table#0;n#form#0;n#div#0;n#!!top" expanded="true" />
+                <element signature="n#style#0;n#td#1;n#tr#0;n#table#0;n#td#2;n#tr#0;n#tbody#0;n#table#0;n#form#0;n#div#0;n#!!top" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/app/templates/base.html">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="38">
+              <caret line="2" lean-forward="true" selection-start-line="2" selection-end-line="2" />
             </state>
           </provider>
         </entry>
@@ -183,14 +194,26 @@
       <find>wyświetli</find>
       <find>zaloguj się</find>
       <find>fzorm</find>
-      <find>sr-only</find>
+      <find>table-bordered</find>
+      <find>th</find>
       <find>form-inline</find>
+      <find>form-control</find>
+      <find>sr-only</find>
+      <find>.table-bordered</find>
+      <find>solid black</find>
+      <find>user</find>
+      <find>red;</find>
+      <find>red</find>
+      <find>godziny</find>
     </findStrings>
     <replaceStrings>
       <replace>&lt;td style=&quot;color: #f4f7f8&quot;&gt;&lt;form action=&quot;/action_page.php&quot;&gt;&lt;input list=&quot;zdarzenia&quot; name=&quot;od_data&quot; placeholder=&quot;      &quot; size=&quot;1&quot;&gt;&lt;/form&gt;&lt;/td&gt;</replace>
       <replace>&quot;</replace>
       <replace>#</replace>
       <replace>True</replace>
+      <replace>solid red</replace>
+      <replace>worker</replace>
+      <replace>begin_hour</replace>
     </replaceStrings>
     <dirStrings>
       <dir>$PROJECT_DIR$/app/templates</dir>
@@ -238,17 +261,18 @@
         <option value="$PROJECT_DIR$/../jquery-form-master/app.py" />
         <option value="$PROJECT_DIR$/../jquery-form-master/static/js/app.js" />
         <option value="$PROJECT_DIR$/app/templates/base_schedule.html" />
-        <option value="$PROJECT_DIR$/app/static/js/table.js" />
-        <option value="$PROJECT_DIR$/app/routes.py" />
         <option value="$PROJECT_DIR$/app/static/css/app.css" />
+        <option value="$PROJECT_DIR$/app/routes.py" />
+        <option value="$PROJECT_DIR$/app/static/css/bootstrap.css" />
         <option value="$PROJECT_DIR$/app/static/css/table.css" />
         <option value="$PROJECT_DIR$/app/templates/empty_schedule.html" />
+        <option value="$PROJECT_DIR$/app/static/js/table.js" />
       </list>
     </option>
   </component>
   <component name="ProjectFrameBounds">
-    <option name="x" value="262" />
-    <option name="y" value="149" />
+    <option name="x" value="119" />
+    <option name="y" value="117" />
     <option name="width" value="1651" />
     <option name="height" value="818" />
   </component>
@@ -258,6 +282,7 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
+      <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
           <expand>
@@ -293,7 +318,6 @@
           <select />
         </subPane>
       </pane>
-      <pane id="Scope" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -504,10 +528,10 @@
     </todo-panel>
   </component>
   <component name="ToolWindowManager">
-    <frame x="262" y="149" width="1651" height="818" extended-state="0" />
+    <frame x="118" y="309" width="1651" height="818" extended-state="0" />
     <editor active="true" />
     <layout>
-      <window_info active="true" content_ui="combo" id="Project" order="0" sideWeight="0.5188953" visible="true" weight="0.20498443" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" sideWeight="0.5188953" visible="true" weight="0.21495327" />
       <window_info id="Structure" order="1" sideWeight="0.48110464" side_tool="true" weight="0.16573209" />
       <window_info id="Favorites" order="2" sideWeight="0.5022625" side_tool="true" weight="0.13991256" />
       <window_info anchor="bottom" id="Message" order="0" />
@@ -739,13 +763,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/app/templates/base.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state>
-          <caret selection-end-line="7" selection-end-column="11" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/app/static/styles/grafik.css" />
     <entry file="file://$PROJECT_DIR$/../jquery-form-master/static/css/bootstrap.css">
       <provider selected="true" editor-type-id="text-editor" />
@@ -799,9 +816,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/app/static/css/app.css">
-      <provider selected="true" editor-type-id="text-editor" />
-    </entry>
     <entry file="file://$PROJECT_DIR$/app/templates/new_schedule.html">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="114">
@@ -809,55 +823,65 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/app/static/css/table.css">
-      <provider selected="true" editor-type-id="text-editor">
-        <state>
-          <caret selection-end-line="7" selection-end-column="1" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/app/static/css/bootstrap.css">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="55727">
-          <caret line="2933" column="8" selection-start-line="2933" selection-start-column="8" selection-end-line="2933" selection-end-column="8" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/app/static/js/table.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="817">
-          <caret line="43" column="35" selection-start-line="43" selection-start-column="35" selection-end-line="43" selection-end-column="35" />
+        <state relative-caret-position="210">
+          <caret line="5648" column="44" selection-start-line="5648" selection-start-column="41" selection-end-line="5648" selection-end-column="44" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/app/templates/base_schedule.html">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="266">
-          <caret line="14" column="50" selection-start-line="14" selection-start-column="50" selection-end-line="14" selection-end-column="50" />
+        <state relative-caret-position="95">
+          <caret line="5" column="30" lean-forward="true" selection-start-line="5" selection-start-column="30" selection-end-line="5" selection-end-column="30" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/static/css/app.css">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/templates/base.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="38">
+          <caret line="2" lean-forward="true" selection-start-line="2" selection-end-line="2" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/app/routes.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="3382">
-          <caret line="184" column="42" selection-start-line="184" selection-start-column="42" selection-end-line="184" selection-end-column="42" />
+        <state relative-caret-position="484">
+          <caret line="182" column="27" selection-start-line="182" selection-start-column="27" selection-end-line="182" selection-end-column="27" />
           <folding>
             <element signature="e#0#68#0" expanded="true" />
-            <marker date="1539289938799" expanded="true" signature="2272:2273" ph="..." />
-            <marker date="1539289938799" expanded="true" signature="2272:2277" ph="..." />
-            <marker date="1539289938799" expanded="true" signature="2765:2767" ph="..." />
-            <marker date="1539289938799" expanded="true" signature="2888:2889" ph="..." />
-            <marker date="1539289938799" expanded="true" signature="2888:2893" ph="..." />
-            <marker date="1539289938799" expanded="true" signature="3211:3216" ph="..." />
-            <marker date="1539289938799" expanded="true" signature="4172:4177" ph="..." />
+            <marker date="1539727194487" expanded="true" signature="2272:2273" ph="..." />
+            <marker date="1539727194487" expanded="true" signature="2272:2277" ph="..." />
+            <marker date="1539727194487" expanded="true" signature="2765:2767" ph="..." />
+            <marker date="1539727194487" expanded="true" signature="2888:2889" ph="..." />
+            <marker date="1539727194487" expanded="true" signature="2888:2893" ph="..." />
+            <marker date="1539727194487" expanded="true" signature="3211:3216" ph="..." />
+            <marker date="1539727194487" expanded="true" signature="4172:4177" ph="..." />
           </folding>
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/app/static/css/table.css">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
     <entry file="file://$PROJECT_DIR$/app/templates/empty_schedule.html">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="285">
-          <caret line="15" column="22" lean-forward="true" selection-start-line="15" selection-start-column="22" selection-end-line="15" selection-end-column="22" />
+        <state relative-caret-position="323">
+          <caret line="119" column="68" lean-forward="true" selection-start-line="119" selection-start-column="68" selection-end-line="119" selection-end-column="68" />
+          <folding>
+            <element signature="n#style#0;n#td#0;n#tr#0;n#table#0;n#td#2;n#tr#0;n#tbody#0;n#table#0;n#form#0;n#div#0;n#!!top" expanded="true" />
+            <element signature="n#style#0;n#td#1;n#tr#0;n#table#0;n#td#2;n#tr#0;n#tbody#0;n#table#0;n#form#0;n#div#0;n#!!top" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/static/js/table.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1003">
+          <caret line="116" column="26" lean-forward="true" selection-start-line="116" selection-start-column="26" selection-end-line="116" selection-end-column="26" />
         </state>
       </provider>
     </entry>

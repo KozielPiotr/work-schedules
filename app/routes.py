@@ -160,16 +160,14 @@ def create_schedule(year, month, shop):
 
     s = Shop.query.filter_by(shopname=shop).first()
     sw = s.works.order_by(User.access_level.asc())
-    users = []
+    workers = []
     for i in sw:
-        users.append(i)
-    number_of_users = len(users)
-    colwidth = 100 / number_of_users / 4
+        workers.append(i)
 
     yearn = int(year)
     monthn = int(month)
-    month_names = ["Styczeń", "luty", "Marzec", "Kwiecień", "Maj", "Czerwiec", "Lipiec", "Sierpień", "Wrzesień",
-                   "Październik", "Listopad", "Grudzień"]
+    month_names = ["Styczeń", "luty", "Marzec", "Kwiecień", "Maj", "Czerwiec", "Lipiec", "Sierpień",
+                   "Wrzesień", "Październik", "Listopad", "Grudzień"]
     month_name = month_names[(monthn)-1]
 
     cal = calendar.Calendar()
@@ -180,14 +178,24 @@ def create_schedule(year, month, shop):
         flash("dupa")
         return redirect(url_for("index"))
 
-    return render_template("empty_schedule.html", title="Grafiki - nowy grafik", users=users, sw=sw,
-                           colwidth=colwidth, shop=shop, month=month, year=year, mn=month_name, cal=cal,
-                           wdn = weekday_names, monthn=monthn, yearn=yearn, form=form)
+    return render_template("empty_schedule.html", title="Grafiki - nowy grafik", workers=workers,
+                           shop=shop, month=month, year=year, mn=month_name, cal=cal, wdn = weekday_names,
+                           monthn=monthn, yearn=yearn, form=form)
 
-"""
-@app.route("/test-fields", methods=["GET", "POST"])
-def test_fields():
-    users = User.query.all()
-    form = Test()
-    return render_template("test_fields.html", title="Grafiki - test", form=form, users=users)
-"""
+
+@app.route("/<path:path>")
+def static_proxy(path):
+    return app.send_static_file(path)
+
+
+@app.route('/schedule', methods=['POST'])
+def transcribe():
+    data = request.json
+    try:
+        for imie in data.items():
+            for dzien in imie:
+                for dni in dzien:
+                    print(dni)
+        return "OK"
+    except (AttributeError):
+        return "godziny muszą być cyframi"
