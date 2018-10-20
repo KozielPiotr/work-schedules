@@ -1,15 +1,51 @@
 {% extends "base.html" %}
 
-{% block content %}
-<div>
-        <form action="" method="post">
-            {{ form.hidden_tag() }}
-            {{ form.shop.label }} {{ form.shop }}
-            {{ form.year.label }} {{ form.year }}
-            {{ form.month.label }} {{ form.month }}
-            {{ form.hours.label }} {{ form.hours }}<br><br>
-            {{ form.submit }}
-        </form>
+{% block styles %}
+<style>
+#new-schedule-card {
+    width: 33%;
+    text-align: center;
+    vertical-align: middle;
+    margin: 0 auto; /* Added */
+    float: none; /* Added */
+    margin-bottom: 10px; /* Added */
+}
+</style>
+{% endblock %}
 
-</div>
+{% block content %}
+<form action="" method="post">
+    <div>
+        <div id="new-schedule-card" class="card">
+            <div class="card-body">
+                <h5 class="card-title">Nowy grafik</h5>
+            </div>
+            <ul class="list-group list-group-flush">
+                <li class="list-group-item">
+                    {{ form.hidden_tag() }}
+                    {{ form.shop.label }} {{ form.shop }}
+                </li>
+                <li class="list-group-item">
+                    {{ form.year.label }} {{ form.year }}
+                </li>
+                <li class="list-group-item">
+                    {{ form.month.label }} {{ form.month }}
+                </li>
+                {% if current_user.access_level=="0" or current_user.access_level=="1" %}
+                    <li class="list-group-item">
+                {% else %}
+                    <li class="list-group-item" style="display: none;">
+                {% endif %}
+                        {{ form.in_schedule.label }} {{form.in_schedule }}
+                    </li>
+                <li class="list-group-item">
+                    {{ form.hours.label }} {{ form.hours }}
+                </li>
+            </ul>
+            <div class="card-body">
+                {{ form.submit }}
+            </div>
+        </div>
+    </div>
+</form>
 {% endblock %}

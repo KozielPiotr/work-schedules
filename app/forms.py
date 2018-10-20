@@ -15,10 +15,11 @@ class LoginForm(FlaskForm):
 
 class NewUserForm(FlaskForm):
     username = StringField("Nazwa użytkownika", validators=[DataRequired(message="Pole wymagane")])
-    email = StringField("E-mail", validators=[DataRequired(message="Pole wymagane"), Email("Nieprawidłowy adres e-mail")])
     password = PasswordField("Hasło", validators=[DataRequired(message="Pole wymagane")])
     password2 = PasswordField("Powtórz hasło", validators=[DataRequired(message="Pole wymagane"), EqualTo("password")])
-    access_level = SelectField("Poziom uprawnień", validators=[DataRequired(message="Pole wymagane")], choices=[("2","podstawowy"), ("1" ,"kierownik"), ("0", "admin")])
+    access_level = SelectField("Poziom uprawnień", validators=[DataRequired(message="Pole wymagane")],
+                               choices=[("3","podstawowy"), ("2" ,"kierownik"), ("1", "kierownik działu"),
+                                        ("0", "admin")])
     submit = SubmitField("Załóż konto")
 
     def validate_username(self, username):
@@ -55,6 +56,14 @@ class UserToShopForm(FlaskForm):
     submit = SubmitField("Przydziel")
 
 
+class BooleanSubField(BooleanField):
+
+    def process_data(self, value):
+        if isinstance(value, BooleanField):
+            self.data = value.data
+        else:
+            self.data = bool(value)
+
 class NewScheduleChoice(FlaskForm):
     def years_list():
         years = []
@@ -69,5 +78,6 @@ class NewScheduleChoice(FlaskForm):
                                             ("9", "Wrzesień"), ("10", "Październik"), ("11", "Listopad"),
                                             ("12", "Grudzień")))
     hours = IntegerField("Ilość roboczogodzin")
+    in_schedule = BooleanSubField("UWAGA! Tworzący uwzględniony w grafiku?", default=True)
     submit = SubmitField("Stwórz")
 
