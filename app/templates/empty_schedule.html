@@ -1,44 +1,13 @@
 {% extends "base_schedule.html" %}
 
 {% block styles %}
-<link href="{{ url_for('static', filename='css/bootstrap.min.css') }}" rel="stylesheet">
 <link href="{{ url_for('static', filename='css/table.css') }}" rel="stylesheet">
+<link href="{{ url_for('static', filename='css/bootstrap.css') }}" rel="stylesheet">
+<link href="{{ url_for('static', filename='css/bootstrap.min.css') }}" rel="stylesheet">
+<script src="{{ url_for('static', filename='js/bootstrap.min.js') }}"></script>
 <script src="{{ url_for('static', filename='js/jquery.js') }}"></script>
 <script src="{{ url_for('static', filename='js/table.js') }}"></script>
-<script src="{{ url_for('static', filename='js/bootstrap.min.js') }}"></script>
-<style>
-input[type="number"]::-webkit-outer-spin-button, input[type="number"]::-webkit-inner-spin-button {
-    -webkit-appearance: none;
-    margin: 0;
-}
 
-input[type="number"] {
-    -moz-appearance: textfield;
-}
-
-* {
-    -moz-box-sizing: border-box;
-    -webkit-box-sizing: border-box;
-    box-sizing: border-box;
-}
-
-table.table-bordered {
-    border: 1px solid black;
-}
-
-table.table-bordered > thead > tr > th {
-    border: 1px solid black;
-}
-
-table.table-bordered > tbody > tr > td {
-    border: 1px solid black;
-    white-space: nowrap;
-}
-
-#counted {
-    white-space: nowrap;
-}
-</style>
 {% endblock %}
 
 
@@ -46,8 +15,8 @@ table.table-bordered > tbody > tr > td {
 
 <div>
     <!-- Legend of events -->
-    <table class="table-bordered from-to">
-        <caption>Legenda zdarzeń:</caption>
+    <table>
+        <caption id="caption">Legenda zdarzeń:</caption>
         <tr>
             <th>
                 <ul>
@@ -74,15 +43,15 @@ table.table-bordered > tbody > tr > td {
     <!-- Schedule -->
     <form method="post" action="/schedule">
         <button type="submit">Submit</button>
-        <table class="table-bordered">
-            <caption>Tworzenie grafiku dla sklepu {{ shop }} na rok {{ year }}, miesiąc {{ mn }}</caption>
+        <table class="new-schedule-table">
+            <caption id="caption">Tworzenie grafiku dla <b>{{ shop }}</b> na rok <b>{{ year }}</b>, miesiąc <b>{{ mn }}</b></b></caption>
     <!-- headers with shop, month, workers -->
             <thead>
             <tr>
                 <th>{{ shop }}</th>
                 <th rowspan="2">D</th>
                 {% for worker in workers %}
-                    <th class="name-header" rowspan="2" colspan="4">{{ worker }}</th>
+                    <th rowspan="2" colspan="4">{{ worker }}</th>
                 {% endfor %}
             </tr>
             <tr>
@@ -94,28 +63,37 @@ table.table-bordered > tbody > tr > td {
             {% for day in cal.itermonthdays2(yearn, monthn) %}
                 {% if day[0] > 0 %}
                     <tr>
-                        <td>{{ wdn[day[1]] }}</td>  <!-- day of the week (name) -->
-                        <td>{{ day[0] }}</td>  <!-- day of the week (number) -->
+                        <th id="dayname-th">{{ wdn[day[1]] }}</th>  <!-- day of the week (name) -->
+                        <th id="daynumber-th">{{ day[0] }}</th>  <!-- day of the week (number) -->
                         {% for worker in workers %}
                             <td class="mytd" colspan="4">
-                                <table class="inner table-bordered">
+                                <table class="inner">
                                     <tr>
                                         <td style="display: none;">
                                             <input name="day" type="hidden" value="{{ day[0] }}">
                                         </td>
                                         <td style="display: none;">
+                                            <input name="month" type="hidden" value="{{ monthn }}">
+                                        </td>
+                                        <td style="display: none;">
+                                            <input name="year" type="hidden" value="{{ yearn }}">
+                                        </td>
+                                        <td style="display: none;">
                                             <input name="worker" type="hidden" value="{{ worker }}">
                                         </td>
-                                        <td id="begin_hour_td">
-                                            <input type="number" name="begin_hour" value="" placeholder="Od">
+                                        <td id="begin-hour-td">
+                                            <input id="begin-hour-fld" type="number" name="begin_hour" value="" placeholder="Od">
                                         </td>
-                                        <td id="end_hour_td">
-                                            <input type="number" name="end_hour" value="" placeholder="Do">
+                                        <td id="end-hour-td">
+                                            <input id="end-hour-fld" type="number" name="end_hour" value="" placeholder="Do">
                                         </td>
-                                        <td id="counted_td">
-                                            <output name="counted">0</output>
+                                        <td id="counted-header-td">
+                                            H:
                                         </td>
-                                        <td  id="event_td">
+                                        <td id="counted-td">
+                                            <output id="counted-fld" name="counted">0</output>
+                                        </td>
+                                        <td  id="event-td">
                                             <select id="select" name="event">
                                                 <option value="off">X</option>
                                                 <option value="in_work">......</option>
@@ -138,19 +116,19 @@ table.table-bordered > tbody > tr > td {
     <!-- footer with amount of hours to work and hours worked by each of workers -->
             <tfoot>
             <tr>
-                <td colspan="2">H/mc</td>
+                <th colspan="2">H/mc:</th>
                 {% for worker in workers %}
                     <td colspan="4">Suma H:</td>
                 {% endfor %}
             </tr>
             <tr>
-                <td colspan="2">'godz/mc'</td>  <!-- amount of hours to work in exact month -->
+                <th colspan="2">{{ hours }}</th>  <!-- amount of hours to work in exact month -->
                 {% for worker in workers %}
                     <td colspan="4">'suma przepracowanych godzin'</td> <!-- sum of hours worked by iterated worker -->
                 {% endfor %}
             </tr>
             <tr>
-                <td colspan="2">Pozostało H:</td>
+                <th colspan="2">Pozostało H:</th>
                 {% for worker in workers %}
                     <td colspan="4">'nadgodziny lub niedogodziny'</td> <!-- hours left to assign or overtime -->
                 {% endfor %}

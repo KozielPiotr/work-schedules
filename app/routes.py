@@ -2,7 +2,7 @@ from flask import render_template, flash, redirect, url_for, request
 from flask_login import login_user, logout_user, current_user, login_required
 from werkzeug.urls import url_parse
 from app import app, db
-from app.forms import LoginForm, NewUserForm, NewShopForm, UserToShopForm, NewScheduleChoice, Test
+from app.forms import LoginForm, NewUserForm, NewShopForm, UserToShopForm, NewScheduleChoice
 from app.models import User, Shop
 import calendar
 
@@ -102,8 +102,8 @@ def user_to_shop():
         else:
             flash("%s był już przypisany do %s" %(u, s))
         return redirect(url_for("user_to_shop"))
-    return render_template("user_to_shop.html", title="Grafiki - przydzielanie użytkownika do sklepu", form=form,
-                           user=user, shop=shop, users_number=users_number)
+    return render_template("user_to_shop.html", title="Grafiki - przydzielanie użytkownika do sklepu",
+                           form=form, user=user, shop=shop, users_number=users_number)
 
 
 # removes connection between user and shop
@@ -142,8 +142,8 @@ def new_schedule():
         s = form.shop.data
         y = form.year.data
         m = form.month.data
-        flash("Tworzenie grafiku dla sklepu %s na rok %s, miesiąc %s" %(s, y, m))
-        return redirect(url_for("create_schedule", year=y, month=m, shop=s))
+        h = form.hours.data
+        return redirect(url_for("create_schedule", year=y, month=m, shop=s, hours=h))
     return render_template("new_schedule.html", title="Grafiki - nowy grafik", form=form)
 
 
@@ -172,15 +172,11 @@ def create_schedule(year, month, shop):
 
     cal = calendar.Calendar()
     weekday_names = ["Poniedziałek", "Wtorek", "Środa", "Czwartek", "Piątek", "Sobota", "Niedziela"]
-
-    form = Test()
-    if form.validate_on_submit():
-        flash("dupa")
-        return redirect(url_for("index"))
+    hours = request.args.get("hours")
 
     return render_template("empty_schedule.html", title="Grafiki - nowy grafik", workers=workers,
-                           shop=shop, month=month, year=year, mn=month_name, cal=cal, wdn = weekday_names,
-                           monthn=monthn, yearn=yearn, form=form)
+                           shop=shop, year=year, mn=month_name, cal=cal, wdn = weekday_names,
+                           monthn=monthn, yearn=yearn, hours=hours)
 
 
 @app.route("/<path:path>")

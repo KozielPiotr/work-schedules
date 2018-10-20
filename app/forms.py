@@ -1,9 +1,9 @@
-from flask_wtf import FlaskForm, Form
-from wtforms import StringField, PasswordField, BooleanField, SubmitField, SelectField, IntegerField,TextAreaField
+from flask_wtf import FlaskForm
+from wtforms import StringField, PasswordField, BooleanField, SubmitField, SelectField, IntegerField
 from wtforms.validators import DataRequired, ValidationError, Email, EqualTo
 from app.models import User, Shop
 from wtforms.ext.sqlalchemy.fields import QuerySelectField
-from app.routes import current_user
+
 
 
 class LoginForm(FlaskForm):
@@ -68,16 +68,6 @@ class NewScheduleChoice(FlaskForm):
                                             ("5", "Maj"), ("6", "Czerweiec"), ("7", "Lipiec"), ("8", "Sierpień"),
                                             ("9", "Wrzesień"), ("10", "Październik"), ("11", "Listopad"),
                                             ("12", "Grudzień")))
+    hours = IntegerField("Ilość roboczogodzin")
     submit = SubmitField("Stwórz")
 
-
-
-#Test fieldlists
-class Test1(FlaskForm):
-    od = IntegerField()
-    do = IntegerField()
-    h = IntegerField()
-    OK = SubmitField("OK")
-
-class Test(Test1):
-    pass

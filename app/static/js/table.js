@@ -4,11 +4,14 @@ function getHours() {
     var work = "";
     $("table.inner").each(function() {
         var day = $(this).find("input[name='day']").val();
+        var month = $(this).find("input[name='month']").val();
+        var year = $(this).find("input[name='year']").val();
         var worker = $(this).find("input[name='worker']").val();
         var begin_hour = $(this).find("input[name='begin_hour']").val();
         var end_hour = $(this).find("input[name='end_hour']").val();
         var wrkd = $(this).find("output[name='counted']").val();
-        hours.push({"day": day, "worker": worker, "from": begin_hour, "to": end_hour, "sum": wrkd});
+        hours.push({"day": day, "month": month, "year": year, "worker": worker, "from": begin_hour,
+                    "to": end_hour, "sum": wrkd});
     });
     jsonDict[work] = hours;
     console.log(jsonDict);
@@ -66,63 +69,31 @@ $(document).ready(function() {
             var counted = $(this).find("output[name='counted']");
             var ev = $(this).find(":selected");
 
-            switch (ev.val()) {
-                case "off":
-                    $(this).css("background", "#fff");
+            if (ev.val()==="off" || ev.val()==="in_work") {
+                $(this).css("background", "#fff");
                     h1.css("background", "#fff");
                     h2.css("background", "#fff");
                     ev.css("background", "#fff");
-                    break;
-                case "in_work":
-                    $(this).css("background", "#fff");
-                    h1.css("background", "#fff");
-                    h2.css("background", "#fff");
-                    ev.css("background", "#fff");
-                    break;
-                case "UW":
-                    $(this).css("background", "#d62cbe");
-                    h1.css("background", "#d62cbe");
-                    h2.css("background", "#d62cbe");
-                    ev.css("background", "#d62cbe");
-                    h1.val("");
-                    h2.val(8);
-                    break;
-                case "UNŻ":
-                    if ((isNaN(parseInt(h1.val()))===true) || (isNaN(parseInt(h2.val()))===true)) {
-                        alert(`Wpisz prawidłowe godziny pracy dla pracownika ${worker} w dniu ${day}.`);
-                    };
-                    $(this).css("background", "#d62cbe");
-                    h1.css("background", "#d62cbe");
-                    h2.css("background", "#d62cbe");
-                    ev.css("background", "#d62cbe");
-                    break;
-                case "UO":
-                    if ((isNaN(parseInt(h1.val()))===true) || (isNaN(parseInt(h2.val()))===true)) {
-                        alert(`Wpisz prawidłowe godziny pracy dla pracownika ${worker} w dniu ${day}.`);
-                    };
-                    $(this).css("background", "#d62cbe");
-                    h1.css("background", "#d62cbe");
-                    h2.css("background", "#d62cbe");
-                    ev.css("background", "#d62cbe");
-                    break;
-                case "UOJ":
-                    if ((isNaN(parseInt(h1.val()))===true) || (isNaN(parseInt(h2.val()))===true)) {
-                        alert(`Wpisz prawidłowe godziny pracy dla pracownika ${worker} w dniu ${day}.`);
-                    };
-                    $(this).css("background", "#d62cbe");
-                    h1.css("background", "#d62cbe");
-                    h2.css("background", "#d62cbe");
-                    ev.css("background", "#d62cbe");
-                    break;
-                case "UR":
-                    if ((isNaN(parseInt(h1.val()))===true) || (isNaN(parseInt(h2.val()))===true)) {
-                        alert(`Wpisz prawidłowe godziny pracy dla pracownika ${worker} w dniu ${day}.`);
-                    };
-                    $(this).css("background", "#d62cbe");
-                    h1.css("background", "#d62cbe");
-                    h2.css("background", "#d62cbe");
-                    ev.css("background", "#d62cbe");
-                    break;
+            } else if (ev.val()=="UW") {
+                $(this).css("background", "#FC33FF");
+                h1.css("background", "#FC33FF");
+                h2.css("background", "#FC33FF");
+                ev.css("background", "#FC33FF");
+                h1.val("");
+                h2.val(8);
+            } else if (ev.val()==="UNŻ" || ev.val()==="UO" || ev.val()==="UOJ" || ev.val()==="UR") {
+                if ((isNaN(parseInt(h1.val()))===true) || (isNaN(parseInt(h2.val()))===true)) {
+                    alert(`Wpisz prawidłowe godziny pracy dla pracownika ${worker} w dniu ${day}.`);
+                };
+                $(this).css("background", "#FC33FF");
+                h1.css("background", "#FC33FF");
+                h2.css("background", "#FC33FF");
+                ev.css("background", "#FC33FF");
+            } else if (ev.val()==="L4") {
+                $(this).css("background", "#80D332");
+                h1.css("background", "#80D332");
+                h2.css("background", "#80D332");
+                ev.css("background", "#80D332");
             };
         });
     });

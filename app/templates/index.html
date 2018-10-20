@@ -1,38 +1,54 @@
 {% extends "base.html" %}
 
-{% block content %}
-    <div>
-        <h1>POWITALNA</h1>
-    </div>
-    <form action="" method="post">
-        <table class="options_table">
-            <thead>
-                <tr>
-                    {% if current_user.access_level=="0" %}
-                        <th>
-                            Administrator<br>
-                            <div>
-                                <a href="{{ url_for('new_user') }}">Nowy użytkownik</a><br>
-                                <a href="{{ url_for('new_shop') }}">Nowy sklep</a><br>
-                                <a href="{{ url_for('user_to_shop') }}">Powiązania użytkownik - sklep</a><br>
-                            </div>
-                        </th>
-                    {% endif %}
-                    {% if current_user.access_level=="0" or current_user.access_level=="1" %}
-                        <th>Kierownik:
-                            <div>
-                                <a href="{{ url_for('new_schedule') }}">Nowy grafik</a><br>
-                            </div>
-                        </th>
-                    {% endif %}
-                        <th>
-                        Użytkownik:
-                        <div>
+{% block styles %}
+<link href="{{ url_for('static', filename='css/table.css') }}" rel="stylesheet">
+<style>
+#option-card {
+    width: 33%;
+    text-align: center;
+    vertical-align: middle;
+}
 
-                        </div>
-                    </th>
-                </tr>
-            </thead>
-        </table>
-    </form>
+.card {display:inline-block;}
+</style>
+{% endblock %}
+
+{% block content %}
+<div>
+    <h1>POWITALNA</h1>
+</div>
+    <div class="card-group">
+    {% if current_user.access_level=="0" %}
+        <div id="option-card" class="card">
+            <div class="card-body">
+                <h5 class="card-title ">Administrator</h5>
+            <ul class="list-group list-group-flush">
+                <li class="list-group-item"><a href="{{ url_for('new_user') }}" class="btn btn-primary">Nowy użytkownik</a></li>
+                <li class="list-group-item"><a href="{{ url_for('new_shop') }}" class="btn btn-primary">Nowy sklep</a></li>
+                <li class="list-group-item"><a href="{{ url_for('user_to_shop') }}" class="btn btn-primary">Powiązania użytkownik - sklep</a></li>
+            </ul>
+            </div>
+        </div>
+    {% endif %}
+    {% if current_user.access_level=="0" or current_user.access_level=="1" %}
+        <div id="option-card" class="card">
+            <div class="card-body">
+                <h5 class="card-title ">Kierownik</h5>
+            <ul class="list-group list-group-flush">
+                <li class="list-group-item"><a href="{{ url_for('new_schedule') }}" class="btn btn-primary">Nowy grafik</a></li>
+            </ul>
+            </div>
+        </div>
+    {% endif %}
+    {% if current_user.access_level=="0" or current_user.access_level=="1" %}
+        <div id="option-card" class="card">
+            <div class="card-body">
+                <h5 class="card-title ">Użytkownik</h5>
+            <ul class="list-group list-group-flush">
+
+            </ul>
+            </div>
+        </div>
+    {% endif %}
+    </div>
 {% endblock %}

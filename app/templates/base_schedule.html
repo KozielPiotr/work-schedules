@@ -1,36 +1,42 @@
 <!DOCTYPE html>
 <html lang="pl-PL">
 
-	<head>
-		<title>{{ title }}</title>
-		<meta charset="utf-8">
-        {% block styles %}{% endblock %}
-	</head>
+<head>
+	<title>{{ title }}</title>
+	<meta charset="utf-8">
+    {% block styles %}{% endblock %}
+</head>
 
-    <body>
-    <!-- TOP MENU -->
-        <div style="text-align: right; font-size: 16px; width: 99%;">
-            <ul>
-                <li><a href="{{ url_for('index') }}">Główna</a></li>
-                {% if current_user.is_anonymous %}
-                <li><a href="{{ url_for('login') }}">Zaloguj</a></li>
-                {% else %}
-                <li><a href="{{ url_for('logout') }}">Wyloguj {{ current_user.username }}</a></li>
-                {% endif %}
+<body>
+<!-- TOP MENU -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <div class="collapse navbar-collapse flex-grow-1 text-right">
+            <ul class="navbar-nav ml-auto flex-nowrap">
+                <li class="nav-item">
+                    <a href="{{ url_for('index') }}" class="nav-link m-2 menu-item nav-active">Główna</a>
+                </li>
+                <li class="nav-item">
+                    {% if current_user.is_anonymous %}
+                    <a href="{{ url_for('login') }}" class="nav-link m-2 menu-item">Zaloguj</a>
+                    {% else %}
+                    <a href="{{ url_for('logout') }}" class="nav-link m-2 menu-item">Wyloguj {{ current_user.username }}</a>
+                    {% endif %}
+                </li>
             </ul>
-            <hr>
         </div>
+    </nav>
 
-    <!-- MAIN CONTENT -->
-        {% block content %}{% endblock %}
+<!-- MAIN CONTENT -->
+    {% block content %}{% endblock %}
 
-    <!-- FOOT
-        <div style="font-size: 11px; position: absolute; bottom: 0px; width: 99%;">
-            <br>
-            <br>
-            <hr>
-            <p style="text-align: right;">2018 by Piotr Kozieł. All rights reserved. <a href="mailto:koziel.piotr1988@gmail.com">Contact</a></p>
-        </div>
-    -->
-    </body>
+<!-- FOOT
+    <div style="font-size: 11px; position: absolute; bottom: 0px; width: 99%;">
+        <br>
+        <br>
+        <hr>
+        <p style="text-align: right;">2018 by Piotr Kozieł. All rights reserved. <a href="mailto:koziel.piotr1988@gmail.com">Contact</a></p>
+    </div>
+-->
+</body>
+
 </html>
