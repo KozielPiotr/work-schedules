@@ -33,7 +33,7 @@ class Shop(db.Model):
     def __repr__(self):
         return "{}".format(self.shopname)
 
-class Schedule(db.Model):
+class Personal_schedule(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     date = db.Column(db.DateTime, index=True)
     worker = db.Column(db.String)

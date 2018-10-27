@@ -3,7 +3,7 @@ from flask_login import login_user, logout_user, current_user, login_required
 from werkzeug.urls import url_parse
 from app import app, db
 from app.forms import LoginForm, NewUserForm, NewShopForm, UserToShopForm, NewScheduleChoice
-from app.models import User, Shop, Schedule
+from app.models import User, Shop, Personal_schedule
 import calendar
 import datetime
 from datetime import datetime, date
@@ -208,6 +208,6 @@ def transcribe():
                     event = element["event"]
                     workplace = element["workplace"]
                     print(d, worker, b_hour, e_hour, sum, event, workplace)
-        return "OK"
+        return url_for("index")
     except (AttributeError):
-        return "godziny muszą być cyframi"
+        return "Popraw błędy w stworzonym grafiku"

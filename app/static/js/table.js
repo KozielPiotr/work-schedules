@@ -7,6 +7,8 @@ function getHours() {
     $("td[id^='begin']").each(function() {
         $(this).change();
     });
+    let numberOfErrors = 0
+    let errors = [];
     $("td[id^=to-json-]").each(function() {
         selHelper = $(this).find("input[name='helper']").val();
         let day = $(this).find("input[name='day']").val();
@@ -27,45 +29,23 @@ function getHours() {
         };
 
         //checks if everything is filled correctly
-            //UW
-        if (event==="UW" && (beginHour!==0 || endHour!==8)) {
-            isEvent = confirm(`Niewłaściwe godziny przy UW\nCzy ${worker} w dniu ${day} powinien być na urlopie wypoczynkowym?`);
-            if (isEvent) {
-                beginHour = 0;
-                endHour = 8;
-                wrkd = 8;
-                check = true;
-            } else {
-                check = true;
-                while (check === true) {
-                    beginHour = prompt(`O której ${worker} powinien ZACZYNAĆ pracę w dniu ${day}?`);
-                    if (isNaN(parseInt(beginHour)) || (parseInt(beginHour)<1 || parseInt(beginHour)>24)) {
-                        alert("Błędna godzina");
-                    } else {
-                        check = false;
-                    };
-                };
-                check = true;
-                while (check === true) {
-                    endHour = prompt(`O której ${worker} powinien KOŃCZYĆ pracę w dniu ${day}?`);
-                    if (isNaN(parseInt(endHour)) || (parseInt(endHour)<1 || parseInt(endHour)>24)) {
-                        alert("Błędna godzina");
-                    } else {
-                        check = false;
-                    };
-                };
-            };
-            wrkd = parseInt(endHour) - parseInt(beginHour);
-            check = true
+        if ((event==="UW" || event==="UO" || event==="UB") && (beginHour!==0 || endHour!==8)) {
+            numberOfErrors += 1
+            errors[numberOfErrors] = (`\n${numberOfErrors}. Niewłaściwe godziny ${event} u ${worker} w dniu ${day}.${month}.${year}`);
         };
-            //UNŻ
-        if (event==="UNŻ" && (beginHour===0 || endHour===8)) {
-
+        if (event==="UNŻ" && (beginHour===0 || endHour===0)) {
+            numberOfErrors += 1
+            errors[numberOfErrors] = (`\n${numberOfErrors}.Niewłaściwe godziny ${event} u ${worker} w dniu ${day}.${month}.${year}`)
         };
 
+        //fills array for json
         hours.push({"day": day, "month": month, "year": year, "worker": worker, "from": beginHour,
                     "to": endHour, "sum": wrkd, "event": event, "workplace": workplace});
     });
+    if (errors.length > 0) {
+        alert(errors);
+        return false;
+    };
     jsonDict[work] = hours;
     console.log(jsonDict);
     return jsonDict;
@@ -73,19 +53,20 @@ function getHours() {
 
 
 $(document).ready(function() {
-    $("form").submit(function(e){
-        let form = $(this);
-        $.ajax({
-            url   : form.attr("action"),
-            type  : form.attr("method"),
-            contentType: 'application/json;charset=UTF-8',
-            data  : JSON.stringify(getHours()),
-            success: function(response){
-                alert(response);
-            },
+        $("form").submit(function(e){
+            let form = $(this);
+            $.ajax({
+                url   : form.attr("action"),
+                type  : form.attr("method"),
+                contentType: 'application/json;charset=UTF-8',
+                data  : JSON.stringify(getHours()),
+                success: function(response){
+                    alert(response);
+                    //window.location.replace(response);
+                },
+            });
+            return false;
         });
-        return false;
-     });
 });
 
 
