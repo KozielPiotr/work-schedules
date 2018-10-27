@@ -1,17 +1,70 @@
+
+
 function getHours() {
-    var hours = [];
-    var jsonDict = {};
-    var work = "";
-    $("table.inner").each(function() {
-        var day = $(this).find("input[name='day']").val();
-        var month = $(this).find("input[name='month']").val();
-        var year = $(this).find("input[name='year']").val();
-        var worker = $(this).find("input[name='worker']").val();
-        var begin_hour = $(this).find("input[name='begin_hour']").val();
-        var end_hour = $(this).find("input[name='end_hour']").val();
-        var wrkd = $(this).find("output[name='counted']").val();
-        hours.push({"day": day, "month": month, "year": year, "worker": worker, "from": begin_hour,
-                    "to": end_hour, "sum": wrkd});
+    let hours = [];
+    let jsonDict = {};
+    let work = "";
+    $("td[id^='begin']").each(function() {
+        $(this).change();
+    });
+    $("td[id^=to-json-]").each(function() {
+        selHelper = $(this).find("input[name='helper']").val();
+        let day = $(this).find("input[name='day']").val();
+        let month = $(this).find("input[name='month']").val();
+        let year = $(this).find("input[name='year']").val();
+        let worker = $(this).find("input[name='worker']").val();
+        let beginHour = parseInt($(this).find("input[name='b-hour']").val());
+        let endHour = parseInt($(this).find("input[name='e-hour']").val());
+        let wrkd = $(this).find("input[name='counted']").val();
+        let event = $(this).find("input[name='event']").val();
+        let workplace = $(this).find("input[name='shop']").val();
+
+        if (isNaN(beginHour)) {
+            beginHour = 0;
+        };
+        if (isNaN(endHour)) {
+            endHour = 0;
+        };
+
+        //checks if everything is filled correctly
+            //UW
+        if (event==="UW" && (beginHour!==0 || endHour!==8)) {
+            isEvent = confirm(`Niewłaściwe godziny przy UW\nCzy ${worker} w dniu ${day} powinien być na urlopie wypoczynkowym?`);
+            if (isEvent) {
+                beginHour = 0;
+                endHour = 8;
+                wrkd = 8;
+                check = true;
+            } else {
+                check = true;
+                while (check === true) {
+                    beginHour = prompt(`O której ${worker} powinien ZACZYNAĆ pracę w dniu ${day}?`);
+                    if (isNaN(parseInt(beginHour)) || (parseInt(beginHour)<1 || parseInt(beginHour)>24)) {
+                        alert("Błędna godzina");
+                    } else {
+                        check = false;
+                    };
+                };
+                check = true;
+                while (check === true) {
+                    endHour = prompt(`O której ${worker} powinien KOŃCZYĆ pracę w dniu ${day}?`);
+                    if (isNaN(parseInt(endHour)) || (parseInt(endHour)<1 || parseInt(endHour)>24)) {
+                        alert("Błędna godzina");
+                    } else {
+                        check = false;
+                    };
+                };
+            };
+            wrkd = parseInt(endHour) - parseInt(beginHour);
+            check = true
+        };
+            //UNŻ
+        if (event==="UNŻ" && (beginHour===0 || endHour===8)) {
+
+        };
+
+        hours.push({"day": day, "month": month, "year": year, "worker": worker, "from": beginHour,
+                    "to": endHour, "sum": wrkd, "event": event, "workplace": workplace});
     });
     jsonDict[work] = hours;
     console.log(jsonDict);
@@ -21,7 +74,7 @@ function getHours() {
 
 $(document).ready(function() {
     $("form").submit(function(e){
-        var form = $(this);
+        let form = $(this);
         $.ajax({
             url   : form.attr("action"),
             type  : form.attr("method"),
@@ -36,65 +89,153 @@ $(document).ready(function() {
 });
 
 
+//fills <td> that sends data to form json
+function tdToJson(selHelper, from, to, counted, event) {
+    let td = $(`td[id="to-json-${selHelper}"]`);
+    td.find("input[name='b-hour']").val(from);
+    td.find("input[name='e-hour']").val(to);
+    td.find("input[name='counted']").val(counted);
+    td.find("input[name='event']").val(event);
+};
+
+
+//counts sum of hours worked by worker in day
 $(document).ready(function() {
-    $("*").change(function() {
-        $("td.mytd").each(function() {
-            var h1 = parseInt($(this).find("input[name='begin_hour']").val());
-            var h2 = parseInt($(this).find("input[name='end_hour']").val());
-            var ev = $(this).find(":selected");
-            if (isNaN(h1)===true) {
-              h1 = 0;
-            };
-            if (isNaN(h2)===true) {
-              h2 = 0;
-            };
-            var sumOfHours = h2 - h1;
-            if (isNaN(sumOfHours)===true) {
-              $(this).find("output[name='counted']").val(0);
-            } else {
-              $(this).find("output[name='counted']").val(sumOfHours);
-            };
-        });
+    $("td[id^='begin-'], td[id^='end-']").change(function() {
+        let selHelper = $(this).find("input[name='helper']").val();
+        let from = parseInt($(`#begin-${selHelper}`).find("input[name='begin-hour']").val());
+        let to = parseInt($(`#end-${selHelper}`).find("input[name='end-hour']").val());
+        let counted = $(`#counted-${selHelper}`).find("output[name='counted']");
+        let event = $(`#event-${selHelper}`).find(":selected").val();
+        if (isNaN(from)) {
+              from = 0;
+        };
+        if (isNaN(to)) {
+            to = 0;
+        };
+        if (isNaN(counted.val())) {
+            counted.val(0);
+        };
+        counted.val(to - from).change();
+        counted = counted.val();
+        tdToJson(selHelper, from, to, counted, event);
     });
 });
 
 
+//gives cells and fields color of event
 $(document).ready(function() {
-    $(":input").change(function() {
-        $("table.inner").each(function() {
-            var h1 = $(this).find("input[name='begin_hour']");
-            var h2 = $(this).find("input[name='end_hour']");
-            var day = $(this).find("input[name='day']").val();
-            var worker = $(this).find("input[name='worker']").val();
-            var counted = $(this).find("output[name='counted']");
-            var ev = $(this).find(":selected");
+    $("td[id^='event-']").change(function() {
+        let selHelper = $(this).find("input[name='helper']").val();
+        let event = $(this).find(":selected");
+        let from = $(`#begin-${selHelper}`).find("input[name='begin-hour']");
+        let to = $(`#end-${selHelper}`).find("input[name='end-hour']");
+        let counted = $(`#counted-${selHelper}`).find("output[name='counted']");
 
-            if (ev.val()==="off" || ev.val()==="in_work") {
-                $(this).css("background", "#fff");
-                    h1.css("background", "#fff");
-                    h2.css("background", "#fff");
-                    ev.css("background", "#fff");
-            } else if (ev.val()=="UW") {
-                $(this).css("background", "#FC33FF");
-                h1.css("background", "#FC33FF");
-                h2.css("background", "#FC33FF");
-                ev.css("background", "#FC33FF");
-                h1.val("");
-                h2.val(8);
-            } else if (ev.val()==="UNŻ" || ev.val()==="UO" || ev.val()==="UOJ" || ev.val()==="UR") {
-                if ((isNaN(parseInt(h1.val()))===true) || (isNaN(parseInt(h2.val()))===true)) {
-                    alert(`Wpisz prawidłowe godziny pracy dla pracownika ${worker} w dniu ${day}.`);
-                };
-                $(this).css("background", "#FC33FF");
-                h1.css("background", "#FC33FF");
-                h2.css("background", "#FC33FF");
-                ev.css("background", "#FC33FF");
-            } else if (ev.val()==="L4") {
-                $(this).css("background", "#80D332");
-                h1.css("background", "#80D332");
-                h2.css("background", "#80D332");
-                ev.css("background", "#80D332");
+        if (event.val()==="off" || event.val()==="in_work") {
+            $(this).css("background", "#fff");
+            $(`#begin-${selHelper}`).css("background", "#fff");
+            $(`#end-${selHelper}`).css("background", "#fff");
+            $(`#counted-${selHelper}`).css("background", "#fff");
+            from.css("background", "#fff");
+            to.css("background", "#fff");
+            counted.css("background", "#fff");
+            event.css("background", "#fff");
+        } else if (event.val()=="UW") {
+            $(this).css("background", "#FC33FF");
+            $(`#begin-${selHelper}`).css("background", "#FC33FF");
+            $(`#end-${selHelper}`).css("background", "#FC33FF");
+            $(`#counted-${selHelper}`).css("background", "#FC33FF");
+            from.css("background", "#FC33FF");
+            to.css("background", "#FC33FF");
+            counted.css("background", "#FC33FF");
+            event.css("background", "#FC33FF");
+            from.val("");
+            to.val(8).change();
+        } else if (event.val()==="UNŻ" || event.val()==="UO" || event.val()==="UOJ" ||
+                    event.val()==="UR" || event.val()==="UB") {
+            if (isNaN(parseInt(from.val()))){
+                let worker = $(`td[id="to-json-${selHelper}"]`).find("input[name='worker']").val();
+                let day = $(`td[id="to-json-${selHelper}"]`).find("input[name='day']").val();
+                missingHours = prompt(`Wpisz prawidłową godzinę rozpoczęcia pracy dla pracownika ${worker} w dniu ${day}.`);
+                from.val(missingHours).change();
             };
-        });
+            if (isNaN(parseInt(to.val()))){
+                let worker = $(`td[id="to-json-${selHelper}"]`).find("input[name='worker']").val();
+                let day = $(`td[id="to-json-${selHelper}"]`).find("input[name='day']").val();
+                missingHours = prompt(`Wpisz prawidłową godzinę zakończenia pracy dla pracownika ${worker} w dniu ${day}.`);
+                to.val(missingHours).change();
+            };
+            $(this).css("background", "#FC33FF");
+            $(`#begin-${selHelper}`).css("background", "#FC33FF");
+            $(`#end-${selHelper}`).css("background", "#FC33FF");
+            $(`#counted-${selHelper}`).css("background", "#FC33FF");
+            from.css("background", "#FC33FF");
+            to.css("background", "#FC33FF");
+            counted.css("background", "#FC33FF");
+            event.css("background", "#FC33FF");
+        } else if (event.val()==="L4") {
+            $(this).css("background", "#80D332");
+            $(`#begin-${selHelper}`).css("background", "#80D332");
+            $(`#end-${selHelper}`).css("background", "#80D332");
+            $(`#counted-${selHelper}`).css("background", "#80D332");
+            from.css("background", "#80D332");
+            to.css("background", "#80D332");
+            counted.css("background", "#80D332");
+            event.css("background", "#80D332");
+        };
     });
 });
+
+
+//counts sum of hours worked by worker in whole month and hours left to work or overtime
+$(document).ready(function() {
+    $("td[id^='begin-'], td[id^='end-']").change(function() {
+        let selHelper = $(this).find("input[name='helper']").val();
+        worker = $(`td[id="to-json-${selHelper}"]`).find("input[name='worker']").val();
+        monthHours = $("#working-hours").val();
+        sum = 0;
+        $(`td[id^="to-json-${worker}"]`).each(function() {
+            hours = parseInt($(this).find("input[name='counted']").val());
+            if (isNaN(hours)) {
+                hours = 0;
+            };
+            sum += hours;
+        });
+        $(`#hours-of-${worker}`).val(sum); //sum of worker's hours
+        $(`#hours-left-for-${worker}`).val(monthHours - sum); //ours left or overtime
+
+        //adds css if there are hours left of overtime
+        if (parseInt($(`#hours-left-for-${worker}`).val()) < 0) {
+            $(`#hours-left-for-${worker}`).css("background", "#ff0000");
+            $(`#left-hours-${worker}`).css("background", "#ff0000");
+        } else if (parseInt($(`#hours-left-for-${worker}`).val()) > 0) {
+            $(`#hours-left-for-${worker}`).css("background", "#ffaa00");
+            $(`#left-hours-${worker}`).css("background", "#ffaa00");
+        } else {
+            $(`#hours-left-for-${worker}`).css("background", "#ffffff");
+            $(`#left-hours-${worker}`).css("background", "#ffffff");
+        };
+    });
+});
+
+
+//adds css to left hours <td> after loading page
+window.onload = function() {
+    $("td[id^='left-hours").each(function() {
+        hours = $(this).find("output");
+        if (parseInt(hours.val()) < 0) {
+            $(this).css("background", "#ff0000");
+            hours.css("background", "#ff0000");
+        } else if (parseInt(hours.val()) > 0) {
+            $(this).css("background", "#ffaa00");
+            hours.css("background", "#ffaa00");
+        } else {
+            $(this).css("background", "#ffffff");
+            hours.css("background", "#ffffff");
+        };
+    });
+};
+
+
+

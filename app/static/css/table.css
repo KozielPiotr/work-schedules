@@ -1,4 +1,4 @@
-#caption {
+.caption {
     padding-top: 0.75rem;
     padding-bottom: 0.75rem;
     color: #000000;
@@ -15,76 +15,23 @@ input[type="number"] {
     -moz-appearance: textfield;
 }
 
-* {
-    -moz-box-sizing: border-box;
-    -webkit-box-sizing: border-box;
-    box-sizing: border-box;
+.card, .btn, .form-control {
+    border-radius: 0;
 }
 
-.new-schedule-table, .new-schedule-table tfoot {
-    border: 1px solid black;
-    text-align: center;
-    vertical-align: middle;
-    border-collapse: collapse;
+td[id*="to-json"] {
+    display: none;
 }
 
-.new-schedule-table tfoot {
-    border: 1px solid black;
-    text-align: center;
-    vertical-align: middle;
-    border-collapse: collapse;
-}
-
-.new-schedule-table th {
-    border: 1px solid black;
-    background: #E0E0E0;
-    text-align: center;
-    vertical-align: middle;
-}
-.inner {
-    text-align: center;
-    vertical-align: middle;
-    width: 100%;
-    border-collapse: collapse;
-}
-
-#dayname-th, #daynumber-th {
-
-}
-
-#begin-hour-fld, #end-hour-fld, #counted_hour_fld, #counted-td {
+td[id*="counted"] {
     width: 4ex;
-    text-align: center;
-    vertical-align: middle;
 }
 
-#begin-hour-fld, #end-hour-fld {
-    border: 1px solid black;
+.table-bordered {
+  border: 1px solid #000000 !important;
 }
 
-#event-td {
-    border-right: 2px solid black;
-    border-left: 1px solid black;
-    width: 18ex;
-    text-align: left;
-    vertical-align: middle;
-}
-
-#counted-fld {
-    width: 4ex;
-    border-left: 0px;
-    text-align: center;
-    vertical-align: middle;
-}
-
-#select {
-    width: 100%;
-}
-
-.weekend {
-    background: #C6C6C6;
-}
-
-tfoot td {
-    border: 1px solid black;
+.table-bordered th,
+.table-bordered td {
+  border: 1px solid #000000 !important;
 }

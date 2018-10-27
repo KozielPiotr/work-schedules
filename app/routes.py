@@ -3,8 +3,10 @@ from flask_login import login_user, logout_user, current_user, login_required
 from werkzeug.urls import url_parse
 from app import app, db
 from app.forms import LoginForm, NewUserForm, NewShopForm, UserToShopForm, NewScheduleChoice
-from app.models import User, Shop
+from app.models import User, Shop, Schedule
 import calendar
+import datetime
+from datetime import datetime, date
 
 
 # welcome page
@@ -195,10 +197,17 @@ def static_proxy(path):
 def transcribe():
     data = request.json
     try:
-        for imie in data.items():
-            for dzien in imie:
-                for dni in dzien:
-                    print(dni)
+        for dates in data.items():
+            for day in dates:
+                for element in day:
+                    d = date(int(element["year"]), int(element["month"]), int(element["day"]))
+                    worker = element["worker"]
+                    b_hour = element["from"]
+                    e_hour = element["to"]
+                    sum = element["sum"]
+                    event = element["event"]
+                    workplace = element["workplace"]
+                    print(d, worker, b_hour, e_hour, sum, event, workplace)
         return "OK"
     except (AttributeError):
         return "godziny muszą być cyframi"

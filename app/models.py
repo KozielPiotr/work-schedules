@@ -2,6 +2,7 @@ from app import db, login
 from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
 
+
 workplaces = db.Table("workplaces",
                      db.Column("worker", db.Integer, db.ForeignKey("user.id")),
                      db.Column("workplace", db.Integer, db.ForeignKey("shop.id")))
@@ -11,7 +12,6 @@ class User(UserMixin, db.Model):
     __table_args__ = {"extend_existing": True}
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(120), index=True, unique=True)
-    email = db.Column(db.String(120), index=True, unique=True)
     password_hash = db.Column(db.String(128))
     access_level = db.Column(db.String(64), index=True, default="2", nullable=False)
     workers_shop = db.relationship("Shop", secondary=workplaces, backref=db.backref("works", lazy="dynamic"))
@@ -32,6 +32,16 @@ class Shop(db.Model):
 
     def __repr__(self):
         return "{}".format(self.shopname)
+
+class Schedule(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    date = db.Column(db.DateTime, index=True)
+    worker = db.Column(db.String)
+    begin_hour = db.Column(db.Integer)
+    end_hour = db.Column(db.Integer)
+    hours_sum = db.Column(db.Integer)
+    event = db.Column(db.String)
+    workplace = db.Column(db.String)
 
 
 @login.user_loader

@@ -4,9 +4,9 @@
 <link href="{{ url_for('static', filename='css/table.css') }}" rel="stylesheet">
 <link href="{{ url_for('static', filename='css/bootstrap.css') }}" rel="stylesheet">
 <link href="{{ url_for('static', filename='css/bootstrap.min.css') }}" rel="stylesheet">
-<script src="{{ url_for('static', filename='js/bootstrap.min.js') }}"></script>
 <script src="{{ url_for('static', filename='js/jquery.js') }}"></script>
 <script src="{{ url_for('static', filename='js/table.js') }}"></script>
+<script src="{{ url_for('static', filename='js/bootstrap.min.js') }}"></script>
 
 {% endblock %}
 
@@ -16,7 +16,7 @@
 <div>
     <!-- Legend of events -->
     <table>
-        <caption id="caption">Legenda zdarzeń:</caption>
+        <caption class="caption">Legenda zdarzeń:</caption>
         <tr>
             <th>
                 <ul>
@@ -36,26 +36,40 @@
                     <li>UR - urlop rodzicielski</li>
                 </ul>
             </th>
+            <th>
+                <ul>
+                    <li>UB - urlop bezpłatny</li>
+                </ul>
+            </th>
         </tr>
     </table>
-    <br><br>
+    <br>
 
     <!-- Schedule -->
     <form method="post" action="/schedule">
         <button type="submit">Submit</button>
-        <table class="new-schedule-table">
-            <caption id="caption">Tworzenie grafiku dla <b>{{ shop }}</b> na rok <b>{{ year }}</b>, miesiąc <b>{{ mn }}</b></caption>
+        <table class="new-schedule-table table-bordered">
+            <caption class="caption">Tworzenie grafiku dla <b>{{ shop }}</b> na rok <b>{{ year }}</b>, miesiąc <b>{{ mn }}</b></caption>
     <!-- headers with shop, month, workers -->
             <thead>
             <tr>
                 <th>{{ shop }}</th>
-                <th rowspan="2">D</th>
+                <th rowspan="3">D</th>
                 {% for worker in workers %}
                     <th rowspan="2" colspan="4">{{ worker }}</th>
                 {% endfor %}
             </tr>
             <tr>
-                <th>{{ mn }}<br>{{ year }}</th>
+                <th>{{ mn }}</th>
+            </tr>
+            <tr>
+                <th>{{ year }}</th>
+                    {% for worker in workers %}
+                        <td>Od</td>
+                        <td>Do</td>
+                        <td>H:</td>
+                        <td>Podpis</td>
+                {% endfor %}
             </tr>
             </thead>
     <!-- body with days and according data -->
@@ -66,47 +80,43 @@
                         <th id="dayname-th">{{ wdn[day[1]] }}</th>  <!-- day of the week (name) -->
                         <th id="daynumber-th">{{ day[0] }}</th>  <!-- day of the week (number) -->
                         {% for worker in workers %}
-                            <td class="mytd" colspan="4">
-                                <table class="inner">
-                                    <tr>
-                                        <td style="display: none;">
-                                            <input name="day" type="hidden" value="{{ day[0] }}">
-                                        </td>
-                                        <td style="display: none;">
-                                            <input name="month" type="hidden" value="{{ monthn }}">
-                                        </td>
-                                        <td style="display: none;">
-                                            <input name="year" type="hidden" value="{{ yearn }}">
-                                        </td>
-                                        <td style="display: none;">
-                                            <input name="worker" type="hidden" value="{{ worker }}">
-                                        </td>
-                                        <td id="begin-hour-td">
-                                            <input id="begin-hour-fld" type="number" name="begin_hour" value="" placeholder="Od">
-                                        </td>
-                                        <td id="end-hour-td">
-                                            <input id="end-hour-fld" type="number" name="end_hour" value="" placeholder="Do">
-                                        </td>
-                                        <td id="counted-header-td">
-                                            H:
-                                        </td>
-                                        <td id="counted-td">
-                                            <output id="counted-fld" name="counted">0</output>
-                                        </td>
-                                        <td  id="event-td">
-                                            <select id="select" name="event">
-                                                <option value="off">X</option>
-                                                <option value="in_work">......</option>
-                                                <option value="UW">UW</option>
-                                                <option value="UNŻ">UNŻ</option>
-                                                <option value="L4">L4</option>
-                                                <option value="UO">UO</option>
-                                                <option value="UOJ">UOJ</option>
-                                                <option value="UR">UR</option>
-                                            </select>
-                                        </td>
-                                    </tr>
-                                </table>
+                            <td id="begin-{{ worker }}-{{ year }}-{{ monthn }}-{{ day[0] }}">
+                                <input type="hidden" value="{{ worker }}-{{ year }}-{{ monthn }}-{{ day[0] }}" name="helper">
+                                <input type="number" name="begin-hour" value="" placeholder="Od" min="0" max="24">
+                            </td>
+                            <td id="end-{{ worker }}-{{ year }}-{{ monthn }}-{{ day[0] }}">
+                                <input type="hidden" value="{{ worker }}-{{ year }}-{{ monthn }}-{{ day[0] }}" name="helper">
+                                <input type="number" name="end-hour" value="" placeholder="Do" min="0" max="24">
+                            </td>
+                            <td id="counted-{{ worker }}-{{ year }}-{{ monthn }}-{{ day[0] }}">
+                                <input type="hidden" value="{{ worker }}-{{ year }}-{{ monthn }}-{{ day[0] }}" name="helper">
+                                <output class="counted-{{ worker }}-{{ year }}-{{ monthn }}-{{ day[0] }}" name="counted">0</output>
+                            </td>
+                            <td id="event-{{ worker }}-{{ year }}-{{ monthn }}-{{ day[0] }}">
+                                <input type="hidden" value="{{ worker }}-{{ year }}-{{ monthn }}-{{ day[0] }}" name="helper">
+                                <select name="event">
+                                    <option value="off">X</option>
+                                    <option value="in_work">......</option>
+                                    <option value="UW">UW</option>
+                                    <option value="UNŻ">UNŻ</option>
+                                    <option value="L4">L4</option>
+                                    <option value="UO">UO</option>
+                                    <option value="UOJ">UOJ</option>
+                                    <option value="UR">UR</option>
+                                    <option value="UB">UB</option>
+                                </select>
+                            </td>
+                            <td id="to-json-{{ worker }}-{{ year }}-{{ monthn }}-{{ day[0] }}">
+                                <input type="hidden" value="{{ worker }}-{{ year }}-{{ monthn }}-{{ day[0] }}" name="helper">
+                                <input name="year" value="{{ yearn }}">
+                                <input name="month" value="{{ monthn }}">
+                                <input name="day" value="{{ day[0] }}">
+                                <input name="worker" value="{{ worker }}">
+                                <input name="b-hour">
+                                <input name="e-hour">
+                                <input name="counted">
+                                <input name="event">
+                                <input name="shop" value="{{ shop }}">
                             </td>
                         {% endfor %}
                     </tr>
@@ -122,15 +132,19 @@
                 {% endfor %}
             </tr>
             <tr>
-                <th colspan="2">{{ hours }}</th>  <!-- amount of hours to work in exact month -->
+                <th colspan="2"><output id="working-hours">{{ hours }}</output></th> <!-- amount of hours to work in exact month -->
                 {% for worker in workers %}
-                    <td colspan="4">'suma przepracowanych godzin'</td> <!-- sum of hours worked by iterated worker -->
+                    <td colspan="4" class="sum-of-worker-hours">
+                        <output id="hours-of-{{ worker }}">0</output> <!-- sum of hours worked by iterated worker -->
+                    </td>
                 {% endfor %}
             </tr>
             <tr>
                 <th colspan="2">Pozostało H:</th>
                 {% for worker in workers %}
-                    <td colspan="4">'nadgodziny lub niedogodziny'</td> <!-- hours left to assign or overtime -->
+                <td colspan="4" id="left-hours-{{ worker }}">
+                    <output id="hours-left-for-{{ worker }}">{{ hours }}</output> <!-- hours left to assign or overtime -->
+                </td>
                 {% endfor %}
             </tr>
             </tfoot>
