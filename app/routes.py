@@ -2,9 +2,10 @@ from flask import render_template, flash, redirect, url_for, request
 from flask_login import login_user, logout_user, current_user, login_required
 from werkzeug.urls import url_parse
 from app import app, db
-from app.forms import LoginForm, NewUserForm, NewShopForm, UserToShopForm, NewScheduleChoice
-from app.models import User, Shop, Personal_schedule
+from app.forms import LoginForm, NewUserForm, NewShopForm, UserToShopForm, NewScheduleChoice, BillingPeriod
+from app.models import User, Shop, Billing_period, Personal_schedule, Schedule
 import calendar
+from sqlalchemy import update
 import datetime
 from datetime import datetime, date
 
@@ -126,6 +127,32 @@ def remove_from_shop():
     return redirect(url_for("user_to_shop"))
 
 
+# gets beginning and duration of billing period
+@app.route("/billing-period", methods=["GET", "POST"])
+#@login_required
+def billing_period():
+    #if (current_user.access_level != "0") and (current_user.access_level != "1"):
+        #flash("Użytkownik nie ma uprawnień do wyświetlenia tej strony")
+        #return redirect(url_for("index"))
+    form = BillingPeriod()
+    if form.validate_on_submit():
+        begin = form.begin_month.data
+        duration = form.length_of_billing_period.data
+        if len(Billing_period.query.all()) == 0:
+            bp = Billing_period(begin=begin, duration=duration)
+            db.session.add(bp)
+            db.session.commit()
+        else:
+            bp = Billing_period
+            bp.query.filter_by(id=1).all()[0].begin=begin
+            bp.query.filter_by(id=1).all()[0].duration = duration
+
+            db.session.commit()
+        return "OK"
+    return render_template("billing_period.html", title="Grafiki - okres rozliczeniowy", form=form)
+
+
+# gets data for new schedule
 @app.route("/new-schedule", methods=["GET", "POST"])
 @login_required
 def new_schedule():
@@ -150,6 +177,7 @@ def new_schedule():
     return render_template("new_schedule.html", title="Grafiki - nowy grafik", form=form)
 
 
+# creates new schedule
 """
 I'm not using calendar module's names for months and days because whole app has to be in polish,
     so the code is little more complicated.
@@ -175,7 +203,8 @@ def create_schedule(year, month, shop):
     sw = s.works.order_by(User.access_level.asc())
     workers = []
     for worker in sw:
-        workers.append(worker)
+        workers.append(str(worker).replace(" ", "-"))
+
 
     # if current user makes schedule, which  shouldn't include himself
     if i_s == "False":
@@ -196,18 +225,40 @@ def static_proxy(path):
 @app.route('/schedule', methods=['POST'])
 def transcribe():
     data = request.json
+    sname = ""
+    syear = ""
+    smonth = ""
+    sworkplace = ""
     try:
         for dates in data.items():
             for day in dates:
                 for element in day:
+                    sname = "%s-%s-%s" %(element["year"], element["month"], element["workplace"])
+                    syear = element["year"]
+                    smonth = element["month"]
+                    sworkplace = element["workplace"]
+        schedule = Schedule(name=sname, year=syear, month=smonth, workplace=sworkplace)
+        db.session.add(schedule)
+        db.session.commit()
+        for dates in data.items():
+            for day in dates:
+                for element in day:
                     d = date(int(element["year"]), int(element["month"]), int(element["day"]))
-                    worker = element["worker"]
+                    worker = element["worker"].replace("-", " ")
                     b_hour = element["from"]
                     e_hour = element["to"]
                     sum = element["sum"]
                     event = element["event"]
                     workplace = element["workplace"]
-                    print(d, worker, b_hour, e_hour, sum, event, workplace)
+                    psname = "%s-%s-%s" %(d, worker, workplace)
+                    #print(psname)
+                    pschedule = Personal_schedule(id=psname, date=d, worker=worker, begin_hour=b_hour,
+                                                  end_hour=e_hour, hours_sum=sum, event=event, workplace=workplace,
+                                                  includes=schedule)
+                    db.session.add(pschedule)
+        db.session.commit()
         return url_for("index")
     except (AttributeError):
-        return "Popraw błędy w stworzonym grafiku"
+        return "Popraw błędy w stworzonym grafiku."
+    except:
+        return "Coś poszło nie tak.\nPrawdopodobnie grafik już istnieje."

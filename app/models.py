@@ -33,8 +33,23 @@ class Shop(db.Model):
     def __repr__(self):
         return "{}".format(self.shopname)
 
-class Personal_schedule(db.Model):
+class Billing_period(db.Model):
     id = db.Column(db.Integer, primary_key=True)
+    begin = db.Column(db.Integer)
+    duration = db.Column(db.Integer)
+
+
+class Schedule(db.Model):
+    id = db.Column(db.Integer, primary_key=True, unique=True, index=True, nullable=False)
+    name = db.Column(db.String, unique=True, index=True)
+    year = db.Column(db.Integer)
+    month = db.Column(db.Integer)
+    workplace = db.Column(db.String)
+    ind = db.relationship("Personal_schedule", backref="includes")
+
+
+class Personal_schedule(db.Model):
+    id = db.Column(db.String, primary_key=True, unique=True, index=True, nullable=False)
     date = db.Column(db.DateTime, index=True)
     worker = db.Column(db.String)
     begin_hour = db.Column(db.Integer)
@@ -42,6 +57,7 @@ class Personal_schedule(db.Model):
     hours_sum = db.Column(db.Integer)
     event = db.Column(db.String)
     workplace = db.Column(db.String)
+    includes_id = db.Column(db.Integer, db.ForeignKey("schedule.id"))
 
 
 @login.user_loader

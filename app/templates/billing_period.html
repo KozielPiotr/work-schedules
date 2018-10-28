@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <div>
+        <form action="" method="post">
+        {{ form.hidden_tag() }}
+            <p>
+                {{ form.begin_month.label }} {{ form.begin_month }}
+            </p>
+            <p>
+                {{ form.length_of_billing_period.label }} {{form.length_of_billing_period }}
+                {{ errors }}
+            </p>
+            <p>
+                {{ form.submit }}
+            </p>
+        </form>
+    </div>
+{% endblock %}
