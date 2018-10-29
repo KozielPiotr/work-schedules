@@ -2,6 +2,12 @@
 
 {% block content %}
     <div>
+        <p>
+            Obecne ustawienia okresu rozliczeniowego:<br>
+            Pierwszy miesiąc: {{ cur_begin }}<br>
+            Długość: {{ cur_duration }}
+            <hr>
+        </p>
         <form action="" method="post">
         {{ form.hidden_tag() }}
             <p>

@@ -135,6 +135,8 @@ def billing_period():
         #flash("Użytkownik nie ma uprawnień do wyświetlenia tej strony")
         #return redirect(url_for("index"))
     form = BillingPeriod()
+    cur_begin = Billing_period.query.filter_by(id=1).first().begin
+    cur_duration = Billing_period.query.filter_by(id=1).first().duration
     if form.validate_on_submit():
         begin = form.begin_month.data
         duration = form.length_of_billing_period.data
@@ -149,7 +151,8 @@ def billing_period():
 
             db.session.commit()
         return "OK"
-    return render_template("billing_period.html", title="Grafiki - okres rozliczeniowy", form=form)
+    return render_template("billing_period.html", title="Grafiki - okres rozliczeniowy", form=form,
+                           cur_begin=cur_begin, cur_duration=cur_duration)
 
 
 # gets data for new schedule
