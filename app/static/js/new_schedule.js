@@ -1,7 +1,6 @@
 // generates checkboxes with workers depending of chosen workplace
 function workersCheckboxes() {
         workplace = $("#workplace").val();
-        console.log(workplace);
         fetch("/new-schedule/" + workplace).then(function(response) {
             response.json().then(function(data) {
                 let checkboxesHTML = "";

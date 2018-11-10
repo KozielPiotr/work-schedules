@@ -28,11 +28,6 @@ class NewUserForm(FlaskForm):
         if user is not None:
             raise ValidationError("Nazwa użytkownika zajęta")
 
-    def validate_email(self, email):
-        user = User.query.filter_by(email=email.data).first()
-        if user is not None:
-            raise ValidationError("Adres e-mail zajęty")
-
 
 class NewShopForm(FlaskForm):
     shopname = StringField("Kod sklepu", validators=[DataRequired(message="Pole wymagane")])

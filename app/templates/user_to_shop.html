@@ -27,16 +27,16 @@
                 </th>
                 </thead>
                 <tbody>
-                {% for i in shop  %}
+                {% for workplace in workplaces  %}
                 <tr>
                     <td style="border: 3px solid #000000;">
                         <!-- List of shops -->
-                        {{ i }}:
+                        {{ workplace }}:
                     </td>
-                    {% for j in i.works %}
+                    {% for worker in workplace.works %}
                     <td style="border: 1px solid #000000; padding: 3px;">
                         <!-- List of users assigned to the shop -->
-                        <a href="{{ url_for('remove_from_shop', user=j, shop=i) }}">{{ j }}</a>
+                        <a href="{{ url_for('remove_from_shop', user=worker, shop=workplace) }}">{{ worker }}</a>
                     </td>
                     {% endfor %}<br>
                 </tr>

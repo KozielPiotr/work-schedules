@@ -96,9 +96,9 @@ def user_to_shop():
         return redirect(url_for("index"))
 
     form = UserToShopForm()
-    shop = Shop.query.order_by(Shop.shopname).all()
-    user = User.query.order_by(User.username).all()
-    users_number = len(user)
+    workplaces = Shop.query.order_by(Shop.shopname).all()
+    users = User.query.order_by(User.username).all()
+    users_number = len(users)
     if form.validate_on_submit():
         u = form.user.data
         s = form.shop.data
@@ -111,7 +111,7 @@ def user_to_shop():
             flash("%s był już przypisany do %s" %(u, s))
         return redirect(url_for("user_to_shop"))
     return render_template("user_to_shop.html", title="Grafiki - przydzielanie użytkownika do sklepu",
-                           form=form, user=user, shop=shop, users_number=users_number)
+                           form=form, users=users, workplaces=workplaces, users_number=users_number)
 
 
 # removes connection between user and shop

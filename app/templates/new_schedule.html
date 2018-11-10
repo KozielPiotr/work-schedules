@@ -42,7 +42,6 @@
                     {% endfor %}
                 </li>
                 <li class="list-group-item">
-                    <label for="workers">Pracownicy:</label>
                     {{ form.workerslabel }} {{form.workers }}
                     {% for error in form.workers.errors %}
                         <span style="color: red;">[{{ error }}]</span>
