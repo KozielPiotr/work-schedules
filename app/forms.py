@@ -1,8 +1,9 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, BooleanField, SubmitField, SelectField, IntegerField
+from wtforms import StringField, PasswordField, BooleanField, SubmitField, SelectField, IntegerField, SelectMultipleField
 from wtforms.validators import DataRequired, ValidationError, Email, EqualTo
 from app.models import User, Shop
 from wtforms.ext.sqlalchemy.fields import QuerySelectField
+from wtforms.widgets import ListWidget, CheckboxInput
 
 
 
@@ -57,7 +58,6 @@ class UserToShopForm(FlaskForm):
 
 
 class BooleanSubField(BooleanField):
-
     def process_data(self, value):
         if isinstance(value, BooleanField):
             self.data = value.data
@@ -88,3 +88,19 @@ class BillingPeriod(FlaskForm):
                                             ("12", "Grudzień")))
     length_of_billing_period = IntegerField("Długość okresu rozliczeniowego (w miesiącach)")
     submit = SubmitField("Zatwierdź")
+
+
+class MultiCheckboxField(SelectMultipleField):
+    widget = ListWidget(prefix_label=False)
+    option_widget = CheckboxInput()
+
+class NewScheduleForm(FlaskForm):
+    workplace = SelectField("Sklep: ")
+    year = IntegerField("Rok: ", [DataRequired(message="Wprowadź rok")])
+    month = SelectField("Miesiąc: ", choices=(("1", "Styczeń"), ("2", "Luty"), ("3", "Marzec"), ("4", "Kwiecień"),
+                                            ("5", "Maj"), ("6", "Czerweiec"), ("7", "Lipiec"), ("8", "Sierpień"),
+                                            ("9", "Wrzesień"), ("10", "Październik"), ("11", "Listopad"),
+                                            ("12", "Grudzień")))
+    workers = MultiCheckboxField("Pracownicy: ")
+    hours = IntegerField("Ilość roboczogodzin")
+    submit = SubmitField("Przydziel", [DataRequired(message="Wprowadź ilość godzin")])

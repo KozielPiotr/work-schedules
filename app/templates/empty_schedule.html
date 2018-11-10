@@ -5,7 +5,7 @@
 <link href="{{ url_for('static', filename='css/bootstrap.css') }}" rel="stylesheet">
 <link href="{{ url_for('static', filename='css/bootstrap.min.css') }}" rel="stylesheet">
 <script src="{{ url_for('static', filename='js/jquery.js') }}"></script>
-<script src="{{ url_for('static', filename='js/table.js') }}"></script>
+<script src="{{ url_for('static', filename='js/empty_schedule.js') }}"></script>
 <script src="{{ url_for('static', filename='js/bootstrap.min.js') }}"></script>
 
 {% endblock %}
@@ -46,7 +46,7 @@
     <br>
 
     <!-- Schedule -->
-    <form method="post" action="/schedule">
+    <form method="post" action="/schedule-to-db">
         <button type="submit">Submit</button>
         <table class="new-schedule-table table-bordered">
             <caption class="caption">Tworzenie grafiku dla <b>{{ shop }}</b> na rok <b>{{ year }}</b>, miesiąc <b>{{ mn }}</b></caption>

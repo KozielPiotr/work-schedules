@@ -1,8 +1,8 @@
-from flask import render_template, flash, redirect, url_for, request
+from flask import render_template, flash, redirect, url_for, request, jsonify
 from flask_login import login_user, logout_user, current_user, login_required
 from werkzeug.urls import url_parse
 from app import app, db
-from app.forms import LoginForm, NewUserForm, NewShopForm, UserToShopForm, NewScheduleChoice, BillingPeriod
+from app.forms import LoginForm, NewUserForm, NewShopForm, UserToShopForm, NewScheduleForm, BillingPeriod
 from app.models import User, Shop, Billing_period, Personal_schedule, Schedule
 import calendar
 from sqlalchemy import update
@@ -39,7 +39,7 @@ def login():
 
 #  Logging out user
 @app.route("/logout")
-#@login_required
+@login_required
 def logout():
     logout_user()
     return redirect(url_for("index"))
@@ -47,11 +47,11 @@ def logout():
 
 #  New user
 @app.route("/new-user", methods=["GET", "POST"])
-#@login_required
+@login_required
 def new_user():
-    #if current_user.access_level != "0" and current_user.access_level != "1":
-        #flash("Użytkownik nie ma uprawnień do wyświetlenia tej strony")
-        #return redirect(url_for("index"))
+    if current_user.access_level != "0" and current_user.access_level != "1":
+        flash("Użytkownik nie ma uprawnień do wyświetlenia tej strony")
+        return redirect(url_for("index"))
 
     form = NewUserForm()
     if form.validate_on_submit():
@@ -66,11 +66,11 @@ def new_user():
 
 # New shop
 @app.route("/new-shop", methods=["GET", "POST"])
-#@login_required
+@login_required
 def new_shop():
-    # if current_user.access_level != "0" and current_user.access_level != "1":
-        # flash("Użytkownik nie ma uprawnień do wyświetlenia tej strony")
-        # return redirect(url_for("index"))
+    if current_user.access_level != "0" and current_user.access_level != "1":
+        flash("Użytkownik nie ma uprawnień do wyświetlenia tej strony")
+        return redirect(url_for("index"))
 
     form = NewShopForm()
     if form.validate_on_submit():
@@ -82,13 +82,18 @@ def new_shop():
     return render_template("new_shop.html", title="Grafiki - nowy sklep", form=form)
 
 
+@app.route("/<path:path>")
+def static_proxy(path):
+    return app.send_static_file(path)
+
+
 # Assigns user to the shop
 @app.route("/shop-user-connect", methods=["GET", "POST"])
-#@login_required
+@login_required
 def user_to_shop():
-    # if current_user.access_level != "0" and current_user.access_level != "1":
-        # flash("Użytkownik nie ma uprawnień do wyświetlenia tej strony")
-        # return redirect(url_for("index"))
+    if current_user.access_level != "0" and current_user.access_level != "1":
+        flash("Użytkownik nie ma uprawnień do wyświetlenia tej strony")
+        return redirect(url_for("index"))
 
     form = UserToShopForm()
     shop = Shop.query.order_by(Shop.shopname).all()
@@ -111,11 +116,11 @@ def user_to_shop():
 
 # removes connection between user and shop
 @app.route("/remove-user-from-shop", methods=["GET", "POST"])
-#@login_required
+@login_required
 def remove_from_shop():
-    #if (current_user.access_level != "0") and (current_user.access_level != "1"):
-        #flash("Użytkownik nie ma uprawnień do wyświetlenia tej strony")
-        #return redirect(url_for("index"))
+    if (current_user.access_level != "0") and (current_user.access_level != "1"):
+        flash("Użytkownik nie ma uprawnień do wyświetlenia tej strony")
+        return redirect(url_for("index"))
 
     user = request.args.get("user")
     shop = request.args.get("shop")
@@ -129,11 +134,11 @@ def remove_from_shop():
 
 # gets beginning and duration of billing period
 @app.route("/billing-period", methods=["GET", "POST"])
-#@login_required
+@login_required
 def billing_period():
-    #if (current_user.access_level != "0") and (current_user.access_level != "1"):
-        #flash("Użytkownik nie ma uprawnień do wyświetlenia tej strony")
-        #return redirect(url_for("index"))
+    if (current_user.access_level != "0") and (current_user.access_level != "1"):
+        flash("Użytkownik nie ma uprawnień do wyświetlenia tej strony")
+        return redirect(url_for("index"))
     form = BillingPeriod()
     cur_begin = Billing_period.query.filter_by(id=1).first().begin
     cur_duration = Billing_period.query.filter_by(id=1).first().duration
@@ -163,21 +168,58 @@ def new_schedule():
         flash("Użytkownik nie ma uprawnień do wyświetlenia tej strony")
         return redirect(url_for("index"))
 
-    form = NewScheduleChoice()
-    u = current_user.workers_shop
-    users_shops = []
-    for i in u:
-        users_shops.append((str(i), str(i)))
+    workplaces = []
+    workers_list = []
+    form = NewScheduleForm()
+    for workplace in Shop.query.order_by(Shop.shopname).all():
+        workplaces.append((str(workplace), str(workplace)))
+    form.workplace.choices = workplaces
 
-    form.shop.choices = users_shops
+    for worker in User.query.order_by(User.username).all():
+        workers_list.append((str(worker), str(worker)))
+    form.workers.choices = workers_list
+
     if form.validate_on_submit():
-        s = form.shop.data
-        y = form.year.data
-        m = form.month.data
-        h = form.hours.data
-        i_s = form.in_schedule.data
-        return redirect(url_for("create_schedule", year=y, month=m, shop=s, hours=h, i_s=i_s))
+        workplace = form.workplace.data
+        year = form.year.data
+        month = form.month.data
+        workers_list = form.workers.data
+        hours = form.hours.data
+
+        yearn = int(year)
+        monthn = int(month)
+        month_names = ["Styczeń", "luty", "Marzec", "Kwiecień", "Maj", "Czerwiec", "Lipiec", "Sierpień",
+                       "Wrzesień", "Październik", "Listopad", "Grudzień"]
+        month_name = month_names[(monthn) - 1]
+        cal = calendar.Calendar()
+        weekday_names = ["Poniedziałek", "Wtorek", "Środa", "Czwartek", "Piątek", "Sobota", "Niedziela"]
+
+        workers = []
+        for worker in workers_list:
+            workers.append(str(worker).replace(" ", "_"))
+
+        return render_template("empty_schedule.html", title="Grafiki - nowy grafik", workers=workers,
+                               shop=workplace, year=year, mn=month_name, cal=cal, wdn=weekday_names,
+                               monthn=monthn, yearn=yearn, hours=hours)
+
     return render_template("new_schedule.html", title="Grafiki - nowy grafik", form=form)
+
+
+# jsonifies data for dynamicly generated checkboxes in new_schedule()
+@app.route("/new-schedule/<workplace>")
+@login_required
+def new_schedule_find_workers(workplace):
+    if current_user.access_level != "0" and current_user.access_level != "1" and current_user.access_level != "2":
+        flash("Użytkownik nie ma uprawnień do wyświetlenia tej strony")
+        return redirect(url_for("index"))
+    shop = Shop.query.filter_by(shopname=workplace).first()
+    workers = shop.works.all()
+    jsondict = []
+    for worker in workers:
+        workers_list = {}
+        workers_list["name"] = worker.username
+        jsondict.append(workers_list)
+    return jsonify({"workers" : jsondict})
 
 
 # creates new schedule
@@ -187,7 +229,7 @@ I'm not using calendar module's names for months and days because whole app has 
 """
 @app.route("/create-schedule/<year>/<month>/<shop>", methods=["GET", "POST"])
 @login_required
-def create_schedule(year, month, shop):
+def create_schedule(year, month, shop, workers):
     if current_user.access_level != "0" and current_user.access_level != "1" and current_user.access_level != "2":
         flash("Użytkownik nie ma uprawnień do wyświetlenia tej strony")
         return redirect(url_for("index"))
@@ -200,33 +242,17 @@ def create_schedule(year, month, shop):
     cal = calendar.Calendar()
     weekday_names = ["Poniedziałek", "Wtorek", "Środa", "Czwartek", "Piątek", "Sobota", "Niedziela"]
     hours = request.args.get("hours")
-    i_s = request.args.get("i_s")
+    workers_list = workers
 
-    s = Shop.query.filter_by(shopname=shop).first()
-    sw = s.works.order_by(User.access_level.asc())
-    workers = []
-    for worker in sw:
+    for worker in workers_list:
         workers.append(str(worker).replace(" ", "-"))
-
-
-    # if current user makes schedule, which  shouldn't include himself
-    if i_s == "False":
-        if current_user in workers:
-            workers.remove(current_user)
-
 
     return render_template("empty_schedule.html", title="Grafiki - nowy grafik", workers=workers,
                            shop=shop, year=year, mn=month_name, cal=cal, wdn=weekday_names,
                            monthn=monthn, yearn=yearn, hours=hours)
 
-
-@app.route("/<path:path>")
-def static_proxy(path):
-    return app.send_static_file(path)
-
-
-@app.route('/schedule', methods=['POST'])
-def transcribe():
+@app.route('/schedule-to-db', methods=['POST'])
+def new_schedule_to_db():
     data = request.json
     sname = ""
     syear = ""
@@ -247,7 +273,7 @@ def transcribe():
             for day in dates:
                 for element in day:
                     d = date(int(element["year"]), int(element["month"]), int(element["day"]))
-                    worker = element["worker"].replace("-", " ")
+                    worker = element["worker"].replace("_", " ")
                     b_hour = element["from"]
                     e_hour = element["to"]
                     sum = element["sum"]

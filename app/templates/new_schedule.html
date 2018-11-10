@@ -11,6 +11,7 @@
     margin-bottom: 10px; /* Added */
 }
 </style>
+<script src="{{ url_for('static', filename='js/new_schedule.js') }}"></script>
 {% endblock %}
 
 {% block content %}
@@ -23,27 +24,42 @@
             <ul class="list-group list-group-flush">
                 <li class="list-group-item">
                     {{ form.hidden_tag() }}
-                    {{ form.shop.label }} {{ form.shop }}
+                    {{ form.workplace.label }} {{ form.workplace }}
+                    {% for error in form.workplace.errors %}
+                        <span style="color: red;">[{{ error }}]</span>
+                    {% endfor %}
                 </li>
                 <li class="list-group-item">
                     {{ form.year.label }} {{ form.year }}
+                    {% for error in form.year.errors %}
+                        <span style="color: red;">[{{ error }}]</span>
+                    {% endfor %}
                 </li>
                 <li class="list-group-item">
                     {{ form.month.label }} {{ form.month }}
+                    {% for error in form.month.errors %}
+                        <span style="color: red;">[{{ error }}]</span>
+                    {% endfor %}
                 </li>
-                {% if current_user.access_level=="0" or current_user.access_level=="1" %}
-                    <li class="list-group-item">
-                {% else %}
-                    <li class="list-group-item" style="display: none;">
-                {% endif %}
-                        {{ form.in_schedule.label }} {{form.in_schedule }}
-                    </li>
+                <li class="list-group-item">
+                    <label for="workers">Pracownicy:</label>
+                    {{ form.workerslabel }} {{form.workers }}
+                    {% for error in form.workers.errors %}
+                        <span style="color: red;">[{{ error }}]</span>
+                    {% endfor %}
+                </li>
                 <li class="list-group-item">
                     {{ form.hours.label }} {{ form.hours }}
+                    {% for error in form.hours.errors %}
+                        <span style="color: red;">[{{ error }}]</span>
+                    {% endfor %}
                 </li>
             </ul>
             <div class="card-body">
                 {{ form.submit }}
+                {% for error in form.submit.errors %}
+                    <span style="color: red;">[{{ error }}]</span>
+                {% endfor %}
             </div>
         </div>
     </div>
