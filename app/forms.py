@@ -98,4 +98,4 @@ class NewScheduleForm(FlaskForm):
                                             ("12", "Grudzień")))
     workers = MultiCheckboxField("Pracownicy: ")
     hours = IntegerField("Ilość roboczogodzin")
-    submit = SubmitField("Przydziel", [DataRequired(message="Wprowadź ilość godzin")])
+    submit = SubmitField("Nowy grafik", [DataRequired(message="Wprowadź ilość godzin")])
