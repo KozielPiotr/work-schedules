@@ -40,15 +40,8 @@ class NewShopForm(FlaskForm):
 
 
 class UserToShopForm(FlaskForm):
-    def shops_list():
-        return Shop.query.order_by(Shop.shopname).all()
-
-    def users_list():
-        return User.query.order_by(User.username).all()
-
-
-    shop = QuerySelectField("Wybierz sklep", query_factory=shops_list)
-    user = QuerySelectField("Wybierz użytkownika", query_factory=users_list)
+    workplace = SelectField("Wybierz sklep")
+    worker = SelectField("Wybierz użytkownika")
     submit = SubmitField("Przydziel")
 
 

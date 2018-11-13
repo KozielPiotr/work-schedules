@@ -97,11 +97,22 @@ def user_to_shop():
 
     form = UserToShopForm()
     workplaces = Shop.query.order_by(Shop.shopname).all()
-    users = User.query.order_by(User.username).all()
-    users_number = len(users)
+    workplaces_list = []
+    for workplace in workplaces:
+        workplaces_list.append((str(workplace), str(workplace)))
+    form.workplace.choices = workplaces_list
+
+    workers = User.query.order_by(User.username).all()
+    workers_list = []
+    for worker in workers:
+        workers_list.append((str(worker), str(worker)))
+    form.worker.choices = workers_list
+
+
+    users_number = len(workers_list)
     if form.validate_on_submit():
-        u = form.user.data
-        s = form.shop.data
+        u = User.query.filter_by(username=form.worker.data).first()
+        s = Shop.query.filter_by(shopname=form.workplace.data).first()
         already_assigned = s.works
         if u not in already_assigned:
             s.works.append(u)
@@ -111,7 +122,29 @@ def user_to_shop():
             flash("%s był już przypisany do %s" %(u, s))
         return redirect(url_for("user_to_shop"))
     return render_template("user_to_shop.html", title="Grafiki - przydzielanie użytkownika do sklepu",
-                           form=form, users=users, workplaces=workplaces, users_number=users_number)
+                           form=form, workplaces=workplaces, users_number=users_number)
+
+
+# jsonifies data for dynamicly generated checkboxes in new_schedule()
+@app.route("/shop-user-connect/<workplace>")
+@login_required
+def user_to_shop_workers(workplace):
+    if current_user.access_level != "0" and current_user.access_level != "1" and current_user.access_level != "2":
+        flash("Użytkownik nie ma uprawnień do wyświetlenia tej strony")
+        return redirect(url_for("index"))
+    shop = Shop.query.filter_by(shopname=workplace).first()
+    workers_appended = shop.works.all()
+    workers_all = User.query.order_by(User.username).all()
+    workers = []
+    for worker in workers_all:
+        if worker not in workers_appended:
+            workers.append(worker)
+    jsondict = []
+    for worker in workers:
+        workers_list = {}
+        workers_list["name"] = worker.username
+        jsondict.append(workers_list)
+    return jsonify({"workers": jsondict})
 
 
 # removes connection between user and shop
@@ -219,7 +252,8 @@ def new_schedule_find_workers(workplace):
         workers_list = {}
         workers_list["name"] = worker.username
         jsondict.append(workers_list)
-    return jsonify({"workers" : jsondict})
+        print(type(worker))
+    return jsonify({"workers": jsondict})
 
 
 # creates new schedule

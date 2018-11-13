@@ -1,5 +1,18 @@
 {% extends "base.html" %}
 
+{% block styles %}
+<style>
+caption {
+    padding-top: 0.75rem;
+    padding-bottom: 0.75rem;
+    color: #000000;
+    text-align: left;
+    caption-side: top;
+}
+</style>
+<script src="{{ url_for('static', filename='js/user_to_shop.js') }}"></script>
+{% endblock %}
+
 {% block content %}
 <div style="text-align: center">
     <h1>Przypisz użytkownika do sklepu</h1>
@@ -7,10 +20,16 @@
         {{ form.hidden_tag() }}
         <br>
         <p>
-            {{ form.shop.label }} {{ form.shop }}<br>
+            {{ form.workplace.label }} {{ form.workplace }}<br>
+            {% for error in form.workplace.errors %}
+                        <span style="color: red;">[{{ error }}]</span>
+                    {% endfor %}
         </p>
         <p>
-            {{ form.user.label }} {{ form.user }}<br>
+            {{ form.worker.label }} {{ form.worker }}<br>
+            {% for error in form.worker.errors %}
+                        <span style="color: red;">[{{ error }}]</span>
+                    {% endfor %}
         </p>
         <p>
             <br>{{ form.submit }}
@@ -38,7 +57,7 @@
                         <!-- List of users assigned to the shop -->
                         <a href="{{ url_for('remove_from_shop', user=worker, shop=workplace) }}">{{ worker }}</a>
                     </td>
-                    {% endfor %}<br>
+                    {% endfor %}
                 </tr>
                 {% endfor %}
                 </tbody>
