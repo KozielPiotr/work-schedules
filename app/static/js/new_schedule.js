@@ -6,7 +6,7 @@ function workersCheckboxes() {
                 let checkboxesHTML = "";
                 let workerNumber = 0
                 for (let worker of data.workers) {
-                    checkboxesHTML += `<li class="list-group-item"><input id="worker-${workerNumber}" name="workers" type="checkbox" value="${worker.name}" checked> <label for="worker-${workerNumber}">${worker.name}</label></li><br>`;
+                    checkboxesHTML += `<li class="list-group-item list-workers"><input id="worker-${workerNumber}" name="workers" type="checkbox" value="${worker.name}" checked> <label for="worker-${workerNumber}">${worker.name}</label></li><br>`;
                     workerNumber += 1;
                 };
                 document.getElementById("workers").innerHTML = checkboxesHTML;

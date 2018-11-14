@@ -34,34 +34,26 @@ caption {
         <p>
             <br>{{ form.submit }}
         </p>
-        <!-- List of shops with assigned users -->
-            <table class="table_shop_to_users">
-                <caption>Kliknij użytkownika, aby usunąć go ze sklepu</caption>
-                <thead>
-                <th style="border: 3px solid #000000;">
-                    Salon
-                </th>
-                <th colspan="{{ users_number }}" style="border: 3px solid #000000;">
-                    użytkownicy
-                </th>
-                </thead>
-                <tbody>
-                {% for workplace in workplaces  %}
-                <tr>
-                    <td style="border: 3px solid #000000;">
-                        <!-- List of shops -->
-                        {{ workplace }}:
-                    </td>
-                    {% for worker in workplace.works %}
-                    <td style="border: 1px solid #000000; padding: 3px;">
-                        <!-- List of users assigned to the shop -->
-                        <a href="{{ url_for('remove_from_shop', user=worker, shop=workplace) }}">{{ worker }}</a>
-                    </td>
-                    {% endfor %}
-                </tr>
-                {% endfor %}
-                </tbody>
-            </table>
     </form>
+
+    <!-- List of shops with assigned users -->
+
+    <p> Wybierz pracownika, aby zlikwidować powiązanie:</p>
+    <div class="btn-group" role="group" aria-label="Button group with nested dropdown">
+        {% for workplace in workplaces  %}
+            <div class="btn-group" role="group">
+                <button id="{{ workplace }}" type="button" class="btn btn-secondary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    {{ workplace }}
+                </button>
+                <div class="dropdown-menu" aria-labelledby="{{ workplace }}">
+                    {% for worker in workplace.works %}
+                        <a href="{{ url_for('remove_from_shop', user=worker, shop=workplace) }}" class="btn btn-secondary btn-sm btn-block">{{ worker }}</a>
+                    {% endfor %}
+                </div>
+            </div>
+        {% endfor %}
+
+
+    </div>
 </div>
 {% endblock %}

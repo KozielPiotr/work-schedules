@@ -7,7 +7,10 @@
         <link href="{{ url_for('static', filename='css/bootstrap.css') }}" rel="stylesheet">
         <link href="{{ url_for('static', filename='css/bootstrap.min.css') }}" rel="stylesheet">
         <link href="{{ url_for('static', filename='css/base.css') }}" rel="stylesheet">
+        <script src="{{ url_for('static', filename='js/popper.js') }}"></script>
         <script src="{{ url_for('static', filename='js/jquery.js') }}"></script>
+        <script src="{{ url_for('static', filename='js/jquery.min.js') }}"></script>
+        <script src="{{ url_for('static', filename='js/popper.min.js') }}"></script>
         <script src="{{ url_for('static', filename='js/bootstrap.min.js') }}"></script>
         {% block styles %}{% endblock %}
 	</head>
@@ -15,9 +18,9 @@
     <body>
     <!-- TOP MENU -->
         <nav class="navbar navbar-expand-lg navbar-light bg-light">
-            <div class="collapse navbar-collapse flex-grow-1 text-right">
-                <ul class="navbar-nav ml-auto flex-nowrap">
-                    <li class="nav-item">
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav navbar-right">
+                    <li class="nav-item active">
                         <a href="{{ url_for('index') }}" class="nav-link m-2 menu-item nav-active">Główna</a>
                     </li>
                     <li class="nav-item">
@@ -35,13 +38,11 @@
         <div style="text-align: center">
             {% with messages = get_flashed_messages() %}
             {% if messages %}
-            <hr>
-            <ul>
                 {% for message in messages %}
-                <li  class="list-group-item">{{ message }}<br></li>
+                    <hr>
+                    {{ message }}
+                    <hr>
                 {% endfor %}
-            </ul>
-            <hr>
             {% endif %}
             {% endwith %}
             <br>

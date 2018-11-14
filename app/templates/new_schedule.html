@@ -2,14 +2,25 @@
 
 {% block styles %}
 <style>
-#new-schedule-card {
-    width: 33%;
-    text-align: center;
-    vertical-align: middle;
-    margin: 0 auto;
-    float: none;
-    margin-bottom: 10px;
-}
+    #new-schedule-card {
+        width: 33%;
+        text-align: center;
+        vertical-align: middle;
+        margin: 0 auto;
+        float: none;
+        margin-bottom: 10px;
+        background-color: #ced4da;
+    }
+
+    .list-group-item {
+        background-color: #ced4da;
+    }
+
+    .list-workers {
+        background-color: rgba(0,0,0,.075);
+    }
+
+
 </style>
 <script src="{{ url_for('static', filename='js/new_schedule.js') }}"></script>
 {% endblock %}
@@ -40,13 +51,20 @@
                     {% for error in form.month.errors %}
                         <span style="color: red;">[{{ error }}]</span>
                     {% endfor %}
+                    <br><br>
                 </li>
-                <li class="list-group-item">
+            </ul>
+            <p>Wybierz pracowników, którzy mają być umieszczeni w grafiku</p>
+            <ul class="list-group list-group-flush" id="workers">
+                <li class="list-group-item list-workers">
+
                     {{ form.workerslabel }} {{form.workers }}
                     {% for error in form.workers.errors %}
                         <span style="color: red;">[{{ error }}]</span>
                     {% endfor %}
                 </li>
+            </ul>
+            <ul class="list-group list-group-flush">
                 <li class="list-group-item">
                     {{ form.hours.label }} {{ form.hours }}
                     {% for error in form.hours.errors %}

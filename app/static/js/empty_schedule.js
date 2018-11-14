@@ -48,7 +48,6 @@ function getHours() {
     };
     alert("to zajmie parę sekund\nkliknij OK")
     jsonDict[work] = hours;
-    console.log(jsonDict);
     return jsonDict;
 }
 
