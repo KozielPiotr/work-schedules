@@ -262,7 +262,6 @@ def new_schedule_find_workers(workplace):
         workers_list = {}
         workers_list["name"] = worker.username
         jsondict.append(workers_list)
-        print(type(worker))
     return jsonify({"workers": jsondict})
 
 

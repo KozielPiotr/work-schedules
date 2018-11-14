@@ -6,6 +6,7 @@
 		<meta charset="utf-8">
         <link href="{{ url_for('static', filename='css/bootstrap.css') }}" rel="stylesheet">
         <link href="{{ url_for('static', filename='css/bootstrap.min.css') }}" rel="stylesheet">
+        <link href="{{ url_for('static', filename='css/base.css') }}" rel="stylesheet">
         <script src="{{ url_for('static', filename='js/jquery.js') }}"></script>
         <script src="{{ url_for('static', filename='js/bootstrap.min.js') }}"></script>
         {% block styles %}{% endblock %}
@@ -49,13 +50,12 @@
     <!-- MAIN CONTENT -->
         {% block content %}{% endblock %}
 
-    <!-- FOOT
-        <div style="font-size: 11px; position: absolute; bottom: 0px; width: 99%;">
-            <br>
-            <br>
-            <hr>
-            <p style="text-align: right;">2018 by Piotr Kozieł. All rights reserved. <a href="mailto:koziel.piotr1988@gmail.com">Contact</a></p>
-        </div> -->
-
+    <!-- FOOT -->
+        <br><br>
+        <footer class="footer">
+            <div class="container">
+                <span class="text-muted">2018 by Piotr Kozieł. All rights reserved. <a href="mailto:koziel.piotr1988@gmail.com">Contact</a></span>
+            </div>
+        </footer>
     </body>
 </html>
