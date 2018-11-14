@@ -1,11 +1,10 @@
 // generates checkboxes with workers depending of chosen workplace
 function workersCheckboxes() {
         workplace = $("#workplace").val();
-        fetch("/shop-user-connect/" + workplace).then(function(response) {
+        fetch("/workplace-worker-connect/" + workplace).then(function(response) {
             response.json().then(function(data) {
                 let optionsHTML = "";
                 for (let worker of data.workers) {
-                console.log(worker.name.typeof)
                     optionsHTML += `<option value="${worker.name}">${worker.name}</option>`;
                 };
                 document.getElementById("worker").innerHTML = optionsHTML;

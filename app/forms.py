@@ -52,22 +52,6 @@ class BooleanSubField(BooleanField):
         else:
             self.data = bool(value)
 
-class NewScheduleChoice(FlaskForm):
-    def years_list():
-        years = []
-        for i in range(2018,2031):
-            years.append((str(i), str(i)))
-        return years
-
-    shop = SelectField("Sklep")
-    year = SelectField("Rok: ", choices = years_list(), coerce=str)
-    month = SelectField("Miesiąc", choices=(("1", "Styczeń"), ("2", "Luty"), ("3", "Marzec"), ("4", "Kwiecień"),
-                                            ("5", "Maj"), ("6", "Czerweiec"), ("7", "Lipiec"), ("8", "Sierpień"),
-                                            ("9", "Wrzesień"), ("10", "Październik"), ("11", "Listopad"),
-                                            ("12", "Grudzień")))
-    hours = IntegerField("Ilość roboczogodzin")
-    in_schedule = BooleanSubField("UWAGA! Tworzący uwzględniony w grafiku?", default=True)
-    submit = SubmitField("Stwórz")
 
 class BillingPeriod(FlaskForm):
     begin_month = SelectField("Początek okresu rozliczeniowego", choices=(("1", "Styczeń"), ("2", "Luty"),("3", "Marzec"), ("4", "Kwiecień"),

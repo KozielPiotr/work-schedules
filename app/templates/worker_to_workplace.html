@@ -10,7 +10,7 @@ caption {
     caption-side: top;
 }
 </style>
-<script src="{{ url_for('static', filename='js/user_to_shop.js') }}"></script>
+<script src="{{ url_for('static', filename='js/worker_to_workplace.js') }}"></script>
 {% endblock %}
 
 {% block content %}
@@ -22,14 +22,14 @@ caption {
         <p>
             {{ form.workplace.label }} {{ form.workplace }}<br>
             {% for error in form.workplace.errors %}
-                        <span style="color: red;">[{{ error }}]</span>
-                    {% endfor %}
+                <span style="color: red;">[{{ error }}]</span>
+            {% endfor %}
         </p>
         <p>
             {{ form.worker.label }} {{ form.worker }}<br>
             {% for error in form.worker.errors %}
-                        <span style="color: red;">[{{ error }}]</span>
-                    {% endfor %}
+                <span style="color: red;">[{{ error }}]</span>
+            {% endfor %}
         </p>
         <p>
             <br>{{ form.submit }}
@@ -38,10 +38,10 @@ caption {
             <table class="table_shop_to_users">
                 <caption>Kliknij użytkownika, aby usunąć go ze sklepu</caption>
                 <thead>
-                <th style="border: 1px solid #000000;">
+                <th style="border: 3px solid #000000;">
                     Salon
                 </th>
-                <th colspan="{{ users_number }}" style="border: 1px solid #000000;">
+                <th colspan="{{ users_number }}" style="border: 3px solid #000000;">
                     użytkownicy
                 </th>
                 </thead>

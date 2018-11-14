@@ -88,9 +88,9 @@ def static_proxy(path):
 
 
 # Assigns user to the shop
-@app.route("/shop-user-connect", methods=["GET", "POST"])
+@app.route("/workplace-worker-connect", methods=["GET", "POST"])
 @login_required
-def user_to_shop():
+def worker_to_workplace():
     if current_user.access_level != "0" and current_user.access_level != "1":
         flash("Użytkownik nie ma uprawnień do wyświetlenia tej strony")
         return redirect(url_for("index"))
@@ -120,15 +120,15 @@ def user_to_shop():
             flash("Przypisano %s do %s" %(u, s))
         else:
             flash("%s był już przypisany do %s" %(u, s))
-        return redirect(url_for("user_to_shop"))
-    return render_template("user_to_shop.html", title="Grafiki - przydzielanie użytkownika do sklepu",
+        return redirect(url_for("worker_to_workplace"))
+    return render_template("worker_to_workplace.html", title="Grafiki - przydzielanie użytkownika do sklepu",
                            form=form, workplaces=workplaces, users_number=users_number)
 
 
-# jsonifies data for dynamicly generated checkboxes in new_schedule()
-@app.route("/shop-user-connect/<workplace>")
+# jsonifies data for dynamicly generated checkboxes in worker_to_workplace()
+@app.route("/workplace-worker-connect/<workplace>")
 @login_required
-def user_to_shop_workers(workplace):
+def worker_to_workplace_workers(workplace):
     if current_user.access_level != "0" and current_user.access_level != "1" and current_user.access_level != "2":
         flash("Użytkownik nie ma uprawnień do wyświetlenia tej strony")
         return redirect(url_for("index"))
@@ -162,7 +162,7 @@ def remove_from_shop():
     s.works.remove(u)
     db.session.commit()
     flash("Usunięto %s z %s"%(user, shop))
-    return redirect(url_for("user_to_shop"))
+    return redirect(url_for("worker_to_workplace"))
 
 
 # gets beginning and duration of billing period
@@ -193,7 +193,11 @@ def billing_period():
                            cur_begin=cur_begin, cur_duration=cur_duration)
 
 
-# gets data for new schedule
+# gets data for new schedule and creates new schedule template
+"""
+I'm not using calendar module's names for months and days because whole app has to be in polish,
+    so the code is little more complicated.
+"""
 @app.route("/new-schedule", methods=["GET", "POST"])
 @login_required
 def new_schedule():
@@ -227,13 +231,19 @@ def new_schedule():
         cal = calendar.Calendar()
         weekday_names = ["Poniedziałek", "Wtorek", "Środa", "Czwartek", "Piątek", "Sobota", "Niedziela"]
 
-        workers = []
-        for worker in workers_list:
-            workers.append(str(worker).replace(" ", "_"))
+        schedule_name = "%s-%s-%s" %(year, month, workplace)
+        check_schedule = Schedule.query.filter_by(name=schedule_name).first()
+        if check_schedule is not None:
+            flash("Taki grafik już istnieje")
+            redirect(url_for("new_schedule"))
+        else:
+            workers = []
+            for worker in workers_list:
+                workers.append(str(worker).replace(" ", "_"))
 
-        return render_template("empty_schedule.html", title="Grafiki - nowy grafik", workers=workers,
-                               shop=workplace, year=year, mn=month_name, cal=cal, wdn=weekday_names,
-                               monthn=monthn, yearn=yearn, hours=hours)
+            return render_template("empty_schedule.html", title="Grafiki - nowy grafik", workers=workers,
+                                   shop=workplace, year=year, mn=month_name, cal=cal, wdn=weekday_names,
+                                   monthn=monthn, yearn=yearn, hours=hours)
 
     return render_template("new_schedule.html", title="Grafiki - nowy grafik", form=form)
 
@@ -255,35 +265,6 @@ def new_schedule_find_workers(workplace):
         print(type(worker))
     return jsonify({"workers": jsondict})
 
-
-# creates new schedule
-"""
-I'm not using calendar module's names for months and days because whole app has to be in polish,
-    so the code is little more complicated.
-"""
-@app.route("/create-schedule/<year>/<month>/<shop>", methods=["GET", "POST"])
-@login_required
-def create_schedule(year, month, shop, workers):
-    if current_user.access_level != "0" and current_user.access_level != "1" and current_user.access_level != "2":
-        flash("Użytkownik nie ma uprawnień do wyświetlenia tej strony")
-        return redirect(url_for("index"))
-
-    yearn = int(year)
-    monthn = int(month)
-    month_names = ["Styczeń", "luty", "Marzec", "Kwiecień", "Maj", "Czerwiec", "Lipiec", "Sierpień",
-                   "Wrzesień", "Październik", "Listopad", "Grudzień"]
-    month_name = month_names[(monthn)-1]
-    cal = calendar.Calendar()
-    weekday_names = ["Poniedziałek", "Wtorek", "Środa", "Czwartek", "Piątek", "Sobota", "Niedziela"]
-    hours = request.args.get("hours")
-    workers_list = workers
-
-    for worker in workers_list:
-        workers.append(str(worker).replace(" ", "-"))
-
-    return render_template("empty_schedule.html", title="Grafiki - nowy grafik", workers=workers,
-                           shop=shop, year=year, mn=month_name, cal=cal, wdn=weekday_names,
-                           monthn=monthn, yearn=yearn, hours=hours)
 
 @app.route('/schedule-to-db', methods=['POST'])
 def new_schedule_to_db():
@@ -314,7 +295,6 @@ def new_schedule_to_db():
                     event = element["event"]
                     workplace = element["workplace"]
                     psname = "%s-%s-%s" %(d, worker, workplace)
-                    #print(psname)
                     pschedule = Personal_schedule(id=psname, date=d, worker=worker, begin_hour=b_hour,
                                                   end_hour=e_hour, hours_sum=sum, event=event, workplace=workplace,
                                                   includes=schedule)
