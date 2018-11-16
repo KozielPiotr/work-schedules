@@ -1,20 +1,21 @@
 {% extends "base.html" %}
 
 {% block styles %}
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <link href="{{ url_for('static', filename='css/table.css') }}" rel="stylesheet">
-<link href="{{ url_for('static', filename='css/bootstrap.css') }}" rel="stylesheet">
-<link href="{{ url_for('static', filename='css/bootstrap.min.css') }}" rel="stylesheet">
-<script src="{{ url_for('static', filename='js/jquery.js') }}"></script>
 <script src="{{ url_for('static', filename='js/empty_schedule.js') }}"></script>
-<script src="{{ url_for('static', filename='js/bootstrap.min.js') }}"></script>
+
+
 
 {% endblock %}
 
 
 {% block content %}
 
-<div>
-    <!-- Legend of events -->
+
+<!-- Legend of events -->
+<button id="legend-btn" type="button" class="btn btn-primary btn-sm btn-block" data-toggle="collapse" data-target="#legend-of-events">Legenda</button>
+<div id="legend-of-events" class="collapse">
     <table>
         <caption class="caption">Legenda zdarzeń:</caption>
         <tr>
@@ -39,14 +40,31 @@
             <th>
                 <ul>
                     <li>UB - urlop bezpłatny</li>
+                    <li>PD - Pierwszy dzień pracy</li>
                 </ul>
             </th>
         </tr>
     </table>
     <br>
+</div>
 
-    <!-- Schedule -->
-    <form method="post" action="/schedule-to-db">
+
+<!-- Schedule for previous month (not editable) -->
+<button id="prev-month-schedule-btn" class="btn btn-primary btn-sm btn-block" data-toggle="collapse" data-target="#prev-month-schedule">Grafik na poprzedni miesiąc</button>
+<div id="prev-month-schedule" class="collapse">
+    {% if prev_month_schedule != None %}
+        <table class="prev-schedule-table table-bordered">
+            <caption class="caption">Grafik dla <b>{{ shop }}</b> na rok <b>{{ prev_month_year }}</b>, miesiąc <b>{{ prev_month_name }}</b></caption>
+        </table>
+    {% else %}
+        <p>Grafik NIE istnieje</p>
+    {% endif %}
+</div>
+
+
+<!-- Schedule for chosen month (editable) -->
+<div id="curr-month-schedule">   <!-- Schedule -->
+    <form method="post" action="/schedule-to-db/{{ hours }}">
         <button type="submit">Submit</button>
         <table class="new-schedule-table table-bordered">
             <caption class="caption">Tworzenie grafiku dla <b>{{ shop }}</b> na rok <b>{{ year }}</b>, miesiąc <b>{{ mn }}</b></caption>
@@ -96,7 +114,7 @@
                                 <input type="hidden" value="{{ worker }}-{{ year }}-{{ monthn }}-{{ day[0] }}" name="helper">
                                 <select name="event">
                                     <option value="off">X</option>
-                                    <option value="in_work">......</option>
+                                    <option value="in_work">........</option>
                                     <option value="UW">UW</option>
                                     <option value="UNŻ">UNŻ</option>
                                     <option value="L4">L4</option>
@@ -104,6 +122,7 @@
                                     <option value="UOJ">UOJ</option>
                                     <option value="UR">UR</option>
                                     <option value="UB">UB</option>
+                                    <option value="PD">PD</option>
                                 </select>
                             </td>
                             <td id="to-json-{{ worker }}-{{ year }}-{{ monthn }}-{{ day[0] }}">

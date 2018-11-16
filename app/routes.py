@@ -5,9 +5,7 @@ from app import app, db
 from app.forms import LoginForm, NewUserForm, NewShopForm, UserToShopForm, NewScheduleForm, BillingPeriod
 from app.models import User, Shop, Billing_period, Personal_schedule, Schedule
 import calendar
-from sqlalchemy import update
-import datetime
-from datetime import datetime, date
+from datetime import date
 
 
 # welcome page
@@ -16,6 +14,18 @@ from datetime import datetime, date
 @login_required
 def index():
     return render_template("index.html", title="Grafiki")
+
+@app.route("/test", methods=["GET", "POST"])
+def test():
+    queries = []
+    months = Schedule.query.filter_by(month=11)
+    places = Schedule.query.filter_by(workplace="Sklep 1")
+    for month in months:
+        if month in places:
+            queries.append(month.name)
+    print(queries)
+    return "%s"
+
 
 
 # Login page. Checks if user is logged in and if not redirects to log in  page
@@ -173,8 +183,16 @@ def billing_period():
         flash("Użytkownik nie ma uprawnień do wyświetlenia tej strony")
         return redirect(url_for("index"))
     form = BillingPeriod()
-    cur_begin = Billing_period.query.filter_by(id=1).first().begin
-    cur_duration = Billing_period.query.filter_by(id=1).first().duration
+    if Billing_period.query.filter_by(id=1).first() is None:
+        cur_begin = 1
+    else:
+        cur_begin = Billing_period.query.filter_by(id=1).first().begin
+
+    if Billing_period.query.filter_by(id=1).first() is None:
+        cur_duration = 3
+    else:
+        cur_duration = Billing_period.query.filter_by(id=1).first().duration
+
     if form.validate_on_submit():
         begin = form.begin_month.data
         duration = form.length_of_billing_period.data
@@ -186,9 +204,9 @@ def billing_period():
             bp = Billing_period
             bp.query.filter_by(id=1).all()[0].begin=begin
             bp.query.filter_by(id=1).all()[0].duration = duration
-
             db.session.commit()
-        return "OK"
+        flash("Zmieniono okres rozliczeniowy na: Pierwszy miesiąc: %s Długość: %s" % (begin, duration))
+        return redirect(url_for("index"))
     return render_template("billing_period.html", title="Grafiki - okres rozliczeniowy", form=form,
                            cur_begin=cur_begin, cur_duration=cur_duration)
 
@@ -212,7 +230,7 @@ def new_schedule():
         workplaces.append((str(workplace), str(workplace)))
     form.workplace.choices = workplaces
 
-    for worker in User.query.order_by(User.username).all():
+    for worker in User.query.order_by(User.access_level).all():
         workers_list.append((str(worker), str(worker)))
     form.workers.choices = workers_list
 
@@ -222,7 +240,6 @@ def new_schedule():
         month = form.month.data
         workers_list = form.workers.data
         hours = form.hours.data
-
         yearn = int(year)
         monthn = int(month)
         month_names = ["Styczeń", "luty", "Marzec", "Kwiecień", "Maj", "Czerwiec", "Lipiec", "Sierpień",
@@ -241,9 +258,60 @@ def new_schedule():
             for worker in workers_list:
                 workers.append(str(worker).replace(" ", "_"))
 
-            return render_template("empty_schedule.html", title="Grafiki - nowy grafik", workers=workers,
-                                   shop=workplace, year=year, mn=month_name, cal=cal, wdn=weekday_names,
-                                   monthn=monthn, yearn=yearn, hours=hours)
+
+        # data for prev month schedule part of template
+        prev_month = monthn - 1
+        prev_month_schedules_q1 = Schedule.query.filter_by(month=prev_month).all()
+        prev_month_schedules_q2 = Schedule.query.filter_by(workplace=workplace).all()
+        prev_month_schedule = None
+
+
+            # finds schedule for previous month
+        for prev_m_schedule in prev_month_schedules_q1:
+            if prev_m_schedule in prev_month_schedules_q2:
+                prev_month_schedule = prev_m_schedule
+            print(prev_month_schedule)
+
+
+            # checks if schedule for prev month exists
+        if prev_month_schedule != None:
+            # finds personal schedules for previous month
+            prev_month_p_schedules = prev_month_schedule.ind
+
+            prev_month_name = month_names[(monthn-1) - 1]
+
+
+                # finds workers, who worked in the workplace in prev month
+            prev_month_workers_list = []
+            for p_schedule in prev_month_p_schedules:
+                if p_schedule.worker not in prev_month_workers_list:
+                    prev_month_workers_list.append(p_schedule.worker)
+
+            prev_month_workers = []
+            for worker in prev_month_workers_list:
+                worker = str(worker).replace(" ", "_")
+                prev_month_workers.append(worker)
+
+
+                # finds working hours in prev month
+            prev_month_hours = prev_month_schedule.hrs_to_work
+
+
+                #finds prev month year
+            prev_month_year = prev_month_schedule.year
+            print(prev_month_year)
+        else:
+            prev_month_p_schedules = None
+            prev_month_workers = None
+            prev_month_hours = None
+            prev_month_year = None
+
+        return render_template("empty_schedule.html", title="Grafiki - nowy grafik", workers=workers,
+                               shop=workplace, year=year, mn=month_name, cal=cal, wdn=weekday_names,
+                               monthn=monthn, yearn=yearn, hours=hours, prev_month=prev_month,
+                               prev_month_schedule=prev_month_schedule, prev_month_p_schedules=prev_month_p_schedules,
+                               prev_month_workers=prev_month_workers, prev_month_hours=prev_month_hours,
+                               prev_month_year=prev_month_year, prev_month_name=prev_month_name)
 
     return render_template("new_schedule.html", title="Grafiki - nowy grafik", form=form)
 
@@ -265,42 +333,44 @@ def new_schedule_find_workers(workplace):
     return jsonify({"workers": jsondict})
 
 
-@app.route('/schedule-to-db', methods=['POST'])
-def new_schedule_to_db():
+@app.route('/schedule-to-db/<hours>', methods=['POST'])
+def new_schedule_to_db(hours):
     data = request.json
     sname = ""
     syear = ""
     smonth = ""
     sworkplace = ""
-    try:
-        for dates in data.items():
-            for day in dates:
-                for element in day:
-                    sname = "%s-%s-%s" %(element["year"], element["month"], element["workplace"])
-                    syear = element["year"]
-                    smonth = element["month"]
-                    sworkplace = element["workplace"]
-        schedule = Schedule(name=sname, year=syear, month=smonth, workplace=sworkplace)
-        db.session.add(schedule)
-        db.session.commit()
-        for dates in data.items():
-            for day in dates:
-                for element in day:
-                    d = date(int(element["year"]), int(element["month"]), int(element["day"]))
-                    worker = element["worker"].replace("_", " ")
-                    b_hour = element["from"]
-                    e_hour = element["to"]
-                    sum = element["sum"]
-                    event = element["event"]
-                    workplace = element["workplace"]
-                    psname = "%s-%s-%s" %(d, worker, workplace)
-                    pschedule = Personal_schedule(id=psname, date=d, worker=worker, begin_hour=b_hour,
-                                                  end_hour=e_hour, hours_sum=sum, event=event, workplace=workplace,
-                                                  includes=schedule)
-                    db.session.add(pschedule)
-        db.session.commit()
-        return url_for("index")
-    except (AttributeError):
-        return "Popraw błędy w stworzonym grafiku."
-    except:
-        return "Coś poszło nie tak.\nPrawdopodobnie grafik już istnieje."
+    hours = hours
+    #try:
+    for dates in data.items():
+        for day in dates:
+            for element in day:
+                sname = "%s-%s-%s" %(element["year"], element["month"], element["workplace"])
+                syear = element["year"]
+                smonth = element["month"]
+                sworkplace = element["workplace"]
+    schedule = Schedule(name=sname, year=syear, month=smonth, workplace=sworkplace, hrs_to_work=hours,
+                        accepted = False, version = 0)
+    db.session.add(schedule)
+    db.session.commit()
+    for dates in data.items():
+        for day in dates:
+            for element in day:
+                d = date(int(element["year"]), int(element["month"]), int(element["day"]))
+                worker = element["worker"].replace("_", " ")
+                b_hour = element["from"]
+                e_hour = element["to"]
+                sum = element["sum"]
+                event = element["event"]
+                workplace = element["workplace"]
+                psname = "%s-%s-%s" %(d, worker, workplace)
+                pschedule = Personal_schedule(id=psname, date=d, worker=worker, begin_hour=b_hour,
+                                              end_hour=e_hour, hours_sum=sum, event=event, workplace=workplace,
+                                              includes=schedule)
+                db.session.add(pschedule)
+    db.session.commit()
+    return url_for("index")
+    #except (AttributeError):
+        #return "Popraw błędy w stworzonym grafiku."
+    #except:
+        #return "Coś poszło nie tak.\nPrawdopodobnie grafik już istnieje."

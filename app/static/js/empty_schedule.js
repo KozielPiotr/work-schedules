@@ -1,5 +1,32 @@
+//checkes if there is 11 hours of rest between shifts
+function restTime(currentSelector, worker, year, month, day) {
+    currentDay = parseInt($(currentSelector).find("input[name='day']").val());
+    currentDayHour = parseInt($(currentSelector).find("input[name='b-hour']").val());
+    prevMonthDays = [];
+    if (currentDay > 1) {
+        prevDay = $(`td[id="to-json-${worker}-${year}-${month}-${day-1}"]`);
+    } else {
+        console.log("Zeszły miesiąc");
+        $("td[id^='to-json-prev-${worker}-']").each(function() {
+            prevMonthLastDay.push(parseInt($(this).find("input[name='day']").val()));
+        });
+        prevMonthLastDay = Math.max(...prevMonthDays);
+        prevSelector = $(`td[id="to-json-prev-${worker}-${year}-${month}-${prevMonthLastDay}"]`);
+    };
+    prevDay = parseInt($(prevSelector).find("input[name='day']").val());
+    prevDayHour = parseInt($(prevSelector).find("input[name='e-hour']").val());
+
+    restStart = new Date(year, (month-1), prevDay, prevDayHour);
+    restStop = new Date(year, (month-1), currentDay, currentDayHour);
+    restHours = (restStop-restStart)/3600000;
+
+    if (isNaN(prevDayHour)) {
+        prevDayHour = 8;
+    };
+};
 
 
+//gets data of all days in month and prepers dict for json
 function getHours() {
     let hours = [];
     let jsonDict = {};
@@ -9,7 +36,7 @@ function getHours() {
     });
     let numberOfErrors = 0
     let errors = [];
-    $("td[id^=to-json-]").each(function() {
+    $("td[id^='to-json-']").each(function() {
         selHelper = $(this).find("input[name='helper']").val();
         let day = $(this).find("input[name='day']").val();
         let month = $(this).find("input[name='month']").val();
@@ -27,6 +54,8 @@ function getHours() {
         if (isNaN(endHour)) {
             endHour = 0;
         };
+        directDay = $(this);
+        restTime(directDay, worker, year, month, day);
 
         //checks if everything is filled correctly
         if ((event==="UW" || event==="UO" || event==="UB") && (beginHour!==0 || endHour!==8)) {
@@ -38,6 +67,7 @@ function getHours() {
             errors[numberOfErrors] = (`\n${numberOfErrors}.Niewłaściwe godziny ${event} u ${worker} w dniu ${day}.${month}.${year}`)
         };
 
+
         //fills array for json
         hours.push({"day": day, "month": month, "year": year, "worker": worker, "from": beginHour,
                     "to": endHour, "sum": wrkd, "event": event, "workplace": workplace});
@@ -46,7 +76,6 @@ function getHours() {
         alert(errors);
         return false;
     };
-    alert("to zajmie parę sekund\nkliknij OK")
     jsonDict[work] = hours;
     return jsonDict;
 }
@@ -124,7 +153,7 @@ $(document).ready(function() {
             event.css("background", "#fff");
         } else if (event.val()=="UW") {
             $(this).css("background", "#FC33FF");
-            $(`#begin-${selHelper}`).css("background", "#FC33FF");
+            $(`#begin-${selHelper} *`).css("background", "#FC33FF");
             $(`#end-${selHelper}`).css("background", "#FC33FF");
             $(`#counted-${selHelper}`).css("background", "#FC33FF");
             from.css("background", "#FC33FF");
@@ -217,6 +246,3 @@ window.onload = function() {
         };
     });
 };
-
-
-

@@ -1,6 +1,0 @@
-Nowa tabela w bazie
-rok, miesiąc, kod salonu, wersja, akcept (tak, nie)
-
-NOWY GRAFIK
-- zapisz szkic eksportuje zmienne do pliku i pozwala edytować grafik dalej
-- zatwierdzenie grafiku tworzy arkusz xlsx o nazwie bazującej na roku, miesiącu i kodzie sklepu, dodaje rekord do tabeli, ustawia wartość "akcept" w tabeli na "nie" i wysyła wiadomość o utworzeniu nowego grafiku

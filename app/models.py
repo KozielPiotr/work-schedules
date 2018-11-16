@@ -45,6 +45,9 @@ class Schedule(db.Model):
     year = db.Column(db.Integer)
     month = db.Column(db.Integer)
     workplace = db.Column(db.String)
+    hrs_to_work = db.Column(db.Integer, index=True, nullable=False, default=0)
+    accepted = db.Column(db.Boolean, index=True, nullable=False, default = False)
+    version = db.Column(db.Integer, index=True, nullable=False)
     ind = db.relationship("Personal_schedule", backref="includes")
 
 
