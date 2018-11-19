@@ -15,10 +15,6 @@ input[type="number"] {
     -moz-appearance: textfield;
 }
 
-.card, .btn, .form-control {
-    border-radius: 0;
-}
-
 td[id*="to-json"] {
     display: none;
 }
@@ -28,10 +24,32 @@ td[id*="counted"] {
 }
 
 .table-bordered {
-  border: 1px solid #000000 !important;
+    border: 1px solid #000000 !important;
+    background: white;
 }
 
 .table-bordered th,
 .table-bordered td {
-  border: 1px solid #000000 !important;
+    border: 1px solid #000000 !important;
+    text-align: center !important;
+    vertical-align: middle !important;
+}
+
+.table-bordered td {
+    font-weight: 550;
+}
+
+.new-schedule-table {
+    background: white;
+}
+
+table th{
+    background: #1111115c;
+    padding-right: 1ex;
+    padding-left: 1ex;
+}
+
+input {
+    text-align: center;
+    vertical-align: middle;
 }

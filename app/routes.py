@@ -252,66 +252,81 @@ def new_schedule():
         check_schedule = Schedule.query.filter_by(name=schedule_name).first()
         if check_schedule is not None:
             flash("Taki grafik już istnieje")
-            redirect(url_for("new_schedule"))
+            redirect(url_for("index"))
         else:
             workers = []
             for worker in workers_list:
                 workers.append(str(worker).replace(" ", "_"))
 
 
-        # data for prev month schedule part of template
-        prev_month = monthn - 1
-        prev_month_schedules_q1 = Schedule.query.filter_by(month=prev_month).all()
-        prev_month_schedules_q2 = Schedule.query.filter_by(workplace=workplace).all()
-        prev_month_schedule = None
+            # data for prev month schedule part of template
+            prev_month = monthn - 1
+            prev_month_schedules_q1 = Schedule.query.filter_by(month=prev_month).all()
+            prev_month_schedules_q2 = Schedule.query.filter_by(workplace=workplace).all()
+            prev_month_schedule = None
 
 
-            # finds schedule for previous month
-        for prev_m_schedule in prev_month_schedules_q1:
-            if prev_m_schedule in prev_month_schedules_q2:
-                prev_month_schedule = prev_m_schedule
-            print(prev_month_schedule)
+                # finds schedule for previous month
+            for prev_m_schedule in prev_month_schedules_q1:
+                if prev_m_schedule in prev_month_schedules_q2:
+                    prev_month_schedule = prev_m_schedule
 
 
-            # checks if schedule for prev month exists
-        if prev_month_schedule != None:
-            # finds personal schedules for previous month
-            prev_month_p_schedules = prev_month_schedule.ind
+                # checks if schedule for prev month exists
+            if prev_month_schedule != None:
+                # finds personal schedules for previous month
+                prev_month_p_schedules = prev_month_schedule.ind
 
-            prev_month_name = month_names[(monthn-1) - 1]
-
-
-                # finds workers, who worked in the workplace in prev month
-            prev_month_workers_list = []
-            for p_schedule in prev_month_p_schedules:
-                if p_schedule.worker not in prev_month_workers_list:
-                    prev_month_workers_list.append(p_schedule.worker)
-
-            prev_month_workers = []
-            for worker in prev_month_workers_list:
-                worker = str(worker).replace(" ", "_")
-                prev_month_workers.append(worker)
+                prev_month_name = month_names[(monthn-1) - 1]
 
 
-                # finds working hours in prev month
-            prev_month_hours = prev_month_schedule.hrs_to_work
+                    # finds workers, who worked in the workplace in prev month
+                prev_month_workers_list = []
+                for p_schedule in prev_month_p_schedules:
+                    if p_schedule.worker not in prev_month_workers_list:
+                        prev_month_workers_list.append(p_schedule.worker)
+
+                prev_month_workers = []
+                for worker in prev_month_workers_list:
+                    worker = str(worker).replace(" ", "_")
+                    prev_month_workers.append(worker)
 
 
-                #finds prev month year
-            prev_month_year = prev_month_schedule.year
-            print(prev_month_year)
-        else:
-            prev_month_p_schedules = None
-            prev_month_workers = None
-            prev_month_hours = None
-            prev_month_year = None
+                    # finds working hours in prev month
+                prev_month_hours = prev_month_schedule.hrs_to_work
 
-        return render_template("empty_schedule.html", title="Grafiki - nowy grafik", workers=workers,
-                               shop=workplace, year=year, mn=month_name, cal=cal, wdn=weekday_names,
-                               monthn=monthn, yearn=yearn, hours=hours, prev_month=prev_month,
-                               prev_month_schedule=prev_month_schedule, prev_month_p_schedules=prev_month_p_schedules,
-                               prev_month_workers=prev_month_workers, prev_month_hours=prev_month_hours,
-                               prev_month_year=prev_month_year, prev_month_name=prev_month_name)
+
+                    # finds prev month year
+                prev_month_year = prev_month_schedule.year
+
+
+                    # counts sum of worker hours worker by each worker
+                workers_hours = {}
+                for worker in prev_month_workers:
+                    worker_hours = 0
+                    for p_schedule in prev_month_p_schedules:
+                        if p_schedule.worker == str(worker).replace("_", " "):
+                            worker_hours += p_schedule.hours_sum
+                        workers_hours[worker] = worker_hours
+                print(workers_hours)
+
+
+
+            else:
+                prev_month_p_schedules = None
+                prev_month_name = None
+                prev_month_workers = None
+                prev_month_hours = None
+                prev_month_year = None
+                workers_hours = None
+
+            return render_template("empty_schedule.html", title="Grafiki - nowy grafik", workers=workers,
+                                   shop=workplace, year=year, mn=month_name, cal=cal, wdn=weekday_names,
+                                   monthn=monthn, yearn=yearn, hours=hours, prev_month=prev_month,
+                                   prev_month_schedule=prev_month_schedule, prev_month_p_schedules=prev_month_p_schedules,
+                                   prev_month_workers=prev_month_workers, prev_month_hours=prev_month_hours,
+                                   prev_month_year=prev_month_year, prev_month_name=prev_month_name,
+                                   workers_hours=workers_hours)
 
     return render_template("new_schedule.html", title="Grafiki - nowy grafik", form=form)
 
