@@ -4,14 +4,14 @@
     <div style="text-align: center">
         <p>
             Obecne ustawienia okresu rozliczeniowego:<br>
-            Pierwszy miesiąc: {{ cur_begin }}<br>
+            Początek: {{ cur_begin }}<br>
             Długość: {{ cur_duration }}
             <hr>
         </p>
         <form action="" method="post">
         {{ form.hidden_tag() }}
             <p>
-                {{ form.begin_month.label }} {{ form.begin_month }}
+                {{ form.begin_month.label }} {{ form.begin_month }} {{ form.begin_year.label }} {{ form.begin_year }}
             </p>
             <p>
                 {{ form.length_of_billing_period.label }} {{form.length_of_billing_period }}

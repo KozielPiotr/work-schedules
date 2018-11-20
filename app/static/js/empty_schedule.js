@@ -230,6 +230,9 @@ $(document).ready(function() {
 });
 
 
+
+
+
 //adds css to left hours <td> after loading page
 window.onload = function() {
     $("td[id^='left-hours").each(function() {
@@ -243,6 +246,17 @@ window.onload = function() {
         } else {
             $(this).css("background", "#ffffff");
             hours.css("background", "#ffffff");
+        };
+    });
+    $("td[id^='prev-left-hours").each(function() {
+        hours = $(this).text();
+        if (parseInt(hours) < 0) {
+            $(this).css("background", "#ff0000");
+        } else if (parseInt(hours) > 0) {
+            $(this).css("background", "#ffaa00");
+        } else {
+            $(this).css("background", "#ffffff");
+
         };
     });
 };

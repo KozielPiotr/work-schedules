@@ -35,6 +35,12 @@ td[id*="counted"] {
     vertical-align: middle !important;
 }
 
+.prev-schedule-table, .new-schedule-table {
+    width: auto;
+    margin-left: auto;
+    margin-right: auto;
+}
+
 .table-bordered td {
     font-weight: 550;
 }

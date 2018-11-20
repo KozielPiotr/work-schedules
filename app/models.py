@@ -25,6 +25,9 @@ class User(UserMixin, db.Model):
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
 
+@login.user_loader
+def load_user(id):
+    return User.query.get(int(id))
 
 class Shop(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -35,7 +38,7 @@ class Shop(db.Model):
 
 class Billing_period(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    begin = db.Column(db.Integer)
+    begin = db.Column(db.DateTime, index=True)
     duration = db.Column(db.Integer)
 
 
@@ -63,6 +66,3 @@ class Personal_schedule(db.Model):
     includes_id = db.Column(db.Integer, db.ForeignKey("schedule.id"))
 
 
-@login.user_loader
-def load_user(id):
-    return User.query.get(int(id))

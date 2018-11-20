@@ -58,6 +58,7 @@ class BillingPeriod(FlaskForm):
                                             ("5", "Maj"), ("6", "Czerweiec"), ("7", "Lipiec"), ("8", "Sierpień"),
                                             ("9", "Wrzesień"), ("10", "Październik"), ("11", "Listopad"),
                                             ("12", "Grudzień")))
+    begin_year = IntegerField("Rok: ", [DataRequired(message="Wprowadź rok")])
     length_of_billing_period = IntegerField("Długość okresu rozliczeniowego (w miesiącach)")
     submit = SubmitField("Zatwierdź")
 

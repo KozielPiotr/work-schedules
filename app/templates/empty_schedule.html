@@ -131,6 +131,14 @@
                     </td>
                 {% endfor %}
             </tr>
+            <tr>
+                <th colspan="2">Pozostało H:</th>
+                {% for worker in workers %}
+                <td colspan="4" id="prev-left-hours-{{ worker }}"> <!-- hours left to assign or overtime -->
+                    {{ prev_month_hours - workers_hours[worker] }}
+                </td>
+                {% endfor %}
+            </tr>
             </tfoot>
         </table>
 
@@ -141,7 +149,7 @@
 
 
 <!-- Schedule for chosen month (editable) -->
-<container>
+
 <div id="curr-month-schedule">   <!-- Schedule -->
     <form method="post" action="/schedule-to-db/{{ hours }}">
         <button type="submit">Submit</button>
@@ -250,5 +258,5 @@
         </table>
     </form>
 </div>
-</container>
+
 {% endblock %}

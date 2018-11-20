@@ -5,7 +5,8 @@ from app import app, db
 from app.forms import LoginForm, NewUserForm, NewShopForm, UserToShopForm, NewScheduleForm, BillingPeriod
 from app.models import User, Shop, Billing_period, Personal_schedule, Schedule
 import calendar
-from datetime import date
+from datetime import date, datetime
+from dateutil.relativedelta import relativedelta
 
 
 # welcome page
@@ -186,7 +187,7 @@ def billing_period():
     if Billing_period.query.filter_by(id=1).first() is None:
         cur_begin = 1
     else:
-        cur_begin = Billing_period.query.filter_by(id=1).first().begin
+        cur_begin = "{:%d - %m - %Y}".format(Billing_period.query.filter_by(id=1).first().begin)
 
     if Billing_period.query.filter_by(id=1).first() is None:
         cur_duration = 3
@@ -194,7 +195,7 @@ def billing_period():
         cur_duration = Billing_period.query.filter_by(id=1).first().duration
 
     if form.validate_on_submit():
-        begin = form.begin_month.data
+        begin = datetime(int(form.begin_year.data), int(form.begin_month.data), 1)
         duration = form.length_of_billing_period.data
         if len(Billing_period.query.all()) == 0:
             bp = Billing_period(begin=begin, duration=duration)
@@ -205,7 +206,8 @@ def billing_period():
             bp.query.filter_by(id=1).all()[0].begin=begin
             bp.query.filter_by(id=1).all()[0].duration = duration
             db.session.commit()
-        flash("Zmieniono okres rozliczeniowy na: Pierwszy miesiąc: %s Długość: %s" % (begin, duration))
+        #txt = "{:%d - %m - %Y}"
+        flash("Zmieniono okres rozliczeniowy na: Początek: %s Długość: %s" % ("{:%d - %m - %Y}".format(begin), duration))
         return redirect(url_for("index"))
     return render_template("billing_period.html", title="Grafiki - okres rozliczeniowy", form=form,
                            cur_begin=cur_begin, cur_duration=cur_duration)
