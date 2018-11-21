@@ -2,32 +2,34 @@
 function restTime(currentSelector, worker, year, month, day) {
     currentDay = parseInt($(currentSelector).find("input[name='day']").val());
     currentDayHour = parseInt($(currentSelector).find("input[name='b-hour']").val());
-    prevMonthDays = [];
-    if (currentDay > 1) {
-        prevSelector = $(`td[id="to-json-${worker}-${year}-${month}-${day-1}"]`);
-        prevDay = parseInt($(prevSelector).find("input[name='day']").val());
-        prevDayHour = parseInt($(prevSelector).find("input[name='e-hour']").val());
-        restStart = new Date(year, (month-1), prevDay, prevDayHour);
-        restStop = new Date(year, (month-1), currentDay, currentDayHour);
-    } else {
-        $("th[class='prev-daynumber-th']").each(function() {
-            prevMonthDays.push(parseInt($(this).text()));
-        });
-        prevDay = Math.max(...prevMonthDays);
-        prevDayHour = $(`td[id="prev-end-${worker}-${year}-${month-1}-${prevDay}"]`).text();
-        restStart = new Date(year, (month-2), prevDay, prevDayHour);
-        restStop = new Date(year, (month-1), currentDay, currentDayHour);
-    };
-    if (isNaN(prevDayHour)) {
+    if ($(currentSelector).find("input[name='event']").val() !== "in_work" && $(currentSelector).find("input[name='event']").val() !== "UNŻ" &&
+        $(currentSelector).find("input[name='event']").val() !== "in_work" !== "L4") {
         restHours = 11;
     } else {
-
-
-    restHours = (restStop-restStart)/3600000;
-
-
+        prevMonthDays = [];
+        if (currentDay > 1) {
+            prevSelector = $(`td[id="to-json-${worker}-${year}-${month}-${day-1}"]`);
+            prevDay = parseInt($(prevSelector).find("input[name='day']").val());
+            prevDayHour = parseInt($(prevSelector).find("input[name='e-hour']").val());
+            restStart = new Date(year, (month-1), prevDay, prevDayHour);
+            restStop = new Date(year, (month-1), currentDay, currentDayHour);
+        } else {
+            $("th[class='prev-daynumber-th']").each(function() {
+                prevMonthDays.push(parseInt($(this).text()));
+            });
+            prevDay = Math.max(...prevMonthDays);
+            prevDayHour = $(`td[id="prev-end-${worker}-${year}-${month-1}-${prevDay}"]`).text();
+            restStart = new Date(year, (month-2), prevDay, prevDayHour);
+            restStop = new Date(year, (month-1), currentDay, currentDayHour);
+        };
+        if (isNaN(prevDayHour)) {
+            restHours = 11;
+        } else {
+            restHours = (restStop-restStart)/3600000;
+        };
+        console.log(worker, restStop, restStart, restHours, currentDayHour);
     };
-    console.log(worker, restStop, restStart, restHours);
+    return restHours
 };
 
 
@@ -60,7 +62,11 @@ function getHours() {
             endHour = 0;
         };
         directDay = $(this);
-        restTime(directDay, worker, year, month, day);
+
+        if (restTime(directDay, worker, year, month, day) < 11) {
+            numberOfErrors += 1;
+            errors[numberOfErrors] = (`\n${numberOfErrors}. Niezachowane 11 godzin odpoczynku u ${worker} przed dniem ${day}.${month}.${year} `)
+        };
 
         //checks if everything is filled correctly
         if ((event==="UW" || event==="UO" || event==="UB") && (beginHour!==0 || endHour!==8)) {
