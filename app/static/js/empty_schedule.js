@@ -1,28 +1,33 @@
-//checkes if there is 11 hours of rest between shifts
+//checkes if there is 11 hours rest time between shifts
 function restTime(currentSelector, worker, year, month, day) {
     currentDay = parseInt($(currentSelector).find("input[name='day']").val());
     currentDayHour = parseInt($(currentSelector).find("input[name='b-hour']").val());
     prevMonthDays = [];
     if (currentDay > 1) {
-        prevDay = $(`td[id="to-json-${worker}-${year}-${month}-${day-1}"]`);
+        prevSelector = $(`td[id="to-json-${worker}-${year}-${month}-${day-1}"]`);
+        prevDay = parseInt($(prevSelector).find("input[name='day']").val());
+        prevDayHour = parseInt($(prevSelector).find("input[name='e-hour']").val());
+        restStart = new Date(year, (month-1), prevDay, prevDayHour);
+        restStop = new Date(year, (month-1), currentDay, currentDayHour);
     } else {
-        console.log("Zeszły miesiąc");
-        $("td[id^='to-json-prev-${worker}-']").each(function() {
-            prevMonthLastDay.push(parseInt($(this).find("input[name='day']").val()));
+        $("th[class='prev-daynumber-th']").each(function() {
+            prevMonthDays.push(parseInt($(this).text()));
         });
-        prevMonthLastDay = Math.max(...prevMonthDays);
-        prevSelector = $(`td[id="to-json-prev-${worker}-${year}-${month}-${prevMonthLastDay}"]`);
+        prevDay = Math.max(...prevMonthDays);
+        prevDayHour = $(`td[id="prev-end-${worker}-${year}-${month-1}-${prevDay}"]`).text();
+        restStart = new Date(year, (month-2), prevDay, prevDayHour);
+        restStop = new Date(year, (month-1), currentDay, currentDayHour);
     };
-    prevDay = parseInt($(prevSelector).find("input[name='day']").val());
-    prevDayHour = parseInt($(prevSelector).find("input[name='e-hour']").val());
+    if (isNaN(prevDayHour)) {
+        restHours = 11;
+    } else {
 
-    restStart = new Date(year, (month-1), prevDay, prevDayHour);
-    restStop = new Date(year, (month-1), currentDay, currentDayHour);
+
     restHours = (restStop-restStart)/3600000;
 
-    if (isNaN(prevDayHour)) {
-        prevDayHour = 8;
+
     };
+    console.log(worker, restStop, restStart, restHours);
 };
 
 
@@ -59,12 +64,12 @@ function getHours() {
 
         //checks if everything is filled correctly
         if ((event==="UW" || event==="UO" || event==="UB") && (beginHour!==0 || endHour!==8)) {
-            numberOfErrors += 1
+            numberOfErrors += 1;
             errors[numberOfErrors] = (`\n${numberOfErrors}. Niewłaściwe godziny ${event} u ${worker} w dniu ${day}.${month}.${year}`);
         };
         if (event==="UNŻ" && (beginHour===0 || endHour===0)) {
-            numberOfErrors += 1
-            errors[numberOfErrors] = (`\n${numberOfErrors}.Niewłaściwe godziny ${event} u ${worker} w dniu ${day}.${month}.${year}`)
+            numberOfErrors += 1;
+            errors[numberOfErrors] = (`\n${numberOfErrors}.Niewłaściwe godziny ${event} u ${worker} w dniu ${day}.${month}.${year}`);
         };
 
 
@@ -82,20 +87,20 @@ function getHours() {
 
 
 $(document).ready(function() {
-        $("form").submit(function(e){
-            let form = $(this);
-            $.ajax({
-                url   : form.attr("action"),
-                type  : form.attr("method"),
-                contentType: 'application/json;charset=UTF-8',
-                data  : JSON.stringify(getHours()),
-                success: function(response){
-                    alert(response);
-                    //window.location.replace(response);
-                },
-            });
-            return false;
+    $("form").submit(function(e){
+        let form = $(this);
+        $.ajax({
+            url   : form.attr("action"),
+            type  : form.attr("method"),
+            contentType: 'application/json;charset=UTF-8',
+            data  : JSON.stringify(getHours()),
+            success: function(response){
+                alert(response);
+                //window.location.replace(response);
+            },
         });
+        return false;
+    });
 });
 
 
@@ -133,7 +138,7 @@ $(document).ready(function() {
 });
 
 
-//gives cells and fields color of event
+//gives cells and fields color of event for current month
 $(document).ready(function() {
     $("td[id^='event-']").change(function() {
         let selHelper = $(this).find("input[name='helper']").val();

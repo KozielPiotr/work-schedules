@@ -262,7 +262,11 @@ def new_schedule():
 
 
             # data for prev month schedule part of template
-            prev_month = monthn - 1
+            if monthn == 1:
+                prev_month = 12
+            else:
+                prev_month = monthn - 1
+            print(prev_month)
             prev_month_schedules_q1 = Schedule.query.filter_by(month=prev_month).all()
             prev_month_schedules_q2 = Schedule.query.filter_by(workplace=workplace).all()
             prev_month_schedule = None
@@ -325,7 +329,7 @@ def new_schedule():
             return render_template("empty_schedule.html", title="Grafiki - nowy grafik", workers=workers,
                                    shop=workplace, year=year, mn=month_name, cal=cal, wdn=weekday_names,
                                    monthn=monthn, yearn=yearn, hours=hours, prev_month=prev_month,
-                                   prev_month_schedule=prev_month_schedule, prev_month_p_schedules=prev_month_p_schedules,
+                                   prev_month_schedule=prev_month_schedule, Personal_schedule = Personal_schedule,
                                    prev_month_workers=prev_month_workers, prev_month_hours=prev_month_hours,
                                    prev_month_year=prev_month_year, prev_month_name=prev_month_name,
                                    workers_hours=workers_hours)

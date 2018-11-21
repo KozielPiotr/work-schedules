@@ -80,36 +80,20 @@
             {% for day in cal.itermonthdays2(prev_month_year, prev_month) %}
                 {% if day[0] > 0 %}
                     <tr>
-                        <th id="prev-dayname-th">{{ wdn[day[1]] }}</th>  <!-- day of the week (name) -->
-                        <th id="prev-daynumber-th">{{ day[0] }}</th>
+                        <th class="prev-dayname-th">{{ wdn[day[1]] }}</th>  <!-- day of the week (name) -->
+                        <th class="prev-daynumber-th">{{ day[0] }}</th>
                         {% for worker in prev_month_workers %}
                             <td id="prev-begin-{{ worker }}-{{ prev_month_year }}-{{ prev_month }}-{{ day[0] }}">
-                                {% for schedule in prev_month_p_schedules %}
-                                    {% if schedule.id == "%d-%d-%02d-%s-%s" %(prev_month_year, prev_month, day[0], worker.replace("_", " "), shop) %}
-                                        <p>{{ schedule.begin_hour }}</p>
-                                    {% endif %}
-                                {% endfor %}
+                                {{ Personal_schedule.query.filter_by(id= "%d-%02d-%02d-%s-%s" %(prev_month_year, prev_month, day[0], worker.replace("_", " "), shop)).first().begin_hour }}
                             </td>
                             <td id="prev-end-{{ worker }}-{{ prev_month_year }}-{{ prev_month }}-{{ day[0] }}">
-                                {% for schedule in prev_month_p_schedules %}
-                                    {% if schedule.id == "%d-%d-%02d-%s-%s" %(prev_month_year, prev_month, day[0], worker.replace("_", " "), shop) %}
-                                        <p>{{ schedule.end_hour }}</p>
-                                    {% endif %}
-                                {% endfor %}
+                                {{ Personal_schedule.query.filter_by(id= "%d-%02d-%02d-%s-%s" %(prev_month_year, prev_month, day[0], worker.replace("_", " "), shop)).first().end_hour }}
                             </td>
                             <td id="prev-counted-{{ worker }}-{{ prev_month_year }}-{{ prev_month }}-{{ day[0] }}">
-                                {% for schedule in prev_month_p_schedules %}
-                                    {% if schedule.id == "%d-%d-%02d-%s-%s" %(prev_month_year, prev_month, day[0], worker.replace("_", " "), shop) %}
-                                        <p>{{ schedule.hours_sum }}</p>
-                                    {% endif %}
-                                {% endfor %}
+                                {{ Personal_schedule.query.filter_by(id= "%d-%02d-%02d-%s-%s" %(prev_month_year, prev_month, day[0], worker.replace("_", " "), shop)).first().hours_sum }}
                             </td>
                             <td id="prev-event-{{ worker }}-{{ prev_month_year }}-{{ prev_month }}-{{ day[0] }}">
-                                {% for schedule in prev_month_p_schedules %}
-                                    {% if schedule.id == "%d-%d-%02d-%s-%s" %(prev_month_year, prev_month, day[0], worker.replace("_", " "), shop) %}
-                                        <p>{{ schedule.event }}</p>
-                                    {% endif %}
-                                {% endfor %}
+                                {{ Personal_schedule.query.filter_by(id= "%d-%02d-%02d-%s-%s" %(prev_month_year, prev_month, day[0], worker.replace("_", " "), shop)).first().event }}
                             </td>
                         {% endfor %}
                     </tr>
@@ -119,13 +103,13 @@
             <tfoot>
             <tr>
                 <th colspan="2">H/mc:</th>
-                {% for worker in workers %}
+                {% for worker in prev_month_workers %}
                     <td colspan="4">Suma H:</td>
                 {% endfor %}
             </tr>
             <tr>
                 <th colspan="2"><output id="prev-working-hours">{{ prev_month_hours }}</output></th> <!-- amount of hours to work in prev month -->
-                {% for worker in workers %}
+                {% for worker in prev_month_workers %}
                     <td colspan="4" class="prev-sum-of-worker-hours">
                         {{ workers_hours[worker] }} <!-- sum of hours worked by iterated worker i prev month -->
                     </td>
@@ -133,7 +117,7 @@
             </tr>
             <tr>
                 <th colspan="2">Pozostało H:</th>
-                {% for worker in workers %}
+                {% for worker in prev_month_workers %}
                 <td colspan="4" id="prev-left-hours-{{ worker }}"> <!-- hours left to assign or overtime -->
                     {{ prev_month_hours - workers_hours[worker] }}
                 </td>
