@@ -226,7 +226,8 @@ def new_schedule():
     workplaces = []
     workers_list = []
     form = NewScheduleForm()
-    for workplace in Shop.query.order_by(Shop.shopname).all():
+    c_user = User.query.filter_by(username=str(current_user)).first();
+    for workplace in c_user.workers_shop:
         workplaces.append((str(workplace), str(workplace)))
     form.workplace.choices = workplaces
 
@@ -362,7 +363,6 @@ def new_schedule_to_db(hours):
                 smonth = element["month"]
                 sworkplace = element["workplace"]
                 billing_period = element["billing_period"]
-                print(billing_period)
     schedule = Schedule(name=sname, year=syear, month=smonth, workplace=sworkplace, hrs_to_work=hours,
                         accepted=False, version=0, billing_period=billing_period)
     db.session.add(schedule)
@@ -378,9 +378,10 @@ def new_schedule_to_db(hours):
                 event = element["event"]
                 workplace = element["workplace"]
                 psname = "%s-%s-%s" % (d, worker, workplace)
+                billing_week = element["billing_week"]
                 pschedule = Personal_schedule(id=psname, date=d, worker=worker, begin_hour=b_hour,
                                               end_hour=e_hour, hours_sum=sum, event=event, workplace=workplace,
-                                              includes=schedule, billing_period=billing_period)
+                                              includes=schedule, billing_period=billing_period, billing_week=billing_week)
                 db.session.add(pschedule)
     db.session.commit()
     return url_for("index")

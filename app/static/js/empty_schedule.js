@@ -23,6 +23,7 @@ window.onload = function() {
             $(this).css("background", "#ffffff");
         };
     });
+
     //counts in which billing period is current month
     let bpbYear = $("td[id='billing-period-begin']").find("input[name='bpb-y']").val();
     let bpbMonth = $("td[id='billing-period-begin']").find("input[name='bpb-m']").val();
@@ -38,6 +39,28 @@ window.onload = function() {
         period += 1
     };
     $("#billing_period").text(period);
+
+    //counts in which billing week is current shift
+    $("td[id^='to-json-']").each(function() {
+        let bpBegin = new Date(bpbYear, bpbMonth-1);
+        let curYearWeek = $(this).find("input[name='year']").val();
+        let curMonthWeek = $(this).find("input[name='month']").val();
+        let curDayWeek = $(this).find("input[name='day']").val();
+        let curDateWeek = new Date(curYear, curMonth-1, curDayWeek);
+        let tempDateWeek = bpBegin;
+        let periodWeek = 0;
+
+
+        while (tempDateWeek <= curDateWeek) {
+        console.log("Początek pętli wewn.");
+            tempDateWeek = new Date(tempDateWeek.setDate(tempDateWeek.getDate()+7));
+            console.log(tempDateWeek);
+            periodWeek += 1;
+            console.log("Koniec pętli wewn.");
+        };
+        $(this).find("input[name='billing_period-week']").val(periodWeek);
+        console.log(curDateWeek + " to " + periodWeek + " tydzień");
+    });
 };
 
 
@@ -99,6 +122,7 @@ function getHours() {
         let event = $(this).find("input[name='event']").val();
         let workplace = $(this).find("input[name='shop']").val();
         let billingPeriod = $("#billing_period").text();
+        let billingWeek = $(this).find("input[name='billing_period-week']").val();
 
         if (isNaN(beginHour)) {
             beginHour = 0;
@@ -126,7 +150,8 @@ function getHours() {
 
         //fills array for json
         hours.push({"day": day, "month": month, "year": year, "worker": worker, "from": beginHour,
-                    "to": endHour, "sum": wrkd, "event": event, "workplace": workplace, "billing_period": billingPeriod});
+                    "to": endHour, "sum": wrkd, "event": event, "workplace": workplace, "billing_period": billingPeriod,
+                    "billing_week": billingWeek});
     });
     if (errors.length > 0) {
         alert(errors);
