@@ -1,3 +1,47 @@
+window.onload = function() {
+    //adds css to left hours <td> after loading page
+    $("td[id^='left-hours']").each(function() {
+        hours = $(this).find("output");
+        if (parseInt(hours.val()) < 0) {
+            $(this).css("background", "#ff0000");
+            hours.css("background", "#ff0000");
+        } else if (parseInt(hours.val()) > 0) {
+            $(this).css("background", "#ffaa00");
+            hours.css("background", "#ffaa00");
+        } else {
+            $(this).css("background", "#ffffff");
+            hours.css("background", "#ffffff");
+        };
+    });
+    $("td[id^='prev-left-hours']").each(function() {
+        hours = $(this).text();
+        if (parseInt(hours) < 0) {
+            $(this).css("background", "#ff0000");
+        } else if (parseInt(hours) > 0) {
+            $(this).css("background", "#ffaa00");
+        } else {
+            $(this).css("background", "#ffffff");
+        };
+    });
+    //counts in which billing period is current month
+    let bpbYear = $("td[id='billing-period-begin']").find("input[name='bpb-y']").val();
+    let bpbMonth = $("td[id='billing-period-begin']").find("input[name='bpb-m']").val();
+    let bpBegin = new Date(bpbYear, bpbMonth-1);
+    let curYear = $("#cur-year").text();
+    let curMonth = $("#cur-month").text();
+    let curDate = new Date(curYear, curMonth-1);
+    let duration = parseInt($("td[id='billing-period-begin']").find("input[name='bpd']").val());
+    let period = 0;
+    let tempDate = bpBegin;
+    while (tempDate <= curDate) {
+        tempDate = new Date(tempDate.setMonth(tempDate.getMonth()+duration));
+        period += 1
+    };
+    $("#billing_period").text(period);
+};
+
+
+
 //checkes if there is 11 hours rest time between shifts
 function restTime(currentSelector, worker, year, month, day) {
     currentDay = parseInt($(currentSelector).find("input[name='day']").val());
@@ -54,6 +98,7 @@ function getHours() {
         let wrkd = $(this).find("input[name='counted']").val();
         let event = $(this).find("input[name='event']").val();
         let workplace = $(this).find("input[name='shop']").val();
+        let billingPeriod = $("#billing_period").text();
 
         if (isNaN(beginHour)) {
             beginHour = 0;
@@ -81,7 +126,7 @@ function getHours() {
 
         //fills array for json
         hours.push({"day": day, "month": month, "year": year, "worker": worker, "from": beginHour,
-                    "to": endHour, "sum": wrkd, "event": event, "workplace": workplace});
+                    "to": endHour, "sum": wrkd, "event": event, "workplace": workplace, "billing_period": billingPeriod});
     });
     if (errors.length > 0) {
         alert(errors);
@@ -89,7 +134,7 @@ function getHours() {
     };
     jsonDict[work] = hours;
     return jsonDict;
-}
+};
 
 
 $(document).ready(function() {
@@ -242,32 +287,3 @@ $(document).ready(function() {
 
 
 
-
-
-//adds css to left hours <td> after loading page
-window.onload = function() {
-    $("td[id^='left-hours").each(function() {
-        hours = $(this).find("output");
-        if (parseInt(hours.val()) < 0) {
-            $(this).css("background", "#ff0000");
-            hours.css("background", "#ff0000");
-        } else if (parseInt(hours.val()) > 0) {
-            $(this).css("background", "#ffaa00");
-            hours.css("background", "#ffaa00");
-        } else {
-            $(this).css("background", "#ffffff");
-            hours.css("background", "#ffffff");
-        };
-    });
-    $("td[id^='prev-left-hours").each(function() {
-        hours = $(this).text();
-        if (parseInt(hours) < 0) {
-            $(this).css("background", "#ff0000");
-        } else if (parseInt(hours) > 0) {
-            $(this).css("background", "#ffaa00");
-        } else {
-            $(this).css("background", "#ffffff");
-
-        };
-    });
-};

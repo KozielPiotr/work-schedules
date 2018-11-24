@@ -3,10 +3,8 @@
 {% block styles %}
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link href="{{ url_for('static', filename='css/table.css') }}" rel="stylesheet">
+<script src="{{ url_for('static', filename='js/date-pl-PL.js') }}"></script>
 <script src="{{ url_for('static', filename='js/empty_schedule.js') }}"></script>
-
-
-
 {% endblock %}
 
 
@@ -133,14 +131,20 @@
 
 
 <!-- Schedule for chosen month (editable) -->
-
 <div id="curr-month-schedule">   <!-- Schedule -->
     <form method="post" action="/schedule-to-db/{{ hours }}">
         <button type="submit">Submit</button>
         <table class="new-schedule-table table-bordered">
-            <caption class="caption">Tworzenie grafiku dla <b>{{ shop }}</b> na rok <b>{{ year }}</b>, miesiąc <b>{{ mn }}</b></caption>
+            <caption class="caption">Tworzenie grafiku dla <b>{{ shop }}</b> na rok <b><span id="cur-year">{{ year }}</span></b>, miesiąc <b><span id="cur-month">{{ monthn }}</span>{{ mn }}</b>. Okres rezliczeniowy: <b><span id="billing_period"></span></b></caption>
     <!-- headers with shop, month, workers -->
             <thead>
+            <tr id="hidden-data">
+                <td id="billing-period-begin">
+                    <input name="bpb-y" value="{{ Billing_period.query.first().begin.year }}">
+                    <input name="bpb-m" value="{{ Billing_period.query.first().begin.month }}">
+                    <input name="bpd" value="{{ Billing_period.query.first().duration }}">
+                </td>
+            </tr>
             <tr>
                 <th>{{ shop }}</th>
                 <th rowspan="3">D</th>
@@ -208,6 +212,7 @@
                                 <input name="counted">
                                 <input name="event">
                                 <input name="shop" value="{{ shop }}">
+                                <input name = "billing_period">
                             </td>
                         {% endfor %}
                     </tr>

@@ -50,7 +50,8 @@ class Schedule(db.Model):
     workplace = db.Column(db.String)
     hrs_to_work = db.Column(db.Integer, index=True, nullable=False, default=0)
     accepted = db.Column(db.Boolean, index=True, nullable=False, default = False)
-    version = db.Column(db.Integer, index=True, nullable=False)
+    billing_period = db.Column(db.Integer, index=True, nullable=False, default=0)
+    version = db.Column(db.Integer, index=True, nullable=False, default=0)
     ind = db.relationship("Personal_schedule", backref="includes")
 
 
@@ -63,6 +64,7 @@ class Personal_schedule(db.Model):
     hours_sum = db.Column(db.Integer)
     event = db.Column(db.String)
     workplace = db.Column(db.String)
+    billing_period = db.Column(db.Integer, index=True, nullable=False, default=0)
     includes_id = db.Column(db.Integer, db.ForeignKey("schedule.id"))
 
 
