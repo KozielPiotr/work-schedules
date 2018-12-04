@@ -24,7 +24,7 @@ window.onload = function() {
         };
     });
 
-    //counts in which billing period is current month
+    //counts in which billing period is current month and what is current month's number in billing period
     let bpbYear = $("td[id='billing-period-begin']").find("input[name='bpb-y']").val();
     let bpbMonth = $("td[id='billing-period-begin']").find("input[name='bpb-m']").val();
     let bpBegin = new Date(bpbYear, bpbMonth-1);
@@ -34,32 +34,70 @@ window.onload = function() {
     let duration = parseInt($("td[id='billing-period-begin']").find("input[name='bpd']").val());
     let period = 0;
     let tempDate = bpBegin;
+
+    //billing period
+    monthNu = 0;
+    bpBegin = new Date(bpbYear, bpbMonth-1);
+    tempDate = bpBegin;
     while (tempDate <= curDate) {
-        tempDate = new Date(tempDate.setMonth(tempDate.getMonth()+duration));
-        period += 1
+        tempDate = new Date(tempDate.setMonth(tempDate.getMonth()+1));
+        monthNu ++;
+        if (monthNu % duration === 1) {
+            period ++;
+        };
     };
-    $("#billing_period").text(period);
+    $("td[id='billing-period']").find("input[name='billing-period']").val(period);
+
+    //month in billing period
+    monthNumberInBp = monthNu % duration;
+    if (monthNumberInBp === 0) {
+        monthNumberInBp = duration;
+    };
+    $("#month-of-billing-period").text(monthNumberInBp);
 
     //counts in which billing week is current shift
+    let date = new Date(curYear, curMonth-1);
+    let days = [];
+    while (date.getMonth() === curMonth-1) {
+        days.push(new Date(date));
+        date.setDate(date.getDate() + 1);
+    };
+
+    let weekDates = {};
+    function assignDatesToWeeks(element, index, array) {
+        let curDate = new Date(curYear, curMonth-1);
+        let monthsToBegin = monthNumberInBp - 1;
+        let bpBegin = new Date(curDate.setMonth(curDate.getMonth()-monthsToBegin));
+        let curDateWeek = element;
+        let tempDateWeek = bpBegin;
+        let periodWeek = 0;
+        while (tempDateWeek <= curDateWeek) {
+            tempDateWeek = new Date(tempDateWeek.setDate(tempDateWeek.getDate()+7));
+            periodWeek ++;
+        };
+        weekDates[element] = periodWeek;
+
+    }
+    days.forEach(assignDatesToWeeks);
+
+    let zeroWeek;
     $("td[id^='to-json-']").each(function() {
-        let bpBegin = new Date(bpbYear, bpbMonth-1);
+        curDate = new Date(curYear, curMonth-1);
+        let monthsToBegin = monthNumberInBp - 1;
+        let bpBegin = new Date(curDate.setMonth(curDate.getMonth()-monthsToBegin));
         let curYearWeek = $(this).find("input[name='year']").val();
         let curMonthWeek = $(this).find("input[name='month']").val();
         let curDayWeek = $(this).find("input[name='day']").val();
-        let curDateWeek = new Date(curYear, curMonth-1, curDayWeek);
-        let tempDateWeek = bpBegin;
-        let periodWeek = 0;
-
-
-        while (tempDateWeek <= curDateWeek) {
-        console.log("Początek pętli wewn.");
-            tempDateWeek = new Date(tempDateWeek.setDate(tempDateWeek.getDate()+7));
-            console.log(tempDateWeek);
-            periodWeek += 1;
-            console.log("Koniec pętli wewn.");
+        let curDateWeek = new Date(curYearWeek, curMonthWeek-1, curDayWeek);
+        let tempDateWeek = new Date (curDateWeek.getFullYear(), curDateWeek.getMonth(), curDateWeek.getDate());
+        if ((monthNumberInBp === duration && bpBegin.getDay() === curDateWeek.getDay() &&
+            curDateWeek.getMonth() !== new Date (tempDateWeek.setDate(curDateWeek.getDate()+6)).getMonth()) ||
+            curDateWeek >= zeroWeek) {
+                zeroWeek = new Date(curDateWeek);
+                $(this).find("input[name='billing-period-week']").val(0);
+        } else {
+            $(this).find("input[name='billing-period-week']").val(weekDates[curDateWeek]);
         };
-        $(this).find("input[name='billing_period-week']").val(periodWeek);
-        console.log(curDateWeek + " to " + periodWeek + " tydzień");
     });
 };
 
@@ -121,8 +159,8 @@ function getHours() {
         let wrkd = $(this).find("input[name='counted']").val();
         let event = $(this).find("input[name='event']").val();
         let workplace = $(this).find("input[name='shop']").val();
-        let billingPeriod = $("#billing_period").text();
-        let billingWeek = $(this).find("input[name='billing_period-week']").val();
+        let billingPeriod = $("td[id='billing-period']").find("input[name='billing-period']").val();
+        let billingWeek = $(this).find("input[name='billing-period-week']").val();
 
         if (isNaN(beginHour)) {
             beginHour = 0;

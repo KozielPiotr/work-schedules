@@ -133,9 +133,9 @@
 <!-- Schedule for chosen month (editable) -->
 <div id="curr-month-schedule">   <!-- Schedule -->
     <form method="post" action="/schedule-to-db/{{ hours }}">
-        <button type="submit">Submit</button>
+        <button type="submit">Wyślij projekt grafiku do akceptacji</button>
         <table class="new-schedule-table table-bordered">
-            <caption class="caption">Tworzenie grafiku dla <b>{{ shop }}</b> na rok <b><span id="cur-year">{{ year }}</span></b>, miesiąc <b><span id="cur-month">{{ monthn }}</span>{{ mn }}</b>. Okres rezliczeniowy: <b><span id="billing_period"></span></b></caption>
+            <caption class="caption">Tworzenie grafiku dla <b>{{ shop }}</b> na rok <b><span id="cur-year">{{ year }}</span></b>, miesiąc <b><span id="cur-month">{{ monthn }}</span>{{ mn }}</b>, <b><span id="month-of-billing-period"></span></b> miesiąc okresu rozliczeniowego.</caption>
     <!-- headers with shop, month, workers -->
             <thead>
             <tr id="hidden-data">
@@ -143,6 +143,9 @@
                     <input name="bpb-y" value="{{ Billing_period.query.first().begin.year }}">
                     <input name="bpb-m" value="{{ Billing_period.query.first().begin.month }}">
                     <input name="bpd" value="{{ Billing_period.query.first().duration }}">
+                </td>
+                <td id="billing-period">
+                    <input name="billing-period">
                 </td>
             </tr>
             <tr>
@@ -171,8 +174,8 @@
             {% for day in cal.itermonthdays2(yearn, monthn) %}
                 {% if day[0] > 0 %}
                     <tr>
-                        <th id="dayname-th">{{ wdn[day[1]] }}</th>  <!-- day of the week (name) -->
-                        <th id="daynumber-th">{{ day[0] }}</th>  <!-- day of the week (number) -->
+                        <th class="dayname-th">{{ wdn[day[1]] }}</th>  <!-- day of the week (name) -->
+                        <th class="daynumber-th">{{ day[0] }}</th>  <!-- day of the week (number) -->
                         {% for worker in workers %}
                             <td id="begin-{{ worker }}-{{ year }}-{{ monthn }}-{{ day[0] }}">
                                 <input type="hidden" value="{{ worker }}-{{ year }}-{{ monthn }}-{{ day[0] }}" name="helper">
@@ -212,8 +215,7 @@
                                 <input name="counted">
                                 <input name="event">
                                 <input name="shop" value="{{ shop }}">
-                                <input name = "billing_period">
-                                <input name = "billing_period-week">
+                                <input name = "billing-period-week">
                             </td>
                         {% endfor %}
                     </tr>

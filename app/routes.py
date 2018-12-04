@@ -226,7 +226,7 @@ def new_schedule():
     workplaces = []
     workers_list = []
     form = NewScheduleForm()
-    c_user = User.query.filter_by(username=str(current_user)).first();
+    c_user = User.query.filter_by(username=str(current_user)).first()
     for workplace in c_user.workers_shop:
         workplaces.append((str(workplace), str(workplace)))
     form.workplace.choices = workplaces
