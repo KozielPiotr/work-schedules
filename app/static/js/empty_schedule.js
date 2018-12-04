@@ -28,7 +28,6 @@ window.onload = function() {
     $("th[class$='dayname-th']").each(function() {
         if ($(this).text() === "Sobota" || $(this).text() === "Niedziela") {
             $(this).closest("tr").find("*").css("background", "#aba5a5c7");
-            //$(this).closest("tr").children().children().css("background", "red");
         };
     });
 
@@ -108,7 +107,6 @@ window.onload = function() {
         };
     });
 };
-
 
 
 //checkes if there is 11 hours rest time between shifts

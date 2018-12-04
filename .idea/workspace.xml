@@ -2,12 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="3d1609e3-dc01-4bb1-831a-4c1ecd6bc426" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app.db" beforeDir="false" afterPath="$PROJECT_DIR$/app.db" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/routes.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/routes.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/static/css/table.css" beforeDir="false" afterPath="$PROJECT_DIR$/app/static/css/table.css" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/static/js/empty_schedule.js" beforeDir="false" afterPath="$PROJECT_DIR$/app/static/js/empty_schedule.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/templates/empty_schedule.html" beforeDir="false" afterPath="$PROJECT_DIR$/app/templates/empty_schedule.html" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -45,7 +40,7 @@
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="true">
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/app/templates/empty_schedule.html">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="151">
@@ -75,11 +70,11 @@
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="false">
+      <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/app/static/js/empty_schedule.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="342">
-              <caret line="27" column="23" selection-start-line="27" selection-start-column="23" selection-end-line="27" selection-end-column="23" />
+            <state relative-caret-position="361">
+              <caret line="109" lean-forward="true" selection-start-line="109" selection-end-line="109" />
             </state>
           </provider>
         </entry>
@@ -210,8 +205,8 @@
         <option value="$PROJECT_DIR$/app/models.py" />
         <option value="$PROJECT_DIR$/app/routes.py" />
         <option value="$PROJECT_DIR$/app/static/css/table.css" />
-        <option value="$PROJECT_DIR$/app/static/js/empty_schedule.js" />
         <option value="$PROJECT_DIR$/app/templates/empty_schedule.html" />
+        <option value="$PROJECT_DIR$/app/static/js/empty_schedule.js" />
       </list>
     </option>
   </component>
@@ -818,13 +813,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/app/static/js/empty_schedule.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="342">
-          <caret line="27" column="23" selection-start-line="27" selection-start-column="23" selection-end-line="27" selection-end-column="23" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/app/templates/empty_schedule.html">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="151">
@@ -832,6 +820,13 @@
           <folding>
             <element signature="n#div#0;n#!!top" />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/static/js/empty_schedule.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="361">
+          <caret line="109" lean-forward="true" selection-start-line="109" selection-end-line="109" />
         </state>
       </provider>
     </entry>
