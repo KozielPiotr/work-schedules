@@ -24,6 +24,14 @@ window.onload = function() {
         };
     });
 
+    //adds css to weekend rows (saturdays and sundays)
+    $("th[class$='dayname-th']").each(function() {
+        if ($(this).text() === "Sobota" || $(this).text() === "Niedziela") {
+            $(this).closest("tr").find("*").css("background", "#aba5a5c7");
+            //$(this).closest("tr").children().children().css("background", "red");
+        };
+    });
+
     //counts in which billing period is current month and what is current month's number in billing period
     let bpbYear = $("td[id='billing-period-begin']").find("input[name='bpb-y']").val();
     let bpbMonth = $("td[id='billing-period-begin']").find("input[name='bpb-m']").val();

@@ -305,7 +305,6 @@ def new_schedule():
                         if p_schedule.worker == str(worker).replace("_", " "):
                             worker_hours += p_schedule.hours_sum
                         workers_hours[worker] = worker_hours
-
             else:
                 prev_month_name = None
                 prev_month_workers = None
