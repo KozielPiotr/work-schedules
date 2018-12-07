@@ -1,3 +1,117 @@
+//fills <td> that sends data to form json
+function tdToJson(selHelper, from, to, counted, event) {
+    let td = $(`td[id="to-json-${selHelper}"]`);
+    td.find("input[name='b-hour']").val(from);
+    td.find("input[name='e-hour']").val(to);
+    td.find("input[name='counted']").val(counted);
+    td.find("input[name='event']").val(event);
+};
+
+
+//checks if there is 35-hour break once in every billing week
+function weeklyRest() {
+    //fills hidden td with proper event values
+    $("td[id^='event-']").each(function() {
+        $(this).change();
+    });
+
+    //list of workers
+    let workers = [];
+    $("th[class='worker-name']").each(function() {
+        workers.push($(this).text());
+    });
+    console.log(workers);
+
+    //list of billing weeks
+    let billingWeeksNumbers = [];
+    $("input[name='billing-period-week']").each(function(){
+        if (!(billingWeeksNumbers.includes($(this).val()))) {
+            billingWeeksNumbers.push($(this).val())
+        };
+    });
+    console.log(billingWeeksNumbers);
+
+    //list of all dates in month
+    let datesInMonth = [];
+    let curYear = $("#cur-year").text();
+    let curMonth = $("#cur-month").text()-1;
+    let monthBegin = new Date(curYear, curMonth);
+    let tempDate = new Date(monthBegin);
+    while (monthBegin.getMonth() === tempDate.getMonth()) {
+        datesInMonth.push(new Date(tempDate));
+        tempDate = new Date(tempDate.setDate(tempDate.getDate()+1));
+    };
+
+    //defines the beginning of current billing period
+    const monthOfBillingPeriod = parseInt($("#month-of-billing-period").text());
+    const billingPeriodDuration =  $("td[id='billing-period-begin']").find("input[name='bpd']").val();
+    monthBegin = new Date(curYear, curMonth);
+    const currentBillingPeriodBegin = new Date(monthBegin.setMonth(monthBegin.getMonth()-(monthOfBillingPeriod-1)));
+    console.log("1 miesiac obecnego okresu to: "+currentBillingPeriodBegin);
+
+    //assigns dates to weeks
+    let currentBillingPeriodBeginYear = currentBillingPeriodBegin.getFullYear();
+    let currentBillingPeriodBeginMonth = currentBillingPeriodBegin.getMonth();
+    weeksDict = {};
+    for (let week in billingWeeksNumbers) {
+        datesList = [];
+        for (date in datesInMonth) {
+            const beginDate1 = new Date(currentBillingPeriodBeginYear, currentBillingPeriodBeginMonth);
+            const beginDate2 = new Date(currentBillingPeriodBeginYear, currentBillingPeriodBeginMonth);
+            if (datesInMonth[date] <= new Date(beginDate1.setDate(beginDate1.getDate()*billingWeeksNumbers[week]*7)) &&
+                datesInMonth[date] > new Date(beginDate2.setDate(beginDate2.getDate()*(billingWeeksNumbers[week]-1)*7))) {
+                datesList.push(datesInMonth[date]);
+            weeksDict[billingWeeksNumbers[week]] = datesList;
+            };
+        };
+    };
+
+    //checking 35-hours break
+    for (let worker in workers) {
+        console.log(workers[worker]);
+        for (let week in weeksDict) {
+            //finds last day of billing week
+            console.log("tydzień " + week);
+            weekLength = weeksDict[week].length - 1;
+            let lastDay = new Date(weeksDict[week][weekLength]);
+            let hours = 0;
+            weeklyBreak = 0;
+
+            //finds td in template that contains data for current day and worker
+            name = workers[worker].replace(" ", "_");
+            let year = lastDay.getFullYear();
+            let month = lastDay.getMonth();
+            let currentDay = new Date(lastDay);
+            let td = `td[id^="to-json-${name}-${year}-${month+1}-${currentDay.getDate()}"]`;
+            let start = new Date(new Date(lastDay.setDate(lastDay.getDate()+1)));
+            let stop;
+            while ($(td).find("input[name='billing-period-week']").val()==week) {
+                if ($(td).find("input[name='event']").val() === "off") {
+                    console.log("Teraz sprawdzam dzień: "+currentDay.getDate());
+                    console.log("wolne");
+                    currentDay = new Date(currentDay.setDate(currentDay.getDate()-1));
+                    td = `td[id^="to-json-${name}-${year}-${month+1}-${currentDay.getDate()}"]`;
+                } else {
+                    stop = new Date(new Date(currentDay).setHours($(td).find("input[name='e-hour']").val()));
+                    hours = -((stop-start)/3600000);
+                    console.log(`W tygodniu ${week} przerwa trwała od ${start} do ${stop} i wyniosła ${hours} godzin`);
+                    start = new Date(new Date(currentDay).setHours($(td).find("input[name='b-hour']").val()));
+                    currentDay = new Date(currentDay.setDate(currentDay.getDate()-1));
+                    td = `td[id^="to-json-${name}-${year}-${month+1}-${currentDay.getDate()}"]`;
+                };
+            };
+        };
+    };
+};
+
+//testing
+$(document).ready(function() {
+    $("th[class='worker-name']").click(function(){
+        weeklyRest();
+    });
+});
+
+
 window.onload = function() {
     //adds css to left hours <td> after loading page
     $("td[id^='left-hours']").each(function() {
@@ -63,15 +177,16 @@ window.onload = function() {
     $("#month-of-billing-period").text(monthNumberInBp);
 
     //counts in which billing week is current shift
+        //makes list of all days in month
     let date = new Date(curYear, curMonth-1);
     let days = [];
     while (date.getMonth() === curMonth-1) {
         days.push(new Date(date));
         date.setDate(date.getDate() + 1);
     };
-
+        //assigns billing week number to each date in month
     let weekDates = {};
-    function assignDatesToWeeks(element, index, array) {
+    function assignWeeksToDates(element, index, array) {
         let curDate = new Date(curYear, curMonth-1);
         let monthsToBegin = monthNumberInBp - 1;
         let bpBegin = new Date(curDate.setMonth(curDate.getMonth()-monthsToBegin));
@@ -85,7 +200,7 @@ window.onload = function() {
         weekDates[element] = periodWeek;
 
     }
-    days.forEach(assignDatesToWeeks);
+    days.forEach(assignWeeksToDates);
 
     let zeroWeek;
     $("td[id^='to-json-']").each(function() {
@@ -109,12 +224,11 @@ window.onload = function() {
 };
 
 
-//checkes if there is 11 hours rest time between shifts
+//checks if there is 11 hours rest time between shifts
 function restTime(currentSelector, worker, year, month, day) {
     currentDay = parseInt($(currentSelector).find("input[name='day']").val());
     currentDayHour = parseInt($(currentSelector).find("input[name='b-hour']").val());
-    if ($(currentSelector).find("input[name='event']").val() !== "in_work" && $(currentSelector).find("input[name='event']").val() !== "UNŻ" &&
-        $(currentSelector).find("input[name='event']").val() !== "in_work" !== "L4") {
+    if ($(currentSelector).find("input[name='event']").val() === "off") {
         restHours = 11;
     } else {
         prevMonthDays = [];
@@ -162,7 +276,7 @@ function getHours() {
         let worker = $(this).find("input[name='worker']").val();
         let beginHour = parseInt($(this).find("input[name='b-hour']").val());
         let endHour = parseInt($(this).find("input[name='e-hour']").val());
-        let wrkd = $(this).find("input[name='counted']").val();
+        let wrkd = parseInt($(this).find("input[name='counted']").val());
         let event = $(this).find("input[name='event']").val();
         let workplace = $(this).find("input[name='shop']").val();
         let billingPeriod = $("td[id='billing-period']").find("input[name='billing-period']").val();
@@ -182,9 +296,9 @@ function getHours() {
         };
 
         //checks if everything is filled correctly
-        if ((event==="UW" || event==="UO" || event==="UB") && (beginHour!==0 || endHour!==8)) {
+        if ((event==="UW" || event==="UO" || event==="UB") && (wrkd !== 8)) {
             numberOfErrors += 1;
-            errors[numberOfErrors] = (`\n${numberOfErrors}. Niewłaściwe godziny ${event} u ${worker} w dniu ${day}.${month}.${year}`);
+            errors[numberOfErrors] = (`\n${numberOfErrors}. Przy ${event} ${worker} w dniu ${day}.${month}.${year} zmiana musi trwać 8 godzin`);
         };
         if (event==="UNŻ" && (beginHour===0 || endHour===0)) {
             numberOfErrors += 1;
@@ -224,19 +338,9 @@ $(document).ready(function() {
 });
 
 
-//fills <td> that sends data to form json
-function tdToJson(selHelper, from, to, counted, event) {
-    let td = $(`td[id="to-json-${selHelper}"]`);
-    td.find("input[name='b-hour']").val(from);
-    td.find("input[name='e-hour']").val(to);
-    td.find("input[name='counted']").val(counted);
-    td.find("input[name='event']").val(event);
-};
-
-
 //counts sum of hours worked by worker in day
 $(document).ready(function() {
-    $("td[id^='begin-'], td[id^='end-']").change(function() {
+    $("td[id^='begin-'], td[id^='end-'], td[id^='event-']").change(function() {
         let selHelper = $(this).find("input[name='helper']").val();
         let from = parseInt($(`#begin-${selHelper}`).find("input[name='begin-hour']").val());
         let to = parseInt($(`#end-${selHelper}`).find("input[name='end-hour']").val());
@@ -276,19 +380,8 @@ $(document).ready(function() {
             to.css("background", "#fff");
             counted.css("background", "#fff");
             event.css("background", "#fff");
-        } else if (event.val()=="UW") {
-            $(this).css("background", "#FC33FF");
-            $(`#begin-${selHelper} *`).css("background", "#FC33FF");
-            $(`#end-${selHelper}`).css("background", "#FC33FF");
-            $(`#counted-${selHelper}`).css("background", "#FC33FF");
-            from.css("background", "#FC33FF");
-            to.css("background", "#FC33FF");
-            counted.css("background", "#FC33FF");
-            event.css("background", "#FC33FF");
-            from.val("");
-            to.val(8).change();
         } else if (event.val()==="UNŻ" || event.val()==="UO" || event.val()==="UOJ" ||
-                    event.val()==="UR" || event.val()==="UB") {
+                    event.val()==="UR" || event.val()==="UB" || event.val()==="UW") {
             if (isNaN(parseInt(from.val()))){
                 let worker = $(`td[id="to-json-${selHelper}"]`).find("input[name='worker']").val();
                 let day = $(`td[id="to-json-${selHelper}"]`).find("input[name='day']").val();

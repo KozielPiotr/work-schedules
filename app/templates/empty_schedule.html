@@ -152,7 +152,7 @@
                 <th>{{ shop }}</th>
                 <th rowspan="3">D</th>
                 {% for worker in workers %}
-                    <th rowspan="2" colspan="4">{{ worker | replace("_", " ") }}</th>
+                    <th class="worker-name" rowspan="2" colspan="4">{{ worker | replace("_", " ") }}</th>
                 {% endfor %}
             </tr>
             <tr>
