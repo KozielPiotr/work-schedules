@@ -71,11 +71,14 @@ function weeklyRest() {
         console.log(workers[worker]);
         for (let week in weeksDict) {
             //finds last day of billing week
-            console.log("tydzień " + week);
             weekLength = weeksDict[week].length - 1;
             let lastDay = new Date(weeksDict[week][weekLength]);
+            let firstDay= new Date(weeksDict[week][0]);
             let hours = 0;
             weeklyBreak = 0;
+            console.log("tydzień " + week);
+            console.log("dzień pierwszy tygodnia:  " + firstDay.getDate());
+            console.log("dzień ostatni tygodnia:  " + lastDay);
 
             //finds td in template that contains data for current day and worker
             name = workers[worker].replace(" ", "_");
@@ -89,8 +92,17 @@ function weeklyRest() {
                 if ($(td).find("input[name='event']").val() === "off") {
                     console.log("Teraz sprawdzam dzień: "+currentDay.getDate());
                     console.log("wolne");
-                    currentDay = new Date(currentDay.setDate(currentDay.getDate()-1));
-                    td = `td[id^="to-json-${name}-${year}-${month+1}-${currentDay.getDate()}"]`;
+                    if (currentDay.getTime() == firstDay.getTime()) {
+                        console.log("OKOKOKOK");
+                        stop = new Date(firstDay);
+                        hours = -((stop-start)/3600000);
+                        console.log(`W tygodniu ${week} przerwa trwała od ${start} do ${stop} i wyniosła ${hours} godzin`);
+                        td = `td[id^="to-json-${name}-${year}-${month+1}-${currentDay.getDate()-1}"]`;
+                    } else {
+                        currentDay = new Date(currentDay.setDate(currentDay.getDate()-1));
+                        td = `td[id^="to-json-${name}-${year}-${month+1}-${currentDay.getDate()}"]`;
+                        console.log("NIE ok");
+                    };
                 } else {
                     stop = new Date(new Date(currentDay).setHours($(td).find("input[name='e-hour']").val()));
                     hours = -((stop-start)/3600000);
