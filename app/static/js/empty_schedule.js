@@ -20,7 +20,6 @@ function weeklyRest() {
     $("th[class='worker-name']").each(function() {
         workers.push($(this).text());
     });
-    console.log(workers);
 
     //list of billing weeks
     let billingWeeksNumbers = [];
@@ -29,7 +28,6 @@ function weeklyRest() {
             billingWeeksNumbers.push($(this).val())
         };
     });
-    console.log(billingWeeksNumbers);
 
     //list of all dates in month
     let datesInMonth = [];
@@ -47,7 +45,6 @@ function weeklyRest() {
     const billingPeriodDuration =  $("td[id='billing-period-begin']").find("input[name='bpd']").val();
     monthBegin = new Date(curYear, curMonth);
     const currentBillingPeriodBegin = new Date(monthBegin.setMonth(monthBegin.getMonth()-(monthOfBillingPeriod-1)));
-    console.log("1 miesiac obecnego okresu to: "+currentBillingPeriodBegin);
 
     //assigns dates to weeks
     let currentBillingPeriodBeginYear = currentBillingPeriodBegin.getFullYear();
@@ -66,62 +63,105 @@ function weeklyRest() {
         };
     };
 
+    lastWeekInMonth = parseInt(billingWeeksNumbers[billingWeeksNumbers.length-1]);
+
     //checking 35-hours break
+    let weeklyHoursErrors = []
     for (let worker in workers) {
-        console.log(workers[worker]);
         for (let week in weeksDict) {
             //finds last day of billing week
             weekLength = weeksDict[week].length - 1;
             let lastDay = new Date(weeksDict[week][weekLength]);
-            let firstDay= new Date(weeksDict[week][0]);
+            let firstDay= new Date(new Date(lastDay).setDate(lastDay.getDate()-6));
             let hours = 0;
-            weeklyBreak = 0;
-            console.log("tydzień " + week);
-            console.log("dzień pierwszy tygodnia:  " + firstDay.getDate());
-            console.log("dzień ostatni tygodnia:  " + lastDay);
-
-            //finds td in template that contains data for current day and worker
-            name = workers[worker].replace(" ", "_");
-            let year = lastDay.getFullYear();
-            let month = lastDay.getMonth();
-            let currentDay = new Date(lastDay);
-            let td = `td[id^="to-json-${name}-${year}-${month+1}-${currentDay.getDate()}"]`;
-            let start = new Date(new Date(lastDay.setDate(lastDay.getDate()+1)));
-            let stop;
-            while ($(td).find("input[name='billing-period-week']").val()==week) {
-                if ($(td).find("input[name='event']").val() === "off") {
-                    console.log("Teraz sprawdzam dzień: "+currentDay.getDate());
-                    console.log("wolne");
-                    if (currentDay.getTime() == firstDay.getTime()) {
-                        console.log("OKOKOKOK");
-                        stop = new Date(firstDay);
-                        hours = -((stop-start)/3600000);
-                        console.log(`W tygodniu ${week} przerwa trwała od ${start} do ${stop} i wyniosła ${hours} godzin`);
-                        td = `td[id^="to-json-${name}-${year}-${month+1}-${currentDay.getDate()-1}"]`;
+            weeklyBreak = false;
+            if (week ==  lastWeekInMonth && weeksDict[week].length < 7) {
+                weeklyBreak = true;
+            } else {
+                //finds td in template that contains data for current day and worker
+                name = workers[worker].replace(" ", "_");
+                let year = lastDay.getFullYear();
+                let month = lastDay.getMonth();
+                let currentDay = new Date(lastDay);
+                let td = `td[id^="to-json-${name}-${currentDay.getFullYear()}-${currentDay.getMonth()+1}-${currentDay.getDate()}"]`;
+                let start = new Date(new Date(lastDay.setDate(lastDay.getDate()+1)));
+                let stop;
+                while ($(td).find("input[name='billing-period-week']").val()==week) {
+                    if ($(td).find("input[name='event']").val() === "off") {
+                        if (currentDay.getTime() === firstDay.getTime()) {
+                            stop = new Date(firstDay);
+                            hours = -((stop-start)/3600000);
+                            td = `td[id^="${currentDay.getFullYear()}-${currentDay.getMonth()+1}-${currentDay.getDate()-1}"]`;
+                        } else {
+                            currentDay = new Date(currentDay.setDate(currentDay.getDate()-1));
+                            if (currentDay.getMonth() === month-1) {
+                                td = `td[id^="prev-to-json-${name}-${currentDay.getFullYear()}-${currentDay.getMonth()+1}-${currentDay.getDate()}"]`;
+                            } else {
+                                td = `td[id^="to-json-${name}-${currentDay.getFullYear()}-${currentDay.getMonth()+1}-${currentDay.getDate()}"]`;
+                            };
+                        };
                     } else {
+                        stop = new Date(new Date(currentDay).setHours($(td).find("input[name='e-hour']").val()));
+                        hours = -((stop-start)/3600000);
+                        start = new Date(new Date(currentDay).setHours($(td).find("input[name='b-hour']").val()));
                         currentDay = new Date(currentDay.setDate(currentDay.getDate()-1));
-                        td = `td[id^="to-json-${name}-${year}-${month+1}-${currentDay.getDate()}"]`;
-                        console.log("NIE ok");
+                        if (currentDay.getMonth() === month-1) {
+                            td = `td[id^="prev-to-json-${name}-${currentDay.getFullYear()}-${currentDay.getMonth()+1}-${currentDay.getDate()}"]`;
+                        } else {
+                            td = `td[id^="to-json-${name}-${currentDay.getFullYear()}-${currentDay.getMonth()+1}-${currentDay.getDate()}"]`;
+                        };
                     };
-                } else {
-                    stop = new Date(new Date(currentDay).setHours($(td).find("input[name='e-hour']").val()));
-                    hours = -((stop-start)/3600000);
-                    console.log(`W tygodniu ${week} przerwa trwała od ${start} do ${stop} i wyniosła ${hours} godzin`);
-                    start = new Date(new Date(currentDay).setHours($(td).find("input[name='b-hour']").val()));
-                    currentDay = new Date(currentDay.setDate(currentDay.getDate()-1));
-                    td = `td[id^="to-json-${name}-${year}-${month+1}-${currentDay.getDate()}"]`;
+                    if (hours >= 35) {
+                        weeklyBreak = true;
+                    };
                 };
+            };
+            if (weeklyBreak === false) {
+                weeklyHoursErrors.push(`\n${workers[worker]}: Niezachowana 35 godzinna przerwa w tygodniu ${firstDay.getDate()}.${firstDay.getMonth()+1} - ${lastDay.getDate()}.${lastDay.getMonth()+1}`);
             };
         };
     };
+    if (weeklyHoursErrors.length > 0) {
+        alert(weeklyHoursErrors);
+        return false;
+    } else {
+        return true;
+    };
+
 };
 
-//testing
-$(document).ready(function() {
-    $("th[class='worker-name']").click(function(){
-        weeklyRest();
-    });
-});
+
+//checks if there is 11 hours rest time between shifts
+function restTime(currentSelector, worker, year, month, day) {
+    currentDay = parseInt($(currentSelector).find("input[name='day']").val());
+    currentDayHour = parseInt($(currentSelector).find("input[name='b-hour']").val());
+    if ($(currentSelector).find("input[name='event']").val() === "off") {
+        restHours = 11;
+    } else {
+        prevMonthDays = [];
+        if (currentDay > 1) {
+            prevSelector = $(`td[id="to-json-${worker}-${year}-${month}-${day-1}"]`);
+            prevDay = parseInt($(prevSelector).find("input[name='day']").val());
+            prevDayHour = parseInt($(prevSelector).find("input[name='e-hour']").val());
+            restStart = new Date(year, (month-1), prevDay, prevDayHour);
+            restStop = new Date(year, (month-1), currentDay, currentDayHour);
+        } else {
+            $("th[class='prev-daynumber-th']").each(function() {
+                prevMonthDays.push(parseInt($(this).text()));
+            });
+            prevDay = Math.max(...prevMonthDays);
+            prevDayHour = $(`td[id="prev-end-${worker}-${year}-${month-1}-${prevDay}"]`).text();
+            restStart = new Date(year, (month-2), prevDay, prevDayHour);
+            restStop = new Date(year, (month-1), currentDay, currentDayHour);
+        };
+        if (isNaN(prevDayHour)) {
+            restHours = 11;
+        } else {
+            restHours = (restStop-restStart)/3600000;
+        };
+    };
+    return restHours
+};
 
 
 window.onload = function() {
@@ -236,40 +276,6 @@ window.onload = function() {
 };
 
 
-//checks if there is 11 hours rest time between shifts
-function restTime(currentSelector, worker, year, month, day) {
-    currentDay = parseInt($(currentSelector).find("input[name='day']").val());
-    currentDayHour = parseInt($(currentSelector).find("input[name='b-hour']").val());
-    if ($(currentSelector).find("input[name='event']").val() === "off") {
-        restHours = 11;
-    } else {
-        prevMonthDays = [];
-        if (currentDay > 1) {
-            prevSelector = $(`td[id="to-json-${worker}-${year}-${month}-${day-1}"]`);
-            prevDay = parseInt($(prevSelector).find("input[name='day']").val());
-            prevDayHour = parseInt($(prevSelector).find("input[name='e-hour']").val());
-            restStart = new Date(year, (month-1), prevDay, prevDayHour);
-            restStop = new Date(year, (month-1), currentDay, currentDayHour);
-        } else {
-            $("th[class='prev-daynumber-th']").each(function() {
-                prevMonthDays.push(parseInt($(this).text()));
-            });
-            prevDay = Math.max(...prevMonthDays);
-            prevDayHour = $(`td[id="prev-end-${worker}-${year}-${month-1}-${prevDay}"]`).text();
-            restStart = new Date(year, (month-2), prevDay, prevDayHour);
-            restStop = new Date(year, (month-1), currentDay, currentDayHour);
-        };
-        if (isNaN(prevDayHour)) {
-            restHours = 11;
-        } else {
-            restHours = (restStop-restStart)/3600000;
-        };
-        console.log(worker, restStop, restStart, restHours, currentDayHour);
-    };
-    return restHours
-};
-
-
 //gets data of all days in month and prepers dict for json
 function getHours() {
     let hours = [];
@@ -323,6 +329,12 @@ function getHours() {
                     "to": endHour, "sum": wrkd, "event": event, "workplace": workplace, "billing_period": billingPeriod,
                     "billing_week": billingWeek});
     });
+
+    if (weeklyRest() === false) {
+        numberOfErrors += 1;
+        errors[numberOfErrors] = ("\nNiezachowanie 35 godzinnego odpoczynku tygodniowego");
+    }
+
     if (errors.length > 0) {
         alert(errors);
         return false;

@@ -93,6 +93,18 @@
                             <td id="prev-event-{{ worker }}-{{ prev_month_year }}-{{ prev_month }}-{{ day[0] }}">
                                 {{ Personal_schedule.query.filter_by(id= "%d-%02d-%02d-%s-%s" %(prev_month_year, prev_month, day[0], worker.replace("_", " "), shop)).first().event }}
                             </td>
+                            <td id="prev-to-json-{{ worker }}-{{ prev_month_year }}-{{ prev_month }}-{{ day[0] }}">
+                                <input name="year" value="{{ prev_month_year }}">
+                                <input name="month" value="{{ prev_month }}">
+                                <input name="day" value="{{ day[0] }}">
+                                <input name="worker" value="{{ worker }}">
+                                <input name="b-hour" value="{{ Personal_schedule.query.filter_by(id= '%d-%02d-%02d-%s-%s' %(prev_month_year, prev_month, day[0], worker.replace('_', ' '), shop)).first().begin_hour }}">
+                                <input name="e-hour" value="{{ Personal_schedule.query.filter_by(id= '%d-%02d-%02d-%s-%s' %(prev_month_year, prev_month, day[0], worker.replace('_', ' '), shop)).first().end_hour }}">
+                                <input name="counted" value="{{ Personal_schedule.query.filter_by(id= '%d-%02d-%02d-%s-%s' %(prev_month_year, prev_month, day[0], worker.replace('_', ' '), shop)).first().hours_sum }}">
+                                <input name="event" value="{{ Personal_schedule.query.filter_by(id= '%d-%02d-%02d-%s-%s' %(prev_month_year, prev_month, day[0], worker.replace('_', ' '), shop)).first().event }}">
+                                <input name="shop" value="{{ shop }}">
+                                <input name = "billing-period-week" value="{{ Personal_schedule.query.filter_by(id= '%d-%02d-%02d-%s-%s' %(prev_month_year, prev_month, day[0], worker.replace('_', ' '), shop)).first().billing_week }}">
+                            </td>
                         {% endfor %}
                     </tr>
                 {% endif %}
