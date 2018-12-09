@@ -80,7 +80,7 @@
                     <tr>
                         <th class="prev-dayname-th">{{ wdn[day[1]] }}</th>  <!-- day of the week (name) -->
                         <th class="prev-daynumber-th">{{ day[0] }}</th>  <!-- day of the week (number) -->
-                        {% for worker in prev_month_workers %}
+                        {%- for worker in prev_month_workers -%}
                             <td id="prev-begin-{{ worker }}-{{ prev_month_year }}-{{ prev_month }}-{{ day[0] }}">
                                 {{ Personal_schedule.query.filter_by(id= "%d-%02d-%02d-%s-%s" %(prev_month_year, prev_month, day[0], worker.replace("_", " "), shop)).first().begin_hour }}
                             </td>
@@ -91,7 +91,13 @@
                                 {{ Personal_schedule.query.filter_by(id= "%d-%02d-%02d-%s-%s" %(prev_month_year, prev_month, day[0], worker.replace("_", " "), shop)).first().hours_sum }}
                             </td>
                             <td id="prev-event-{{ worker }}-{{ prev_month_year }}-{{ prev_month }}-{{ day[0] }}">
-                                {{ Personal_schedule.query.filter_by(id= "%d-%02d-%02d-%s-%s" %(prev_month_year, prev_month, day[0], worker.replace("_", " "), shop)).first().event }}
+                                {%- if Personal_schedule.query.filter_by(id= "%d-%02d-%02d-%s-%s" %(prev_month_year, prev_month, day[0], worker.replace("_", " "), shop)).first().event == "off" -%}
+                                    X
+                                {%- elif Personal_schedule.query.filter_by(id= "%d-%02d-%02d-%s-%s" %(prev_month_year, prev_month, day[0], worker.replace("_", " "), shop)).first().event == "in_work" -%}
+                                    ........
+                                {%- else -%}
+                                    {{ Personal_schedule.query.filter_by(id= "%d-%02d-%02d-%s-%s" %(prev_month_year, prev_month, day[0], worker.replace("_", " "), shop)).first().event }}
+                                {%- endif -%}
                             </td>
                             <td id="prev-to-json-{{ worker }}-{{ prev_month_year }}-{{ prev_month }}-{{ day[0] }}">
                                 <input name="year" value="{{ prev_month_year }}">

@@ -7,6 +7,100 @@ function tdToJson(selHelper, from, to, counted, event) {
     td.find("input[name='event']").val(event);
 };
 
+function prevEventsCss(selector, selHelper, event, from, to, counted){
+    if (event.text() === "X" || event.text() === "........") {
+        if($(selector).closest("tr").find("th[class='prev-dayname-th']").text() === "Sobota" ||
+                $(selector).closest("tr").find("th[class='prev-dayname-th']").text() === "Niedziela") {
+            from.css("background", "#aba5a5c7");
+            to.css("background", "#aba5a5c7");
+            counted.css("background", "#aba5a5c7");
+            event.css("background", "#aba5a5c7");
+            console.log("1");
+        } else {
+            from.css("background", "#fff");
+            to.css("background", "#fff");
+            counted.css("background", "#fff");
+            event.css("background", "#fff");
+            console.log("2");
+        };
+    } else if (event.text() === "UNŻ" || event.text() === "UO" || event.text() === "UOJ" ||
+                event.text() === "UR" || event.text() === "UB" || event.text() === "UW") {
+        from.css("background", "#FC33FF");
+        to.css("background", "#FC33FF");
+        counted.css("background", "#FC33FF");
+        event.css("background", "#FC33FF");
+        console.log("3");
+    } else if (event.text()==="L4") {
+        from.css("background", "#80D332");
+        to.css("background", "#80D332");
+        counted.css("background", "#80D332");
+        event.css("background", "#80D332");
+        console.log("4");
+    };
+    console.log("funkcja");
+};
+
+function eventsCss(selector, selHelper, event, from, to, counted){
+    //let event = $(selector).find(":selected");
+    //let from = $(`#begin-${selHelper}`).find("input[name='begin-hour']");
+    //let to = $(`#end-${selHelper}`).find("input[name='end-hour']");
+    //let counted = $(`#counted-${selHelper}`).find("output[name='counted']");
+
+    if (event.val() === "off" || event.val() === "in_work") {
+        if($(selector).closest("tr").find("th[class='dayname-th']").text() === "Sobota" ||
+                $(selector).closest("tr").find("th[class='dayname-th']").text() === "Niedziela") {
+            $(selector).css("background", "#aba5a5c7");
+            $(`#begin-${selHelper}`).css("background", "#aba5a5c7");
+            $(`#end-${selHelper}`).css("background", "#aba5a5c7");
+            $(`#counted-${selHelper}`).css("background", "#aba5a5c7");
+            from.css("background", "#aba5a5c7");
+            to.css("background", "#aba5a5c7");
+            counted.css("background", "#aba5a5c7");
+            event.css("background", "#aba5a5c7");
+        } else {
+            $(selector).css("background", "#fff");
+            $(`#begin-${selHelper}`).css("background", "#fff");
+            $(`#end-${selHelper}`).css("background", "#fff");
+            $(`#counted-${selHelper}`).css("background", "#fff");
+            from.css("background", "#fff");
+            to.css("background", "#fff");
+            counted.css("background", "#fff");
+            event.css("background", "#fff");
+        };
+    } else if (event.val() === "UNŻ" || event.val() === "UO" || event.val() === "UOJ" ||
+                event.val() === "UR" || event.val() === "UB" || event.val() === "UW") {
+        if (isNaN(parseInt(from.val()))){
+            let worker = $(`td[id="to-json-${selHelper}"]`).find("input[name='worker']").val();
+            let day = $(`td[id="to-json-${selHelper}"]`).find("input[name='day']").val();
+            missingHours = prompt(`Wpisz prawidłową godzinę rozpoczęcia pracy dla pracownika ${worker} w dniu ${day}.`);
+            from.val(missingHours).change();
+        };
+        if (isNaN(parseInt(to.val()))){
+            let worker = $(`td[id="to-json-${selHelper}"]`).find("input[name='worker']").val();
+            let day = $(`td[id="to-json-${selHelper}"]`).find("input[name='day']").val();
+            missingHours = prompt(`Wpisz prawidłową godzinę zakończenia pracy dla pracownika ${worker} w dniu ${day}.`);
+            to.val(missingHours).change();
+        };
+        $(selector).css("background", "#FC33FF");
+        $(`#begin-${selHelper}`).css("background", "#FC33FF");
+        $(`#end-${selHelper}`).css("background", "#FC33FF");
+        $(`#counted-${selHelper}`).css("background", "#FC33FF");
+        from.css("background", "#FC33FF");
+        to.css("background", "#FC33FF");
+        counted.css("background", "#FC33FF");
+        event.css("background", "#FC33FF");
+    } else if (event.val()==="L4") {
+        $(selector).css("background", "#80D332");
+        $(`#begin-${selHelper}`).css("background", "#80D332");
+        $(`#end-${selHelper}`).css("background", "#80D332");
+        $(`#counted-${selHelper}`).css("background", "#80D332");
+        from.css("background", "#80D332");
+        to.css("background", "#80D332");
+        counted.css("background", "#80D332");
+        event.css("background", "#80D332");
+    };
+};
+
 
 //checks if there is 35-hour break once in every billing week
 function weeklyRest() {
@@ -117,7 +211,7 @@ function weeklyRest() {
                 };
             };
             if (weeklyBreak === false) {
-                weeklyHoursErrors.push(`\n${workers[worker]}: Niezachowana 35 godzinna przerwa w tygodniu ${firstDay.getDate()}.${firstDay.getMonth()+1} - ${lastDay.getDate()}.${lastDay.getMonth()+1}`);
+                weeklyHoursErrors.push(`\n${workers[worker]}: Niezachowana 35 godzinna przerwa w tygodniu ${firstDay.getDate()}.${firstDay.getMonth()+1}.${firstDay.getFullYear()} - ${lastDay.getDate()}.${lastDay.getMonth()+1}.${firstDay.getFullYear()}`);
             };
         };
     };
@@ -165,6 +259,20 @@ function restTime(currentSelector, worker, year, month, day) {
 
 
 window.onload = function() {
+    //adds css to prev month table
+    $("td[id^='prev-event-']").each(function() {
+        let selector = $(this);
+        let selHelper = $(selector).closest("td").attr('id').replace("prev-event-", "");
+        let event = $(selector);
+        //console.log(selHelper);
+        let from = $(`#prev-begin-${selHelper}`);
+        let to = $(`#prev-end-${selHelper}`);
+        let counted = $(`#prev-counted-${selHelper}`);
+        counted.css("background", "red");
+        prevEventsCss(selector, selHelper, event, from, to, counted);
+        console.log("OK");
+    });
+
     //adds css to left hours <td> after loading page
     $("td[id^='left-hours']").each(function() {
         hours = $(this).find("output");
@@ -273,6 +381,9 @@ window.onload = function() {
             $(this).find("input[name='billing-period-week']").val(weekDates[curDateWeek]);
         };
     });
+
+    //adds css to prev month table
+
 };
 
 
@@ -308,19 +419,47 @@ function getHours() {
         };
         directDay = $(this);
 
-        if (restTime(directDay, worker, year, month, day) < 11) {
+        //checks if everything is filled correctly
+        if (wrkd > 12) {
+            tooMany = window.confirm(`Czy ${worker} powinien pracować ponad 12 godzin w dniu ${day}.${month}.${year}?\nJeżeli tak, naciśnij "OK".`);
+            if (!tooMany) {
             numberOfErrors += 1;
-            errors[numberOfErrors] = (`\n${numberOfErrors}. Niezachowane 11 godzin odpoczynku u ${worker} przed dniem ${day}.${month}.${year} `)
+            errors[numberOfErrors] = (`\n${numberOfErrors}. Ponad 12 godzin pracy u ${worker} w dniu ${day}.${month}.${year}`);
+            };
         };
 
-        //checks if everything is filled correctly
-        if ((event==="UW" || event==="UO" || event==="UB") && (wrkd !== 8)) {
+        if (restTime(directDay, worker, year, month, day) < 11) {
+            numberOfErrors += 1;
+            errors[numberOfErrors] = (`\n${numberOfErrors}. Niezachowane 11 godzin odpoczynku u ${worker} przed dniem ${day}.${month}.${year}`);
+        };
+
+        if (beginHour === 0 && endHour !== 0) {
+            numberOfErrors += 1;
+            errors[numberOfErrors] = (`\n${numberOfErrors}. Brak godziny rozpoczęcia pracy ${worker} w dniu ${day}.${month}.${year}`);
+        };
+
+        if (beginHour !== 0 && endHour === 0) {
+            numberOfErrors += 1;
+            errors[numberOfErrors] = (`\n${numberOfErrors}. Brak godziny zakończenia pracy ${worker} w dniu ${day}.${month}.${year}`);
+        };
+
+        if (beginHour > endHour) {
+            numberOfErrors += 1;
+            errors[numberOfErrors] = (`\n${numberOfErrors}. Późniejsza godzina rozpoczęcia niż zakończenia pracy u ${worker} w dniu ${day}.${month}.${year}`);
+        };
+
+        if (beginHour === endHour && beginHour !== 0 && endHour !== 0) {
+            numberOfErrors += 1;
+            errors[numberOfErrors] = (`\n${numberOfErrors}. Praca nie może zaczynać się i kończyć o tej samej godzinie u ${worker} w dniu ${day}.${month}.${year}`);
+        };
+
+        if ((event==="UW" || event==="UB") && (wrkd !== 8)) {
             numberOfErrors += 1;
             errors[numberOfErrors] = (`\n${numberOfErrors}. Przy ${event} ${worker} w dniu ${day}.${month}.${year} zmiana musi trwać 8 godzin`);
         };
-        if (event==="UNŻ" && (beginHour===0 || endHour===0)) {
+        if ((event==="UNŻ" && (beginHour===0 || endHour===0)) || (event==="UO" && (beginHour===0 || endHour===0))) {
             numberOfErrors += 1;
-            errors[numberOfErrors] = (`\n${numberOfErrors}.Niewłaściwe godziny ${event} u ${worker} w dniu ${day}.${month}.${year}`);
+            errors[numberOfErrors] = (`\n${numberOfErrors}. Niewłaściwe godziny ${event} u ${worker} w dniu ${day}.${month}.${year}`);
         };
 
 
@@ -332,7 +471,7 @@ function getHours() {
 
     if (weeklyRest() === false) {
         numberOfErrors += 1;
-        errors[numberOfErrors] = ("\nNiezachowanie 35 godzinnego odpoczynku tygodniowego");
+        errors[numberOfErrors] = (`\n${numberOfErrors}. Niezachowanie 35 godzinnego odpoczynku tygodniowego`);
     }
 
     if (errors.length > 0) {
@@ -386,56 +525,47 @@ $(document).ready(function() {
 });
 
 
+//keeps correct value of event field
+$(document).ready(function() {
+    $("td[id^='begin-'], td[id^='end-']").change(function() {
+        let selHelper = $(this).find("input[name='helper']").val();
+        let from = parseInt($(`#begin-${selHelper}`).find("input[name='begin-hour']").val());
+        let to = parseInt($(`#end-${selHelper}`).find("input[name='end-hour']").val());
+        let event = $(`#event-${selHelper}`).find("select[name='event']");
+
+        //sets event to "off" when begin and end hour fields are empty OR
+        //sets event to "in_work" if begin and end hour are not empty and event is "off"
+        if ((isNaN(from) && isNaN(to)) && (event.val() === "in_work")) {
+            event.val("off").change();
+        } else if (!(isNaN(from) && isNaN(to)) && (event.val() === "off")) {
+            event.val("in_work").change();
+        };
+    });
+
+    //deletes begin and end hour if event is set to "off"
+    $("td[id^='event-']").change(function() {
+        let selHelper = $(this).find("input[name='helper']").val();
+        let from = $(`#begin-${selHelper}`).find("input[name='begin-hour']");
+        let to = $(`#end-${selHelper}`).find("input[name='end-hour']");
+        let event = $(`#event-${selHelper}`).find("select[name='event']");
+        if (event.val() === "off") {
+            from.val("").change();
+            to.val("").change();
+        };
+    });
+});
+
+
 //gives cells and fields color of event for current month
 $(document).ready(function() {
     $("td[id^='event-']").change(function() {
-        let selHelper = $(this).find("input[name='helper']").val();
-        let event = $(this).find(":selected");
+        let selector = $(this);
+        let selHelper = $(selector).find("input[name='helper']").val();
+        let event = $(selector).find(":selected");
         let from = $(`#begin-${selHelper}`).find("input[name='begin-hour']");
         let to = $(`#end-${selHelper}`).find("input[name='end-hour']");
         let counted = $(`#counted-${selHelper}`).find("output[name='counted']");
-
-        if (event.val()==="off" || event.val()==="in_work") {
-            $(this).css("background", "#fff");
-            $(`#begin-${selHelper}`).css("background", "#fff");
-            $(`#end-${selHelper}`).css("background", "#fff");
-            $(`#counted-${selHelper}`).css("background", "#fff");
-            from.css("background", "#fff");
-            to.css("background", "#fff");
-            counted.css("background", "#fff");
-            event.css("background", "#fff");
-        } else if (event.val()==="UNŻ" || event.val()==="UO" || event.val()==="UOJ" ||
-                    event.val()==="UR" || event.val()==="UB" || event.val()==="UW") {
-            if (isNaN(parseInt(from.val()))){
-                let worker = $(`td[id="to-json-${selHelper}"]`).find("input[name='worker']").val();
-                let day = $(`td[id="to-json-${selHelper}"]`).find("input[name='day']").val();
-                missingHours = prompt(`Wpisz prawidłową godzinę rozpoczęcia pracy dla pracownika ${worker} w dniu ${day}.`);
-                from.val(missingHours).change();
-            };
-            if (isNaN(parseInt(to.val()))){
-                let worker = $(`td[id="to-json-${selHelper}"]`).find("input[name='worker']").val();
-                let day = $(`td[id="to-json-${selHelper}"]`).find("input[name='day']").val();
-                missingHours = prompt(`Wpisz prawidłową godzinę zakończenia pracy dla pracownika ${worker} w dniu ${day}.`);
-                to.val(missingHours).change();
-            };
-            $(this).css("background", "#FC33FF");
-            $(`#begin-${selHelper}`).css("background", "#FC33FF");
-            $(`#end-${selHelper}`).css("background", "#FC33FF");
-            $(`#counted-${selHelper}`).css("background", "#FC33FF");
-            from.css("background", "#FC33FF");
-            to.css("background", "#FC33FF");
-            counted.css("background", "#FC33FF");
-            event.css("background", "#FC33FF");
-        } else if (event.val()==="L4") {
-            $(this).css("background", "#80D332");
-            $(`#begin-${selHelper}`).css("background", "#80D332");
-            $(`#end-${selHelper}`).css("background", "#80D332");
-            $(`#counted-${selHelper}`).css("background", "#80D332");
-            from.css("background", "#80D332");
-            to.css("background", "#80D332");
-            counted.css("background", "#80D332");
-            event.css("background", "#80D332");
-        };
+        eventsCss(selector, selHelper, event, from, to, counted);
     });
 });
 
