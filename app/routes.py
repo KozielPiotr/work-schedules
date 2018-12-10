@@ -353,38 +353,38 @@ def new_schedule_to_db(hours):
     sworkplace = ""
     hours = hours
     billing_period = 0
-    #try:
-    for dates in data.items():
-        for day in dates:
-            for element in day:
-                sname = "%s-%s-%s" % (element["year"], element["month"], element["workplace"])
-                syear = element["year"]
-                smonth = element["month"]
-                sworkplace = element["workplace"]
-                billing_period = element["billing_period"]
-    schedule = Schedule(name=sname, year=syear, month=smonth, workplace=sworkplace, hrs_to_work=hours,
-                        accepted=False, version=0, billing_period=billing_period)
-    db.session.add(schedule)
-    db.session.commit()
-    for dates in data.items():
-        for day in dates:
-            for element in day:
-                d = date(int(element["year"]), int(element["month"]), int(element["day"]))
-                worker = element["worker"].replace("_", " ")
-                b_hour = element["from"]
-                e_hour = element["to"]
-                sum = element["sum"]
-                event = element["event"]
-                workplace = element["workplace"]
-                psname = "%s-%s-%s" % (d, worker, workplace)
-                billing_week = element["billing_week"]
-                pschedule = Personal_schedule(id=psname, date=d, worker=worker, begin_hour=b_hour,
-                                              end_hour=e_hour, hours_sum=sum, event=event, workplace=workplace,
-                                              includes=schedule, billing_period=billing_period, billing_week=billing_week)
-                db.session.add(pschedule)
-    db.session.commit()
-    return url_for("index")
-    # except (AttributeError):
-        #return "Popraw błędy w stworzonym grafiku."
-    # except:
-        #return "Coś poszło nie tak.\nPrawdopodobnie grafik już istnieje."
+    try:
+        for dates in data.items():
+            for day in dates:
+                for element in day:
+                    sname = "%s-%s-%s" % (element["year"], element["month"], element["workplace"])
+                    syear = element["year"]
+                    smonth = element["month"]
+                    sworkplace = element["workplace"]
+                    billing_period = element["billing_period"]
+        schedule = Schedule(name=sname, year=syear, month=smonth, workplace=sworkplace, hrs_to_work=hours,
+                            accepted=False, version=0, billing_period=billing_period)
+        db.session.add(schedule)
+        db.session.commit()
+        for dates in data.items():
+            for day in dates:
+                for element in day:
+                    d = date(int(element["year"]), int(element["month"]), int(element["day"]))
+                    worker = element["worker"].replace("_", " ")
+                    b_hour = element["from"]
+                    e_hour = element["to"]
+                    sum = element["sum"]
+                    event = element["event"]
+                    workplace = element["workplace"]
+                    psname = "%s-%s-%s" % (d, worker, workplace)
+                    billing_week = element["billing_week"]
+                    pschedule = Personal_schedule(id=psname, date=d, worker=worker, begin_hour=b_hour,
+                                                  end_hour=e_hour, hours_sum=sum, event=event, workplace=workplace,
+                                                  includes=schedule, billing_period=billing_period, billing_week=billing_week)
+                    db.session.add(pschedule)
+        db.session.commit()
+        return url_for("index")
+    except (AttributeError):
+        return "1"
+    except:
+        return "2"

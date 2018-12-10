@@ -480,8 +480,18 @@ function getHours() {
 };
 
 
+//checks if schedule is filled correctly
+$(document).ready(function() {
+    $("#check-schedule-btn").click(function() {
+        getHours()
+    });
+});
+
+
+//submits schedule
 $(document).ready(function() {
     $("form").submit(function(e){
+    console.log("DUPA");
         let form = $(this);
         $.ajax({
             url   : form.attr("action"),
@@ -489,8 +499,13 @@ $(document).ready(function() {
             contentType: 'application/json;charset=UTF-8',
             data  : JSON.stringify(getHours()),
             success: function(response){
-                alert(response);
-                //window.location.replace(response);
+                if (response === "1") {
+                    alert("Popraw błędy w stworzonym grafiku.");
+                } else if (response === "2") {
+                    alert("Coś poszło nie tak.\nPrawdopodobnie grafik już istnieje.");
+                } else {
+                    window.location.replace("/index");
+                }
             },
         });
         return false;

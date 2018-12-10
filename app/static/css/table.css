@@ -1,3 +1,16 @@
+#check-accept-btns {
+    margin: auto;
+    width: 60%;
+}
+
+#accept-btn {
+    float: left;
+}
+
+#check-btn {
+    float: right;
+}
+
 .caption {
     padding-top: 0.75rem;
     padding-bottom: 0.75rem;
