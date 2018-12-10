@@ -259,20 +259,6 @@ function restTime(currentSelector, worker, year, month, day) {
 
 
 window.onload = function() {
-    //adds css to prev month table
-    $("td[id^='prev-event-']").each(function() {
-        let selector = $(this);
-        let selHelper = $(selector).closest("td").attr('id').replace("prev-event-", "");
-        let event = $(selector);
-        //console.log(selHelper);
-        let from = $(`#prev-begin-${selHelper}`);
-        let to = $(`#prev-end-${selHelper}`);
-        let counted = $(`#prev-counted-${selHelper}`);
-        counted.css("background", "red");
-        prevEventsCss(selector, selHelper, event, from, to, counted);
-        console.log("OK");
-    });
-
     //adds css to left hours <td> after loading page
     $("td[id^='left-hours']").each(function() {
         hours = $(this).find("output");
@@ -383,6 +369,17 @@ window.onload = function() {
     });
 
     //adds css to prev month table
+    $("td[id^='prev-event-']").each(function() {
+        let selector = $(this);
+        let selHelper = $(selector).closest("td").attr('id').replace("prev-event-", "");
+        let event = $(selector);
+        let from = $(`#prev-begin-${selHelper}`);
+        let to = $(`#prev-end-${selHelper}`);
+        let counted = $(`#prev-counted-${selHelper}`);
+        counted.css("background", "red");
+        prevEventsCss(selector, selHelper, event, from, to, counted);
+        console.log("OK");
+    });
 
 };
 
