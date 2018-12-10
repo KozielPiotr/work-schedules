@@ -2,12 +2,8 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="3d1609e3-dc01-4bb1-831a-4c1ecd6bc426" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app.db" beforeDir="false" afterPath="$PROJECT_DIR$/app.db" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/routes.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/routes.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/static/css/table.css" beforeDir="false" afterPath="$PROJECT_DIR$/app/static/css/table.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/static/js/empty_schedule.js" beforeDir="false" afterPath="$PROJECT_DIR$/app/static/js/empty_schedule.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/templates/empty_schedule.html" beforeDir="false" afterPath="$PROJECT_DIR$/app/templates/empty_schedule.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/templates/new_user.html" beforeDir="false" afterPath="$PROJECT_DIR$/app/templates/new_user.html" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -23,11 +19,20 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/app/routes.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="673">
-              <caret line="388" column="11" lean-forward="true" selection-start-line="388" selection-start-column="11" selection-end-line="388" selection-end-column="11" />
+            <state relative-caret-position="420">
+              <caret line="340" column="25" lean-forward="true" selection-start-line="340" selection-start-column="25" selection-end-line="340" selection-end-column="25" />
               <folding>
                 <element signature="e#0#77#0" expanded="true" />
               </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/app/templates/new_user.html">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="627">
+              <caret line="33" column="55" selection-start-line="33" selection-start-column="55" selection-end-line="33" selection-end-column="55" />
             </state>
           </provider>
         </entry>
@@ -46,19 +51,6 @@
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/app/templates/empty_schedule.html">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="152">
-              <caret line="8" lean-forward="true" selection-start-line="8" selection-end-line="8" />
-              <folding>
-                <element signature="n#div#0;n#!!top" />
-                <element signature="n#div#1;n#!!top" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/app/static/css/table.css">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="38">
@@ -67,11 +59,11 @@
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="true">
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/app/static/js/empty_schedule.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="451">
-              <caret line="506" column="54" selection-start-line="506" selection-start-column="54" selection-end-line="506" selection-end-column="54" />
+            <state relative-caret-position="1154">
+              <caret line="501" column="39" lean-forward="true" selection-start-line="501" selection-start-column="39" selection-end-line="501" selection-end-column="39" />
             </state>
           </provider>
         </entry>
@@ -179,7 +171,6 @@
         <option value="$PROJECT_DIR$/app/templates/base_schedule.html" />
         <option value="$PROJECT_DIR$/app/static/css/index.css" />
         <option value="$PROJECT_DIR$/app/templates/_formhelpers.html" />
-        <option value="$PROJECT_DIR$/app/templates/new_user.html" />
         <option value="$PROJECT_DIR$/app/__init__.py" />
         <option value="$PROJECT_DIR$/app/static/js/table.js" />
         <option value="$PROJECT_DIR$/app/templates/test.html" />
@@ -204,12 +195,13 @@
         <option value="$PROJECT_DIR$/app/templates/empty_schedule.html" />
         <option value="$PROJECT_DIR$/app/static/js/empty_schedule.js" />
         <option value="$PROJECT_DIR$/app/routes.py" />
+        <option value="$PROJECT_DIR$/app/templates/new_user.html" />
       </list>
     </option>
   </component>
   <component name="ProjectFrameBounds">
-    <option name="x" value="170" />
-    <option name="y" value="145" />
+    <option name="x" value="183" />
+    <option name="y" value="69" />
     <option name="width" value="1653" />
     <option name="height" value="987" />
   </component>
@@ -236,20 +228,6 @@
               <item name="grafiki" type="462c0819:PsiDirectoryNode" />
               <item name="app" type="462c0819:PsiDirectoryNode" />
               <item name="static" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="grafiki" type="b2602c69:ProjectViewProjectNode" />
-              <item name="grafiki" type="462c0819:PsiDirectoryNode" />
-              <item name="app" type="462c0819:PsiDirectoryNode" />
-              <item name="static" type="462c0819:PsiDirectoryNode" />
-              <item name="css" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="grafiki" type="b2602c69:ProjectViewProjectNode" />
-              <item name="grafiki" type="462c0819:PsiDirectoryNode" />
-              <item name="app" type="462c0819:PsiDirectoryNode" />
-              <item name="static" type="462c0819:PsiDirectoryNode" />
-              <item name="js" type="462c0819:PsiDirectoryNode" />
             </path>
             <path>
               <item name="grafiki" type="b2602c69:ProjectViewProjectNode" />
@@ -472,7 +450,7 @@
     </todo-panel>
   </component>
   <component name="ToolWindowManager">
-    <frame x="170" y="145" width="1653" height="987" extended-state="0" />
+    <frame x="183" y="69" width="1653" height="987" extended-state="0" />
     <editor active="true" />
     <layout>
       <window_info active="true" content_ui="combo" id="Project" order="0" sideWeight="0.5011655" visible="true" weight="0.12883435" />
@@ -646,13 +624,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/app/templates/new_user.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="228">
-          <caret line="12" column="24" lean-forward="true" selection-start-line="11" selection-start-column="12" selection-end-line="12" selection-end-column="24" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/app/templates/test.html" />
     <entry file="file://$PROJECT_DIR$/app/templates/test_fields.html" />
     <entry file="file://$PROJECT_DIR$/app/templates/base_schedule.html" />
@@ -811,20 +782,27 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/app/static/js/empty_schedule.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1154">
+          <caret line="501" column="39" lean-forward="true" selection-start-line="501" selection-start-column="39" selection-end-line="501" selection-end-column="39" />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/app/routes.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="673">
-          <caret line="388" column="11" lean-forward="true" selection-start-line="388" selection-start-column="11" selection-end-line="388" selection-end-column="11" />
+        <state relative-caret-position="420">
+          <caret line="340" column="25" lean-forward="true" selection-start-line="340" selection-start-column="25" selection-end-line="340" selection-end-column="25" />
           <folding>
             <element signature="e#0#77#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/app/static/js/empty_schedule.js">
+    <entry file="file://$PROJECT_DIR$/app/templates/new_user.html">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="451">
-          <caret line="506" column="54" selection-start-line="506" selection-start-column="54" selection-end-line="506" selection-end-column="54" />
+        <state relative-caret-position="627">
+          <caret line="33" column="55" selection-start-line="33" selection-start-column="55" selection-end-line="33" selection-end-column="55" />
         </state>
       </provider>
     </entry>

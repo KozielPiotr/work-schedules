@@ -339,8 +339,11 @@ def new_schedule_find_workers(workplace):
     jsondict = []
     for worker in workers:
         workers_list = {}
-        workers_list["name"] = worker.username
-        jsondict.append(workers_list)
+        if worker.access_level == "0" or worker.access_level == "1":
+            workers.remove(worker)
+        else:
+            workers_list["name"] = worker.username
+            jsondict.append(workers_list)
     return jsonify({"workers": jsondict})
 
 
