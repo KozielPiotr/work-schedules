@@ -15,13 +15,11 @@ function prevEventsCss(selector, selHelper, event, from, to, counted){
             to.css("background", "#aba5a5c7");
             counted.css("background", "#aba5a5c7");
             event.css("background", "#aba5a5c7");
-            console.log("1");
         } else {
             from.css("background", "#fff");
             to.css("background", "#fff");
             counted.css("background", "#fff");
             event.css("background", "#fff");
-            console.log("2");
         };
     } else if (event.text() === "UNŻ" || event.text() === "UO" || event.text() === "UOJ" ||
                 event.text() === "UR" || event.text() === "UB" || event.text() === "UW") {
@@ -37,7 +35,6 @@ function prevEventsCss(selector, selHelper, event, from, to, counted){
         event.css("background", "#80D332");
         console.log("4");
     };
-    console.log("funkcja");
 };
 
 function eventsCss(selector, selHelper, event, from, to, counted){
@@ -378,7 +375,6 @@ window.onload = function() {
         let counted = $(`#prev-counted-${selHelper}`);
         counted.css("background", "red");
         prevEventsCss(selector, selHelper, event, from, to, counted);
-        console.log("OK");
     });
 
 };
@@ -450,14 +446,19 @@ function getHours() {
             errors[numberOfErrors] = (`\n${numberOfErrors}. Praca nie może zaczynać się i kończyć o tej samej godzinie u ${worker} w dniu ${day}.${month}.${year}`);
         };
 
-        if ((event==="UW" || event==="UB") && (wrkd !== 8)) {
+        if ((event === "UW" || event === "UB") && (wrkd !== 8)) {
             numberOfErrors += 1;
             errors[numberOfErrors] = (`\n${numberOfErrors}. Przy ${event} ${worker} w dniu ${day}.${month}.${year} zmiana musi trwać 8 godzin`);
         };
-        if ((event==="UNŻ" && (beginHour===0 || endHour===0)) || (event==="UO" && (beginHour===0 || endHour===0))) {
+        if ((event === "UNŻ" && (beginHour === 0 || endHour === 0)) || (event === "UO" && (beginHour === 0 || endHour === 0))) {
             numberOfErrors += 1;
             errors[numberOfErrors] = (`\n${numberOfErrors}. Niewłaściwe godziny ${event} u ${worker} w dniu ${day}.${month}.${year}`);
         };
+        if (event === "in_work" && (beginHour === 0 || endHour === 0)) {
+            numberOfErrors += 1;
+            errors[numberOfErrors] = (`\n${numberOfErrors}. ${worker} w dniu ${day}.${month}.${year} jest w pracy, anie ma wpisanych godzin`);
+        };
+
 
 
         //fills array for json
@@ -483,7 +484,9 @@ function getHours() {
 //checks if schedule is filled correctly
 $(document).ready(function() {
     $("#check-schedule-btn").click(function() {
-        getHours()
+        if (getHours()) {
+            alert("Grafik OK");
+        };
     });
 });
 
@@ -491,7 +494,6 @@ $(document).ready(function() {
 //submits schedule
 $(document).ready(function() {
     $("form").submit(function(e){
-    console.log("DUPA");
         let form = $(this);
         $.ajax({
             url   : form.attr("action"),
@@ -504,7 +506,8 @@ $(document).ready(function() {
                 } else if (response === "2") {
                     alert("Coś poszło nie tak.\nPrawdopodobnie grafik już istnieje.");
                 } else {
-                    window.location.replace("/index");
+                    alert("Grafik zaakceptowany");
+                    window.location.replace(response);
                 }
             },
         });

@@ -2,25 +2,7 @@
 
 {% block styles %}
 <link href="{{ url_for('static', filename='css/table.css') }}" rel="stylesheet">
-<style>
-    .option-card {
-        width: 33%;
-        text-align: center;
-        vertical-align: middle;
-        margin: 0 auto;
-        float: none;
-        margin-bottom: 10px;
-        background-color: #ced4da;
-    }
-
-    .card {
-        display:inline-block;
-    }
-
-    .list-group-item {
-        background-color: #ced4da;
-    }
-</style>
+<link href="{{ url_for('static', filename='css/index.css') }}" rel="stylesheet">
 {% endblock %}
 
 {% block content %}
@@ -28,7 +10,7 @@
     <h1>Grafiki on-line</h1>
 </div>
     <div class="card-group">
-    {% if current_user.access_level=="0" or current_user.access_level=="1" %}
+    {% if current_user.access_level=="0"%}
         <div class="card option-card">
             <div class="card-body">
                 <h5 class="card-title">Administrator</h5>
@@ -37,6 +19,16 @@
                 <li class="list-group-item"><a href="{{ url_for('new_user') }}" class="btn btn-primary btn-lg btn-block">Nowy użytkownik</a></li>
                 <li class="list-group-item"><a href="{{ url_for('new_shop') }}" class="btn btn-primary btn-lg btn-block">Nowy sklep</a></li>
                 <li class="list-group-item"><a href="{{ url_for('worker_to_workplace') }}" class="btn btn-primary btn-lg btn-block">Powiązania użytkownik - sklep</a></li>
+            </ul>
+            </div>
+        </div>
+    {% endif %}
+        {% if current_user.access_level=="0" or current_user.access_level=="1" %}
+        <div class="card option-card">
+            <div class="card-body">
+                <h5 class="card-title">Kierownik działu</h5>
+            <ul class="list-group list-group-flush">
+                <li class="list-group-item"><a href="{{ url_for('accept_schedule') }}" class="btn btn-primary btn-lg btn-block">Akceptowanie grafików</a></li>
             </ul>
             </div>
         </div>

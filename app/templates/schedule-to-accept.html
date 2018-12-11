@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block styles %}
+<style>
+    .list-group {
+        width: 40%;
+        text-align: center;
+        vertical-align: middle;
+        margin: 0 auto;
+        float: none;
+        margin-bottom: 10px;
+        background-color: #ced4da;
+        border-radius: 0.25rem;
+        border: 1px solid #00000020;
+    }
+
+    .list-group-item {
+        background-color: #00000013;
+        border: 8px solid #ced4d9;
+    }
+
+    .list-group-item-action:hover, .list-group-item-action:focus {
+        color: #495057;
+        text-decoration: none;
+        background-color: #999 !important;
+    }
+
+</style>
+{% endblock %}
+
+{% block content %}
+
+    {% if sn == 0 %}
+        <p>Brak grafików do zaakceptowania</p>
+    {% else %}
+
+        <div class="list-group">
+            <h3>Grafiki czekające na zaakceptowanie</h3>
+            {% for schedule in ua %}
+                <a href="#" class="list-group-item list-group-item-action">{{ schedule.workplace }} na {{ schedule.month }}.{{ schedule.year }}</a>
+            {% endfor %}
+        </div>
+    {% endif %}
+{% endblock %}

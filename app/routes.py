@@ -391,3 +391,23 @@ def new_schedule_to_db(hours):
         return "1"
     except:
         return "2"
+
+
+# makes list of unaccepted schedule for current user
+@app.route("/accept-schedule", methods=["GET", "POST"])
+@login_required
+def accept_schedule():
+    if (current_user.access_level != "0") and (current_user.access_level != "1"):
+        flash("Użytkownik nie ma uprawnień do wyświetlenia tej strony")
+        return redirect(url_for("index"))
+
+    unaccepted_schedules = []
+    for schedule in Schedule.query.filter_by(accepted=False).order_by(Schedule.workplace, Schedule.year, Schedule.month).all():
+        for assigned_workplaces in current_user.workers_shop:
+            if str(schedule.workplace) == str(assigned_workplaces):
+                unaccepted_schedules.append(schedule)
+
+    schedule_number = len(unaccepted_schedules)
+
+    return render_template("schedule-to-accept.html", title="Grafiki - akceptacja grafiku", ua=unaccepted_schedules,
+                           sn=schedule_number, Schedule=Schedule)
