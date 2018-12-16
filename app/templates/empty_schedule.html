@@ -204,11 +204,11 @@
                         {% for worker in workers %}
                             <td id="begin-{{ worker }}-{{ year }}-{{ monthn }}-{{ day[0] }}">
                                 <input type="hidden" value="{{ worker }}-{{ year }}-{{ monthn }}-{{ day[0] }}" name="helper">
-                                <input type="number" name="begin-hour" value="" placeholder="Od" min="0" max="24">
+                                <input type="number" name="begin-hour" value="" placeholder="Od" min="0" max="24" class='hoursInput'>
                             </td>
                             <td id="end-{{ worker }}-{{ year }}-{{ monthn }}-{{ day[0] }}">
                                 <input type="hidden" value="{{ worker }}-{{ year }}-{{ monthn }}-{{ day[0] }}" name="helper">
-                                <input type="number" name="end-hour" value="" placeholder="Do" min="0" max="24">
+                                <input type="number" name="end-hour" value="" placeholder="Do" min="0" max="24" class='hoursInput'>
                             </td>
                             <td id="counted-{{ worker }}-{{ year }}-{{ monthn }}-{{ day[0] }}">
                                 <input type="hidden" value="{{ worker }}-{{ year }}-{{ monthn }}-{{ day[0] }}" name="helper">
