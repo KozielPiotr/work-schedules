@@ -336,14 +336,18 @@ def new_schedule_find_workers(workplace):
         return redirect(url_for("index"))
     shop = Shop.query.filter_by(shopname=workplace).first()
     workers = shop.works.all()
+    print(shop.works.all())
     jsondict = []
-    for worker in workers:
+    for worker in shop.works.all():
+        print(worker, worker.username, worker.access_level)
         workers_list = {}
         if worker.access_level == "0" or worker.access_level == "1":
             workers.remove(worker)
+            print("wywalono ", worker)
         else:
             workers_list["name"] = worker.username
             jsondict.append(workers_list)
+    print(jsondict)
     return jsonify({"workers": jsondict})
 
 
