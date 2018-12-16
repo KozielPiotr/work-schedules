@@ -33,16 +33,10 @@ function prevEventsCss(selector, selHelper, event, from, to, counted){
         to.css("background", "#80D332");
         counted.css("background", "#80D332");
         event.css("background", "#80D332");
-        console.log("4");
     };
 };
 
 function eventsCss(selector, selHelper, event, from, to, counted){
-    //let event = $(selector).find(":selected");
-    //let from = $(`#begin-${selHelper}`).find("input[name='begin-hour']");
-    //let to = $(`#end-${selHelper}`).find("input[name='end-hour']");
-    //let counted = $(`#counted-${selHelper}`).find("output[name='counted']");
-
     if (event.val() === "off" || event.val() === "in_work") {
         if($(selector).closest("tr").find("th[class='dayname-th']").text() === "Sobota" ||
                 $(selector).closest("tr").find("th[class='dayname-th']").text() === "Niedziela") {
@@ -187,6 +181,9 @@ function weeklyRest() {
                             currentDay = new Date(currentDay.setDate(currentDay.getDate()-1));
                             if (currentDay.getMonth() === month-1) {
                                 td = `td[id^="prev-to-json-${name}-${currentDay.getFullYear()}-${currentDay.getMonth()+1}-${currentDay.getDate()}"]`;
+                                if (isNaN($(td).find("input[name='billing-period-week']").val())) {
+                                    hours = 35;
+                                };
                             } else {
                                 td = `td[id^="to-json-${name}-${currentDay.getFullYear()}-${currentDay.getMonth()+1}-${currentDay.getDate()}"]`;
                             };
@@ -198,6 +195,9 @@ function weeklyRest() {
                         currentDay = new Date(currentDay.setDate(currentDay.getDate()-1));
                         if (currentDay.getMonth() === month-1) {
                             td = `td[id^="prev-to-json-${name}-${currentDay.getFullYear()}-${currentDay.getMonth()+1}-${currentDay.getDate()}"]`;
+                            if (isNaN($(td).find("input[name='billing-period-week']").val())) {
+                                hours = 35;
+                            };
                         } else {
                             td = `td[id^="to-json-${name}-${currentDay.getFullYear()}-${currentDay.getMonth()+1}-${currentDay.getDate()}"]`;
                         };
@@ -377,6 +377,14 @@ window.onload = function() {
         prevEventsCss(selector, selHelper, event, from, to, counted);
     });
 
+    $("td[id^='begin']").each(function() {
+        $(this).change();
+    });
+
+    $("td[id^='event']").each(function() {
+        $(this).change();
+    });
+
 };
 
 
@@ -491,31 +499,6 @@ $(document).ready(function() {
 });
 
 
-//submits schedule
-$(document).ready(function() {
-    $("form").submit(function(e){
-        let form = $(this);
-        $.ajax({
-            url   : form.attr("action"),
-            type  : form.attr("method"),
-            contentType: 'application/json;charset=UTF-8',
-            data  : JSON.stringify(getHours()),
-            success: function(response){
-                if (response === "1") {
-                    alert("Popraw błędy w stworzonym grafiku.");
-                } else if (response === "2") {
-                    alert("Coś poszło nie tak.\nPrawdopodobnie grafik już istnieje.");
-                } else {
-                    alert("Grafik zaakceptowany");
-                    window.location.replace(response);
-                }
-            },
-        });
-        return false;
-    });
-});
-
-
 //counts sum of hours worked by worker in day
 $(document).ready(function() {
     $("td[id^='begin-'], td[id^='end-'], td[id^='event-']").change(function() {
@@ -617,4 +600,26 @@ $(document).ready(function() {
 });
 
 
-
+//submits schedule
+$(document).ready(function() {
+    $("form").submit(function(e){
+        let form = $(this);
+        $.ajax({
+            url   : form.attr("action"),
+            type  : form.attr("method"),
+            contentType: 'application/json;charset=UTF-8',
+            data  : JSON.stringify(getHours()),
+            success: function(response){
+                if (response === "1") {
+                    alert("Popraw błędy w stworzonym grafiku.");
+                } else if (response === "2") {
+                    alert("Coś poszło nie tak.\nPrawdopodobnie grafik już istnieje.");
+                } else {
+                    alert("Grafik wysłany");
+                    window.location.replace(response);
+                }
+            },
+        });
+        return false;
+    });
+});

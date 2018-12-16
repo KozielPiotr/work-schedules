@@ -8,8 +8,6 @@
 
 
 {% block content %}
-
-
 <!-- Legend of events -->
 <button id="legend-btn" type="button" class="btn btn-secondary btn-sm btn-block" data-toggle="collapse" data-target="#legend-of-events">Legenda</button>
 <div id="legend-of-events" class="collapse">
@@ -37,7 +35,6 @@
             <th>
                 <ul>
                     <li>UB - urlop bezpłatny</li>
-                    <li>PD - Pierwszy dzień pracy</li>
                 </ul>
             </th>
         </tr>
@@ -45,18 +42,17 @@
     <br>
 </div>
 
-
 <!-- Schedule for previous month (not editable) -->
 <button id="prev-month-schedule-btn" class="btn btn-secondary  btn-sm btn-block" data-toggle="collapse" data-target="#prev-month-schedule">Grafik na poprzedni miesiąc</button>
 <div id="prev-month-schedule" class="collapse">
-    {% if prev_month_schedule != None %}
+    {% if prev_shdict != None %}
         <table class="prev-schedule-table table-bordered">
-            <caption class="caption">Grafik dla <b>{{ shop }}</b> na rok <b>{{ prev_month_year }}</b>, miesiąc <b>{{ prev_month_name }}</b></caption>
+            <caption class="caption">Grafik dla <b>{{ workplace }}</b> na rok <b>{{ prev_year }}</b>, miesiąc <b>{{ prev_month_name }}</b></caption>
             <thead>
             <tr>
-                <th>{{ shop }}</th>
+                <th>{{ workplace }}</th>
                 <th rowspan="3">D</th>
-                {% for worker in prev_month_workers %}
+                {% for worker in prev_workers %}
                     <th rowspan="2" colspan="4">{{ worker | replace("_", " ") }}</th>
                 {% endfor %}
             </tr>
@@ -64,8 +60,8 @@
                 <th>{{ prev_month_name }}</th>
             </tr>
             <tr>
-                <th>{{ prev_month_year }}</th>
-                    {% for worker in prev_month_workers %}
+                <th>{{ prev_year }}</th>
+                    {% for worker in prev_workers %}
                         <td>Od</td>
                         <td>Do</td>
                         <td>H:</td>
@@ -74,41 +70,41 @@
             </tr>
             </thead>
             <tbody>
-            {% for day in cal.itermonthdays2(prev_month_year, prev_month) %}
+            {% for day in cal.itermonthdays2(prev_year, prev_month) %}
                 {% if day[0] > 0 %}
                     <tr>
                         <th class="prev-dayname-th">{{ wdn[day[1]] }}</th>  <!-- day of the week (name) -->
                         <th class="prev-daynumber-th">{{ day[0] }}</th>  <!-- day of the week (number) -->
-                        {%- for worker in prev_month_workers -%}
-                            <td id="prev-begin-{{ worker }}-{{ prev_month_year }}-{{ prev_month }}-{{ day[0] }}">
-                                {{ Personal_schedule.query.filter_by(id="%d-%02d-%02d-%s-%s" %(prev_month_year, prev_month, day[0], worker.replace("_", " "), shop)).first().begin_hour }}
+                        {%- for worker in prev_workers -%}
+                            <td id="prev-begin-{{ worker }}-{{ prev_year }}-{{ prev_month }}-{{ day[0] }}">
+                                {{ prev_shdict["begin-%s-%d-%02d-%02d" % (worker, prev_year, prev_month, day[0])] }}
                             </td>
-                            <td id="prev-end-{{ worker }}-{{ prev_month_year }}-{{ prev_month }}-{{ day[0] }}">
-                                {{ Personal_schedule.query.filter_by(id="%d-%02d-%02d-%s-%s" %(prev_month_year, prev_month, day[0], worker.replace("_", " "), shop)).first().end_hour }}
+                            <td id="prev-end-{{ worker }}-{{ prev_year }}-{{ prev_month }}-{{ day[0] }}">
+                                {{ prev_shdict["end-%s-%d-%02d-%02d" % (worker, prev_year, prev_month, day[0])] }}
                             </td>
-                            <td id="prev-counted-{{ worker }}-{{ prev_month_year }}-{{ prev_month }}-{{ day[0] }}">
-                                {{ Personal_schedule.query.filter_by(id="%d-%02d-%02d-%s-%s" %(prev_month_year, prev_month, day[0], worker.replace("_", " "), shop)).first().hours_sum }}
+                            <td id="prev-counted-{{ worker }}-{{ prev_year }}-{{ prev_month }}-{{ day[0] }}">
+                                {{ prev_shdict["sum-%s-%d-%02d-%02d" % (worker, prev_year, prev_month, day[0])] }}
                             </td>
-                            <td id="prev-event-{{ worker }}-{{ prev_month_year }}-{{ prev_month }}-{{ day[0] }}">
-                                {%- if Personal_schedule.query.filter_by(id="%d-%02d-%02d-%s-%s" %(prev_month_year, prev_month, day[0], worker.replace("_", " "), shop)).first().event == "off" -%}
+                            <td id="prev-event-{{ worker }}-{{ prev_year }}-{{ prev_month }}-{{ day[0] }}">
+                                {%- if prev_shdict["event-%s-%d-%02d-%02d" % (worker, prev_year, prev_month, day[0])] == "off" -%}
                                     X
-                                {%- elif Personal_schedule.query.filter_by(id="%d-%02d-%02d-%s-%s" %(prev_month_year, prev_month, day[0], worker.replace("_", " "), shop)).first().event == "in_work" -%}
+                                {%- elif prev_shdict["event-%s-%d-%02d-%02d" % (worker, prev_year, prev_month, day[0])] == "in_work" -%}
                                     ........
                                 {%- else -%}
-                                    {{ Personal_schedule.query.filter_by(id="%d-%02d-%02d-%s-%s" %(prev_month_year, prev_month, day[0], worker.replace("_", " "), shop)).first().event }}
+                                    {{ prev_shdict["event-%s-%d-%02d-%02d" % (worker, prev_year, prev_month, day[0])] }}
                                 {%- endif -%}
                             </td>
-                            <td id="prev-to-json-{{ worker }}-{{ prev_month_year }}-{{ prev_month }}-{{ day[0] }}">
-                                <input name="year" value="{{ prev_month_year }}">
+                            <td id="prev-to-json-{{ worker }}-{{ prev_year }}-{{ prev_month }}-{{ day[0] }}">
+                                <input name="year" value="{{ prev_year }}">
                                 <input name="month" value="{{ prev_month }}">
                                 <input name="day" value="{{ day[0] }}">
                                 <input name="worker" value="{{ worker }}">
-                                <input name="b-hour" value="{{ Personal_schedule.query.filter_by(id= '%d-%02d-%02d-%s-%s' %(prev_month_year, prev_month, day[0], worker.replace('_', ' '), shop)).first().begin_hour }}">
-                                <input name="e-hour" value="{{ Personal_schedule.query.filter_by(id= '%d-%02d-%02d-%s-%s' %(prev_month_year, prev_month, day[0], worker.replace('_', ' '), shop)).first().end_hour }}">
-                                <input name="counted" value="{{ Personal_schedule.query.filter_by(id= '%d-%02d-%02d-%s-%s' %(prev_month_year, prev_month, day[0], worker.replace('_', ' '), shop)).first().hours_sum }}">
-                                <input name="event" value="{{ Personal_schedule.query.filter_by(id= '%d-%02d-%02d-%s-%s' %(prev_month_year, prev_month, day[0], worker.replace('_', ' '), shop)).first().event }}">
+                                <input name="b-hour" value="{{ prev_shdict['begin-%s-%d-%02d-%02d' % (worker, prev_year, prev_month, day[0])] }}">
+                                <input name="e-hour" value="{{ prev_shdict['end-%s-%d-%02d-%02d' % (worker, prev_year, prev_month, day[0])] }}">
+                                <input name="counted" value="{{ prev_shdict['sum-%s-%d-%02d-%02d' % (worker, prev_year, prev_month, day[0])] }}">
+                                <input name="event" value="{{ prev_shdict['event-%s-%d-%02d-%02d' % (worker, prev_year, prev_month, day[0])] }}">
                                 <input name="shop" value="{{ shop }}">
-                                <input name="billing-period-week" value="{{ Personal_schedule.query.filter_by(id= '%d-%02d-%02d-%s-%s' %(prev_month_year, prev_month, day[0], worker.replace('_', ' '), shop)).first().billing_week }}">
+                                <input name="billing-period-week" value="{{ prev_shdict['billing-week-%s-%d-%02d-%02d' % (worker, prev_year, prev_month, day[0])] }}">
                             </td>
                         {% endfor %}
                     </tr>
@@ -118,13 +114,13 @@
             <tfoot>
             <tr>
                 <th colspan="2">H/mc:</th>
-                {% for worker in prev_month_workers %}
+                {% for worker in prev_workers %}
                     <td colspan="4">Suma H:</td>
                 {% endfor %}
             </tr>
             <tr>
-                <th colspan="2"><output id="prev-working-hours">{{ prev_month_hours }}</output></th> <!-- amount of hours to work in prev month -->
-                {% for worker in prev_month_workers %}
+                <th colspan="2"><output id="prev-working-hours">{{ prev_hours }}</output></th> <!-- amount of hours to work in prev month -->
+                {% for worker in prev_workers %}
                     <td colspan="4" class="prev-sum-of-worker-hours">
                         {{ workers_hours[worker] }} <!-- sum of hours worked by iterated worker i prev month -->
                     </td>
@@ -132,34 +128,35 @@
             </tr>
             <tr>
                 <th colspan="2">Pozostało H:</th>
-                {% for worker in prev_month_workers %}
+                {% for worker in prev_workers %}
                 <td colspan="4" id="prev-left-hours-{{ worker }}"> <!-- hours left to assign or overtime -->
-                    {{ prev_month_hours - workers_hours[worker] }}
+                    {{ prev_hours - workers_hours[worker] }}
                 </td>
                 {% endfor %}
             </tr>
             </tfoot>
         </table>
-
     {% else %}
         <p>Grafik nie istnieje</p>
     {% endif %}
 </div>
 
 <hr>
+
 <!-- Schedule for chosen month (editable) -->
 <div id="curr-month-schedule">   <!-- Schedule -->
-    <form method="post" action="/schedule-to-db/{{ hours }}">
+    <form method="post" action="">
         <div id="check-accept-btns">
             <div id="accept-btn">
-                <button id="submit-schedule-btn" type="submit" class="btn btn-primary btn-sm">Wyślij projekt grafiku do akceptacji</button>
+                <button id="submit-schedule-btn" type="submit" class="btn btn-primary btn-sm">Akceptuj grafik</button>
             </div>
             <div id="check-btn">
                 <button id="check-schedule-btn" type="button" class="btn btn-primary btn-sm">Sprawdź poprawność grafiku</button>
             </div>
         </div>
+
         <table class="new-schedule-table table-bordered">
-            <caption class="caption">Tworzenie grafiku dla <b>{{ shop }}</b> na rok <b><span id="cur-year">{{ year }}</span></b>, miesiąc <b><span id="cur-month">{{ monthn }}</span>{{ mn }}</b>, <b><span id="month-of-billing-period"></span></b> miesiąc okresu rozliczeniowego.</caption>
+            <caption class="caption">Tworzenie grafiku dla <b>{{ workplace }}</b> na rok <b><span id="cur-year">{{ year }}</span></b>, miesiąc <b><span id="cur-month">{{ month }}</span>{{ month_name }}</b>, <b><span id="month-of-billing-period"></span></b> miesiąc okresu rozliczeniowego.</caption>
     <!-- headers with shop, month, workers -->
             <thead>
             <tr id="hidden-data">
@@ -172,17 +169,17 @@
                     <input name="billing-period">
                 </td>
             </tr>
-            <tr>
-                <th>{{ shop }}</th>
+            <tr id="workers-names">
+                <th id="workplace">{{ workplace }}</th>
                 <th rowspan="3">D</th>
                 {% for worker in workers %}
                     <th class="worker-name" rowspan="2" colspan="4">{{ worker | replace("_", " ") }}</th>
                 {% endfor %}
             </tr>
             <tr>
-                <th>{{ mn }}</th>
+                <th>{{ month_name }}</th>
             </tr>
-            <tr>
+            <tr id="worker-from-to-header">
                 <th>{{ year }}</th>
                     {% for worker in workers %}
                         <td>Od</td>
@@ -192,52 +189,51 @@
                 {% endfor %}
             </tr>
             </thead>
-
     <!-- body with days and according data -->
             <tbody>
-            {% for day in cal.itermonthdays2(yearn, monthn) %}
+            {% for day in cal.itermonthdays2(year, month) %}
                 {% if day[0] > 0 %}
-                    <tr>
+                    <tr class="days">
                         <th class="dayname-th">{{ wdn[day[1]] }}</th>  <!-- day of the week (name) -->
                         <th class="daynumber-th">{{ day[0] }}</th>  <!-- day of the week (number) -->
                         {% for worker in workers %}
-                            <td id="begin-{{ worker }}-{{ year }}-{{ monthn }}-{{ day[0] }}">
-                                <input type="hidden" value="{{ worker }}-{{ year }}-{{ monthn }}-{{ day[0] }}" name="helper">
-                                <input type="number" name="begin-hour" value="" placeholder="Od" min="0" max="24" class="hoursInput">
+                            <td id="begin-{{ worker }}-{{ year }}-{{ month }}-{{ day[0] }}">
+                                <input type="hidden" value="{{ worker }}-{{ year }}-{{ month }}-{{ day[0] }}" name="helper">
+                                <input type="number" name="begin-hour" value="{{ shdict['begin-%s-%d-%02d-%02d' %(worker, year, month, day[0])] }}" placeholder="Od" min="0" max="24" class="hoursInput">
                             </td>
-                            <td id="end-{{ worker }}-{{ year }}-{{ monthn }}-{{ day[0] }}">
-                                <input type="hidden" value="{{ worker }}-{{ year }}-{{ monthn }}-{{ day[0] }}" name="helper">
-                                <input type="number" name="end-hour" value="" placeholder="Do" min="0" max="24" class="hoursInput">
+                            <td id="end-{{ worker }}-{{ year }}-{{ month }}-{{ day[0] }}">
+                                <input type="hidden" value="{{ worker }}-{{ year }}-{{ month }}-{{ day[0] }}" name="helper">
+                                <input type="number" name="end-hour" value="{{ shdict['end-%s-%d-%02d-%02d' %(worker, year, month, day[0])] }}" placeholder="Do" min="0" max="24" class="hoursInput">
                             </td>
-                            <td id="counted-{{ worker }}-{{ year }}-{{ monthn }}-{{ day[0] }}">
-                                <input type="hidden" value="{{ worker }}-{{ year }}-{{ monthn }}-{{ day[0] }}" name="helper">
-                                <output class="counted-{{ worker }}-{{ year }}-{{ monthn }}-{{ day[0] }}" name="counted">0</output>
+                            <td id="counted-{{ worker }}-{{ year }}-{{ month }}-{{ day[0] }}">
+                                <input type="hidden" value="{{ worker }}-{{ year }}-{{ month }}-{{ day[0] }}" name="helper">
+                                <output class="counted-{{ worker }}-{{ year }}-{{ month }}-{{ day[0] }}" name="counted">0</output>
                             </td>
-                            <td id="event-{{ worker }}-{{ year }}-{{ monthn }}-{{ day[0] }}">
-                                <input type="hidden" value="{{ worker }}-{{ year }}-{{ monthn }}-{{ day[0] }}" name="helper">
+                            <td id="event-{{ worker }}-{{ year }}-{{ month }}-{{ day[0] }}">
+                                <input type="hidden" value="{{ worker }}-{{ year }}-{{ month }}-{{ day[0] }}" name="helper">
                                 <select name="event">
-                                    <option value="off">X</option>
-                                    <option value="in_work">........</option>
-                                    <option value="UW">UW</option>
-                                    <option value="UNŻ">UNŻ</option>
-                                    <option value="L4">L4</option>
-                                    <option value="UO">UO</option>
-                                    <option value="UOJ">UOJ</option>
-                                    <option value="UR">UR</option>
-                                    <option value="UB">UB</option>
+                                    <option value="off"{%- if shdict['event-%s-%d-%02d-%02d' %(worker, year, month, day[0])] == "off" -%} selected{%- endif -%} >X</option>
+                                    <option value="in_work"{%- if shdict['event-%s-%d-%02d-%02d' %(worker, year, month, day[0])] == "in_work" -%} selected{%- endif -%} >........</option>
+                                    <option value="UW"{%- if shdict['event-%s-%d-%02d-%02d' %(worker, year, month, day[0])] == "UW" -%} selected{%- endif -%} >UW</option>
+                                    <option value="UNŻ"{%- if shdict['event-%s-%d-%02d-%02d' %(worker, year, month, day[0])] == "UNŻ" -%} selected{%- endif -%} >UNŻ</option>
+                                    <option value="L4"{%- if shdict['event-%s-%d-%02d-%02d' %(worker, year, month, day[0])] == "L4" -%} selected{%- endif -%} >L4</option>
+                                    <option value="UO"{%- if shdict['event-%s-%d-%02d-%02d' %(worker, year, month, day[0])] == "UO" -%} selected{%- endif -%} >UO</option>
+                                    <option value="UOJ"{%- if shdict['event-%s-%d-%02d-%02d' %(worker, year, month, day[0])] == "UOJ" -%} selected{%- endif -%} >UOJ</option>
+                                    <option value="UR"{%- if shdict['event-%s-%d-%02d-%02d' %(worker, year, month, day[0])] == "UR" -%} selected{%- endif -%} >UR</option>
+                                    <option value="UB"{%- if shdict['event-%s-%d-%02d-%02d' %(worker, year, month, day[0])] == "UB" -%} selected{%- endif -%} >UB</option>
                                 </select>
                             </td>
-                            <td id="to-json-{{ worker }}-{{ year }}-{{ monthn }}-{{ day[0] }}">
-                                <input type="hidden" value="{{ worker }}-{{ year }}-{{ monthn }}-{{ day[0] }}" name="helper">
-                                <input name="year" value="{{ yearn }}">
-                                <input name="month" value="{{ monthn }}">
+                            <td id="to-json-{{ worker }}-{{ year }}-{{ month }}-{{ day[0] }}">
+                                <input type="hidden" value="{{ worker }}-{{ year }}-{{ month }}-{{ day[0] }}" name="helper">
+                                <input name="year" value="{{ year }}">
+                                <input name="month" value="{{ month }}">
                                 <input name="day" value="{{ day[0] }}">
                                 <input name="worker" value="{{ worker }}">
                                 <input name="b-hour">
                                 <input name="e-hour">
                                 <input name="counted">
                                 <input name="event">
-                                <input name="shop" value="{{ shop }}">
+                                <input name="shop" value="{{ workplace }}">
                                 <input name="billing-period-week">
                             </td>
                         {% endfor %}

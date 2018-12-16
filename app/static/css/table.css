@@ -3,7 +3,7 @@
     width: 60%;
 }
 
-#accept-btn {
+#accept-btn, submit-schedule-btn {
     float: left;
 }
 
@@ -17,6 +17,10 @@
     color: #000000;
     text-align: left;
     caption-side: top;
+}
+
+.hoursInput{
+    max-width: 8ex;
 }
 
 input[type="number"]::-webkit-outer-spin-button, input[type="number"]::-webkit-inner-spin-button {

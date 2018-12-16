@@ -389,14 +389,14 @@ def new_schedule_to_db(hours):
         return url_for("index")
     except (AttributeError):
         return "1"
-    except:
-        return "2"
+    #except:
+        #return "2"
 
 
 # makes list of unaccepted schedule for current user
-@app.route("/accept-schedule", methods=["GET", "POST"])
+@app.route("/unaccepted_schedules", methods=["GET", "POST"])
 @login_required
-def accept_schedule():
+def unaccepted_schedules():
     if (current_user.access_level != "0") and (current_user.access_level != "1"):
         flash("Użytkownik nie ma uprawnień do wyświetlenia tej strony")
         return redirect(url_for("index"))
@@ -409,5 +409,105 @@ def accept_schedule():
 
     schedule_number = len(unaccepted_schedules)
 
-    return render_template("schedule-to-accept.html", title="Grafiki - akceptacja grafiku", ua=unaccepted_schedules,
+    return render_template("schedules-to-accept.html", title="Grafiki - niezaakceptowane grafiki", ua=unaccepted_schedules,
                            sn=schedule_number, Schedule=Schedule)
+
+
+# creates modifiable template with unaccepted schedule
+@app.route("/accept-schedule", methods=["GET", "POST"])
+@login_required
+def accept_schedule():
+    if (current_user.access_level != "0") and (current_user.access_level != "1"):
+        flash("Użytkownik nie ma uprawnień do wyświetlenia tej strony")
+        return redirect(url_for("index"))
+
+    schedule = Schedule.query.filter_by(name=request.args.get("schd")).first()
+    workplace = schedule.workplace
+    year = schedule.year
+    month = schedule.month
+    hours = schedule.hrs_to_work
+    workers = []
+    for pers_schedule in schedule.ind:
+        if str(pers_schedule.worker).replace(" ", "_") not in workers:
+            workers.append(str(pers_schedule.worker).replace(" ", "_"))
+
+    month_names = ["Styczeń", "luty", "Marzec", "Kwiecień", "Maj", "Czerwiec", "Lipiec", "Sierpień",
+                   "Wrzesień", "Październik", "Listopad", "Grudzień"]
+    weekday_names = ["Poniedziałek", "Wtorek", "Środa", "Czwartek", "Piątek", "Sobota", "Niedziela"]
+    month_name = month_names[month - 1]
+    if month == 1:
+        prev_month = 12
+        prev_year = year - 1
+    else:
+        prev_month = month - 1
+        prev_year = year
+    prev_month_name = month_names[prev_month -1]
+    cal = calendar.Calendar()
+
+    prev_month_shd = Schedule.query.filter_by(year=prev_year, month=prev_month, workplace=workplace).first()
+
+    if prev_month_shd is not None:
+        prev_workers = []
+        for pers_schedule in prev_month_shd.ind:
+            if str(pers_schedule.worker).replace(" ", "_") not in prev_workers:
+                prev_workers.append(str(pers_schedule.worker).replace(" ", "_"))
+
+        prev_hours = prev_month_shd.hrs_to_work
+        prev_shdict = {}
+        workers_hours = {}
+        for worker in prev_workers:
+            worker_hours = 0
+            for p_schedule in prev_month_shd.ind:
+                if p_schedule.worker == str(worker).replace("_", " "):
+                    worker_hours += p_schedule.hours_sum
+                workers_hours[worker] = worker_hours
+
+        for worker in prev_workers:
+            for day in cal.itermonthdays(prev_year, prev_month):
+                if day > 0:
+                    begin = Personal_schedule.query.filter_by(date=datetime(prev_year, prev_month, day),
+                                                              worker=worker.replace("_", " ")).first().begin_hour
+                    end = Personal_schedule.query.filter_by(date=datetime(prev_year, prev_month, day),
+                                                            worker=worker.replace("_", " ")).first().end_hour
+                    event = Personal_schedule.query.filter_by(date=datetime(prev_year, prev_month, day),
+                                                              worker=worker.replace("_", " ")).first().event
+                    sum = Personal_schedule.query.filter_by(date=datetime(prev_year, prev_month, day),
+                                                              worker=worker.replace("_", " ")).first().hours_sum
+                    billing_week = Personal_schedule.query.filter_by(date=datetime(prev_year, prev_month, day),
+                                                              worker=worker.replace("_", " ")).first().billing_week
+
+                    prev_shdict["begin-%s-%d-%02d-%02d" % (worker, prev_year, prev_month, day)] = begin
+                    prev_shdict["end-%s-%d-%02d-%02d" % (worker, prev_year, prev_month, day)] = end
+                    prev_shdict["event-%s-%d-%02d-%02d" % (worker, prev_year, prev_month, day)] = event
+                    prev_shdict["sum-%s-%d-%02d-%02d" % (worker, prev_year, prev_month, day)] = sum
+                    prev_shdict["billing-week-%s-%d-%02d-%02d" % (worker, prev_year, prev_month, day)] = billing_week
+    else:
+        prev_shdict = None
+        prev_hours = None
+        prev_workers = None
+        workers_hours = None
+
+    shdict = {}
+    for worker in workers:
+        for day in cal.itermonthdays(year, month):
+            if day > 0:
+                begin = Personal_schedule.query.filter_by(date=datetime(year, month, day),
+                                                          worker=worker.replace("_", " ")).first().begin_hour
+                end = Personal_schedule.query.filter_by(date=datetime(year, month, day),
+                                                          worker=worker.replace("_", " ")).first().end_hour
+                event = Personal_schedule.query.filter_by(date=datetime(year, month, day),
+                                                        worker=worker.replace("_", " ")).first().event
+                if begin == 0:
+                    begin = ""
+                shdict["begin-%s-%d-%02d-%02d" % (worker, year, month, day)] = begin
+                if end == 0:
+                    end = ""
+                shdict["end-%s-%d-%02d-%02d" % (worker, year, month, day)] = end
+                shdict["event-%s-%d-%02d-%02d" % (worker, year, month, day)] = event
+
+    return render_template("accept-schedule.html", title="Grafiki - akceptacja grafiku", schedule=schedule,
+                           workplace=workplace, year=year, month=month, workers=workers, month_name=month_name,
+                           wdn=weekday_names, cal=cal, Billing_period=Billing_period, shdict=shdict,
+                           prev_shdict=prev_shdict, hours=hours, prev_month=prev_month, prev_month_name=prev_month_name,
+                           prev_year=prev_year, prev_hours=prev_hours, prev_workers=prev_workers,
+                           workers_hours=workers_hours)
