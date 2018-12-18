@@ -390,9 +390,8 @@ window.onload = function() {
 
 //gets data of all days in month and prepers dict for json
 function getHours() {
-    let hours = [];
+    let indSchedules = [];
     let jsonDict = {};
-    let work = "";
     $("td[id^='begin']").each(function() {
         $(this).change();
     });
@@ -464,13 +463,13 @@ function getHours() {
         };
         if (event === "in_work" && (beginHour === 0 || endHour === 0)) {
             numberOfErrors += 1;
-            errors[numberOfErrors] = (`\n${numberOfErrors}. ${worker} w dniu ${day}.${month}.${year} jest w pracy, anie ma wpisanych godzin`);
+            errors[numberOfErrors] = (`\n${numberOfErrors}. ${worker} w dniu ${day}.${month}.${year} jest w pracy, a nie ma wpisanych godzin`);
         };
 
 
 
         //fills array for json
-        hours.push({"day": day, "month": month, "year": year, "worker": worker, "from": beginHour,
+        indSchedules.push({"day": day, "month": month, "year": year, "worker": worker, "from": beginHour,
                     "to": endHour, "sum": wrkd, "event": event, "workplace": workplace, "billing_period": billingPeriod,
                     "billing_week": billingWeek});
     });
@@ -484,7 +483,12 @@ function getHours() {
         alert(errors);
         return false;
     };
-    jsonDict[work] = hours;
+    jsonDict["main_data"] = ({"year": $("#cur-year").text(), "month": $("#cur-month").text(), "workplace": $("#workplace").text(),
+        "hours": $("#working-hours").text(), "billing_period": $("td[id='billing-period']").find("input[name='billing-period']").val()})
+    jsonDict["ind_schedules"] = indSchedules;
+    for (let i in jsonDict["main_data"]) {
+        console.log(jsonDict["main_data"][i]);
+    };
     return jsonDict;
 };
 

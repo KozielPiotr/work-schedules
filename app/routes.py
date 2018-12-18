@@ -9,7 +9,79 @@ from datetime import date, datetime
 from dateutil.relativedelta import relativedelta
 
 
-# welcome page
+def prev_schedule(month, year, month_names, cal, workplace):
+    if month == 1:
+        prev_month = 12
+        prev_year = year - 1
+    else:
+        prev_month = month - 1
+        prev_year = year
+    prev_month_name = month_names[prev_month - 1]
+
+    try:
+        prev_month_last_version = Schedule.query.filter_by(year=prev_year, month=prev_month, workplace=workplace,
+                                                           accepted=True).order_by(
+            Schedule.version.desc()).first().version
+        prev_month_shd = Schedule.query.filter_by(year=prev_year, month=prev_month, workplace=workplace,
+                                                  version=prev_month_last_version).first()
+    except(AttributeError):
+        prev_month_shd = None
+
+    if prev_month_shd is not None:
+        prev_workers = []
+        for pers_schedule in prev_month_shd.ind:
+            if str(pers_schedule.worker).replace(" ", "_") not in prev_workers:
+                prev_workers.append(str(pers_schedule.worker).replace(" ", "_"))
+
+        prev_hours = prev_month_shd.hrs_to_work
+        prev_shdict = {}
+        workers_hours = {}
+        for worker in prev_workers:
+            worker_hours = 0
+            for p_schedule in prev_month_shd.ind:
+                if p_schedule.worker == str(worker).replace("_", " "):
+                    worker_hours += p_schedule.hours_sum
+                workers_hours[worker] = worker_hours
+
+        for worker in prev_workers:
+            for day in cal.itermonthdays(prev_year, prev_month):
+                if day > 0:
+                    begin = Personal_schedule.query.filter_by(date=datetime(prev_year, prev_month, day),
+                                                              worker=worker.replace("_", " ")).first().begin_hour
+                    end = Personal_schedule.query.filter_by(date=datetime(prev_year, prev_month, day),
+                                                            worker=worker.replace("_", " ")).first().end_hour
+                    event = Personal_schedule.query.filter_by(date=datetime(prev_year, prev_month, day),
+                                                              worker=worker.replace("_", " ")).first().event
+                    sum = Personal_schedule.query.filter_by(date=datetime(prev_year, prev_month, day),
+                                                            worker=worker.replace("_", " ")).first().hours_sum
+                    billing_week = Personal_schedule.query.filter_by(date=datetime(prev_year, prev_month, day),
+                                                                     worker=worker.replace("_",
+                                                                                           " ")).first().billing_week
+
+                    prev_shdict["begin-%s-%d-%02d-%02d" % (worker, prev_year, prev_month, day)] = begin
+                    prev_shdict["end-%s-%d-%02d-%02d" % (worker, prev_year, prev_month, day)] = end
+                    prev_shdict["event-%s-%d-%02d-%02d" % (worker, prev_year, prev_month, day)] = event
+                    prev_shdict["sum-%s-%d-%02d-%02d" % (worker, prev_year, prev_month, day)] = sum
+                    prev_shdict["billing-week-%s-%d-%02d-%02d" % (worker, prev_year, prev_month, day)] = billing_week
+    else:
+        prev_shdict = None
+        prev_hours = None
+        prev_workers = None
+        workers_hours = None
+    prev = {}
+    prev["prev_shdict"] = prev_shdict
+    prev["hours"] = prev_hours
+    prev["workers"] = prev_workers
+    prev["workers_hours"] = workers_hours
+    prev["year"] = prev_year
+    prev["month"] = prev_month
+    prev["month_name"] = prev_month_name
+    prev["year"] = prev_year
+
+    return prev
+
+
+# main page
 @app.route("/")
 @app.route("/index")
 @login_required
@@ -186,7 +258,7 @@ def billing_period():
     if Billing_period.query.filter_by(id=1).first() is None:
         cur_begin = 1
     else:
-        cur_begin = "{:%d - %m - %Y}".format(Billing_period.query.filter_by(id=1).first().begin)
+        cur_begin = "{: %d - %m - %Y}".format(Billing_period.query.filter_by(id=1).first().begin)
 
     if Billing_period.query.filter_by(id=1).first() is None:
         cur_duration = 3
@@ -216,6 +288,7 @@ def billing_period():
 I'm not using calendar module's names for months and days because whole app has to be in polish,
     so the code is little more complicated.
 """
+
 @app.route("/new-schedule", methods=["GET", "POST"])
 @login_required
 def new_schedule():
@@ -237,15 +310,13 @@ def new_schedule():
 
     if form.validate_on_submit():
         workplace = form.workplace.data
-        year = form.year.data
-        month = form.month.data
-        workers_list = form.workers.data
+        year = int(form.year.data)
+        month = int(form.month.data)
         hours = form.hours.data
-        yearn = int(year)
-        monthn = int(month)
+        #workers_to_schd = form.workers.data
         month_names = ["Styczeń", "luty", "Marzec", "Kwiecień", "Maj", "Czerwiec", "Lipiec", "Sierpień",
                        "Wrzesień", "Październik", "Listopad", "Grudzień"]
-        month_name = month_names[monthn - 1]
+        month_name = month_names[month - 1]
         cal = calendar.Calendar()
         weekday_names = ["Poniedziałek", "Wtorek", "Środa", "Czwartek", "Piątek", "Sobota", "Niedziela"]
 
@@ -255,74 +326,23 @@ def new_schedule():
             flash("Taki grafik już istnieje")
             redirect(url_for("index"))
         else:
-            workers = []
-            for worker in workers_list:
-                workers.append(str(worker).replace(" ", "_"))
+            workers_to_schd = []
+            for worker in form.workers.data:
+                workers_to_schd.append(str(worker).replace(" ", "_"))
 
-            # data for prev month schedule part of template
-            if monthn == 1:
-                prev_month = 12
-            else:
-                prev_month = monthn - 1
-            prev_month_schedules_q1 = Schedule.query.filter_by(month=prev_month).all()
-            prev_month_schedules_q2 = Schedule.query.filter_by(workplace=workplace).all()
-            prev_month_schedule = None
-
-                # finds schedule for previous month
-            for prev_m_schedule in prev_month_schedules_q1:
-                if prev_m_schedule in prev_month_schedules_q2:
-                    prev_month_schedule = prev_m_schedule
-
-                # checks if schedule for prev month exists
-            if prev_month_schedule is not None:
-                # finds personal schedules for previous month
-                prev_month_p_schedules = prev_month_schedule.ind
-
-                prev_month_name = month_names[(monthn-1) - 1]
-
-                    # finds workers, who worked in the workplace in prev month
-                prev_month_workers_list = []
-                for p_schedule in prev_month_p_schedules:
-                    if p_schedule.worker not in prev_month_workers_list:
-                        prev_month_workers_list.append(p_schedule.worker)
-
-                prev_month_workers = []
-                for worker in prev_month_workers_list:
-                    worker = str(worker).replace(" ", "_")
-                    prev_month_workers.append(worker)
-
-                    # finds working hours in prev month
-                prev_month_hours = prev_month_schedule.hrs_to_work
-
-                    # finds prev month year
-                prev_month_year = prev_month_schedule.year
-
-                    # counts sum of worker hours worker by each worker
-                workers_hours = {}
-                for worker in prev_month_workers:
-                    worker_hours = 0
-                    for p_schedule in prev_month_p_schedules:
-                        if p_schedule.worker == str(worker).replace("_", " "):
-                            worker_hours += p_schedule.hours_sum
-                        workers_hours[worker] = worker_hours
-            else:
-                prev_month_name = None
-                prev_month_workers = None
-                prev_month_hours = None
-                prev_month_year = None
-                workers_hours = None
-
-            try:
-                return render_template("empty_schedule.html", title="Grafiki - nowy grafik", workers=workers,
-                                       shop=workplace, year=year, mn=month_name, cal=cal, wdn=weekday_names,
-                                       monthn=monthn, yearn=yearn, hours=hours, prev_month=prev_month,
-                                       prev_month_schedule=prev_month_schedule, Personal_schedule=Personal_schedule,
-                                       prev_month_workers=prev_month_workers, prev_month_hours=prev_month_hours,
-                                       prev_month_year=prev_month_year, prev_month_name=prev_month_name,
-                                       workers_hours=workers_hours, Billing_period=Billing_period)
-            except:
-                flash("Sprawdź, czy jest ustawiony początek okresu rozliczeniowego")
-                redirect(url_for("new_schedule"))
+            prev = prev_schedule(month, year, month_names, cal, workplace)
+            print()
+            #try:
+            return render_template("empty_schedule.html", title="Grafiki - nowy grafik", workers=workers_to_schd,
+                                   shop=workplace, year=year, month=month, mn=month_name, cal=cal, wdn=weekday_names,
+                                   hours=hours, Billing_period=Billing_period,
+                                   prev_shdict=prev["prev_shdict"], prev_month=prev["month"],
+                                   prev_month_name=prev["month_name"], prev_year=prev["year"],
+                                   prev_hours=prev["hours"], prev_workers=prev["workers"],
+                                   workers_hours=prev["workers_hours"])
+            #except:
+                #flash("Sprawdź, czy jest ustawiony początek okresu rozliczeniowego")
+                #redirect(url_for("new_schedule"))
 
     return render_template("new_schedule.html", title="Grafiki - nowy grafik", form=form)
 
@@ -334,65 +354,97 @@ def new_schedule_find_workers(workplace):
     if current_user.access_level != "0" and current_user.access_level != "1" and current_user.access_level != "2":
         flash("Użytkownik nie ma uprawnień do wyświetlenia tej strony")
         return redirect(url_for("index"))
+
     shop = Shop.query.filter_by(shopname=workplace).first()
     workers = shop.works.all()
-    print(shop.works.all())
     jsondict = []
     for worker in shop.works.all():
-        print(worker, worker.username, worker.access_level)
         workers_list = {}
         if worker.access_level == "0" or worker.access_level == "1":
             workers.remove(worker)
-            print("wywalono ", worker)
         else:
             workers_list["name"] = worker.username
             jsondict.append(workers_list)
-    print(jsondict)
     return jsonify({"workers": jsondict})
 
 
-@app.route('/schedule-to-db/<hours>', methods=['POST'])
-def new_schedule_to_db(hours):
+@app.route('/schedule-to-db/<action>', methods=['POST'])
+@login_required
+def new_schedule_to_db(action):
+    if current_user.access_level != "0" and current_user.access_level != "1" and current_user.access_level != "2":
+        flash("Użytkownik nie ma uprawnień do wyświetlenia tej strony")
+        return redirect(url_for("index"))
+
+    def ind_schedules_to_db(data):
+        for element in data["ind_schedules"]:
+            print(element["year"])
+            print(element["month"])
+            print(element["day"])
+            d = date(int(element["year"]), int(element["month"]), int(element["day"]))
+            worker = element["worker"].replace("_", " ")
+            b_hour = element["from"]
+            e_hour = element["to"]
+            sum = element["sum"]
+            event = element["event"]
+            workplace = element["workplace"]
+            psname = "%s-%s-%s" % (d, worker, workplace)
+            billing_week = element["billing_week"]
+            pschedule = Personal_schedule(name=psname, date=d, worker=worker, begin_hour=b_hour,
+                                          end_hour=e_hour, hours_sum=sum, event=event, workplace=workplace,
+                                          includes=schedule, billing_period=billing_period, billing_week=billing_week)
+            db.session.add(pschedule)
+        db.session.commit()
+
     data = request.json
-    sname = ""
-    syear = ""
-    smonth = ""
-    sworkplace = ""
-    hours = hours
-    billing_period = 0
-    try:
-        for dates in data.items():
-            for day in dates:
-                for element in day:
-                    sname = "%s-%s-%s" % (element["year"], element["month"], element["workplace"])
-                    syear = element["year"]
-                    smonth = element["month"]
-                    sworkplace = element["workplace"]
-                    billing_period = element["billing_period"]
-        schedule = Schedule(name=sname, year=syear, month=smonth, workplace=sworkplace, hrs_to_work=hours,
+    unaccepted_schedule = Schedule.query.filter_by(name="%s-%s-%s" % (data["main_data"]["year"], data["main_data"]["month"],
+                                                                  data["main_data"]["workplace"]), accepted=False).first()
+
+
+    # accepting changes in already existing schedule
+    if unaccepted_schedule is not None and action == "acc":
+        print("Znalazłem niezaakceptowany grafik")
+        name = unaccepted_schedule.name
+        year = unaccepted_schedule.year
+        month= unaccepted_schedule.month
+        workplace = unaccepted_schedule.workplace
+        hours = unaccepted_schedule.hrs_to_work
+        accepted = True
+        version = unaccepted_schedule.version + 1
+        billing_period = unaccepted_schedule.billing_period
+        schedule = Schedule(name=name, year=year, month=month, workplace=workplace, hrs_to_work=hours,
+                            accepted=accepted, version=version, billing_period=billing_period)
+        db.session.add(schedule)
+        db.session.commit()
+
+        for ind_schedule in unaccepted_schedule.ind:
+            db.session.delete(ind_schedule)
+        db.session.delete(unaccepted_schedule)
+
+        ind_schedules_to_db(data)
+
+
+    # adding unaccepted version of schedule
+
+
+    # adding new schedule to db
+    elif unaccepted_schedule is None:
+        print("Nie znalazłem niezaakceptowanego grafiku")
+        name = "%s-%s-%s" % (data["main_data"]["year"], data["main_data"]["month"], data["main_data"]["workplace"])
+        year = int(data["main_data"]["year"])
+        month = int(data["main_data"]["month"])
+        workplace = data["main_data"]["workplace"]
+        hours = data["main_data"]["hours"]
+        billing_period = int(data["main_data"]["billing_period"])
+        schedule = Schedule(name=name, year=year, month=month, workplace=workplace, hrs_to_work=hours,
                             accepted=False, version=0, billing_period=billing_period)
         db.session.add(schedule)
         db.session.commit()
-        for dates in data.items():
-            for day in dates:
-                for element in day:
-                    d = date(int(element["year"]), int(element["month"]), int(element["day"]))
-                    worker = element["worker"].replace("_", " ")
-                    b_hour = element["from"]
-                    e_hour = element["to"]
-                    sum = element["sum"]
-                    event = element["event"]
-                    workplace = element["workplace"]
-                    psname = "%s-%s-%s" % (d, worker, workplace)
-                    billing_week = element["billing_week"]
-                    pschedule = Personal_schedule(id=psname, date=d, worker=worker, begin_hour=b_hour,
-                                                  end_hour=e_hour, hours_sum=sum, event=event, workplace=workplace,
-                                                  includes=schedule, billing_period=billing_period, billing_week=billing_week)
-                    db.session.add(pschedule)
-        db.session.commit()
-        return url_for("index")
-    except (AttributeError):
-        return "1"
+
+        ind_schedules_to_db(data)
+
+    return url_for("index")
+    #except (AttributeError):
+        #return "1"
     #except:
         #return "2"
 
@@ -425,7 +477,7 @@ def accept_schedule():
         flash("Użytkownik nie ma uprawnień do wyświetlenia tej strony")
         return redirect(url_for("index"))
 
-    schedule = Schedule.query.filter_by(name=request.args.get("schd")).first()
+    schedule = Schedule.query.filter_by(name=request.args.get("schd"), accepted=False).first()
     workplace = schedule.workplace
     year = schedule.year
     month = schedule.month
@@ -439,57 +491,9 @@ def accept_schedule():
                    "Wrzesień", "Październik", "Listopad", "Grudzień"]
     weekday_names = ["Poniedziałek", "Wtorek", "Środa", "Czwartek", "Piątek", "Sobota", "Niedziela"]
     month_name = month_names[month - 1]
-    if month == 1:
-        prev_month = 12
-        prev_year = year - 1
-    else:
-        prev_month = month - 1
-        prev_year = year
-    prev_month_name = month_names[prev_month -1]
     cal = calendar.Calendar()
 
-    prev_month_shd = Schedule.query.filter_by(year=prev_year, month=prev_month, workplace=workplace).first()
-
-    if prev_month_shd is not None:
-        prev_workers = []
-        for pers_schedule in prev_month_shd.ind:
-            if str(pers_schedule.worker).replace(" ", "_") not in prev_workers:
-                prev_workers.append(str(pers_schedule.worker).replace(" ", "_"))
-
-        prev_hours = prev_month_shd.hrs_to_work
-        prev_shdict = {}
-        workers_hours = {}
-        for worker in prev_workers:
-            worker_hours = 0
-            for p_schedule in prev_month_shd.ind:
-                if p_schedule.worker == str(worker).replace("_", " "):
-                    worker_hours += p_schedule.hours_sum
-                workers_hours[worker] = worker_hours
-
-        for worker in prev_workers:
-            for day in cal.itermonthdays(prev_year, prev_month):
-                if day > 0:
-                    begin = Personal_schedule.query.filter_by(date=datetime(prev_year, prev_month, day),
-                                                              worker=worker.replace("_", " ")).first().begin_hour
-                    end = Personal_schedule.query.filter_by(date=datetime(prev_year, prev_month, day),
-                                                            worker=worker.replace("_", " ")).first().end_hour
-                    event = Personal_schedule.query.filter_by(date=datetime(prev_year, prev_month, day),
-                                                              worker=worker.replace("_", " ")).first().event
-                    sum = Personal_schedule.query.filter_by(date=datetime(prev_year, prev_month, day),
-                                                              worker=worker.replace("_", " ")).first().hours_sum
-                    billing_week = Personal_schedule.query.filter_by(date=datetime(prev_year, prev_month, day),
-                                                              worker=worker.replace("_", " ")).first().billing_week
-
-                    prev_shdict["begin-%s-%d-%02d-%02d" % (worker, prev_year, prev_month, day)] = begin
-                    prev_shdict["end-%s-%d-%02d-%02d" % (worker, prev_year, prev_month, day)] = end
-                    prev_shdict["event-%s-%d-%02d-%02d" % (worker, prev_year, prev_month, day)] = event
-                    prev_shdict["sum-%s-%d-%02d-%02d" % (worker, prev_year, prev_month, day)] = sum
-                    prev_shdict["billing-week-%s-%d-%02d-%02d" % (worker, prev_year, prev_month, day)] = billing_week
-    else:
-        prev_shdict = None
-        prev_hours = None
-        prev_workers = None
-        workers_hours = None
+    prev = prev_schedule(month, year, month_names, cal, workplace)
 
     shdict = {}
     for worker in workers:
@@ -512,6 +516,6 @@ def accept_schedule():
     return render_template("accept-schedule.html", title="Grafiki - akceptacja grafiku", schedule=schedule,
                            workplace=workplace, year=year, month=month, workers=workers, month_name=month_name,
                            wdn=weekday_names, cal=cal, Billing_period=Billing_period, shdict=shdict,
-                           prev_shdict=prev_shdict, hours=hours, prev_month=prev_month, prev_month_name=prev_month_name,
-                           prev_year=prev_year, prev_hours=prev_hours, prev_workers=prev_workers,
-                           workers_hours=workers_hours)
+                           prev_shdict=prev["prev_shdict"], hours=hours, prev_month=prev["month"],
+                           prev_month_name=prev["month_name"], prev_year=prev["year"], prev_hours=prev["hours"],
+                           prev_workers=prev["workers"], workers_hours=prev["workers_hours"])

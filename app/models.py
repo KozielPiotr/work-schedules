@@ -44,7 +44,7 @@ class Billing_period(db.Model):
 
 class Schedule(db.Model):
     id = db.Column(db.Integer, primary_key=True, unique=True, index=True, nullable=False)
-    name = db.Column(db.String, unique=True, index=True)
+    name = db.Column(db.String, index=True)
     year = db.Column(db.Integer)
     month = db.Column(db.Integer)
     workplace = db.Column(db.String)
@@ -56,7 +56,8 @@ class Schedule(db.Model):
 
 
 class Personal_schedule(db.Model):
-    id = db.Column(db.String, primary_key=True, unique=True, index=True, nullable=False)
+    id = db.Column(db.Integer, primary_key=True, unique=True, index=True, nullable=False)
+    name = db.Column(db.String)
     date = db.Column(db.DateTime, index=True)
     worker = db.Column(db.String)
     begin_hour = db.Column(db.Integer)
