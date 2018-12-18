@@ -313,7 +313,6 @@ def new_schedule():
         year = int(form.year.data)
         month = int(form.month.data)
         hours = form.hours.data
-        #workers_to_schd = form.workers.data
         month_names = ["Styczeń", "luty", "Marzec", "Kwiecień", "Maj", "Czerwiec", "Lipiec", "Sierpień",
                        "Wrzesień", "Październik", "Listopad", "Grudzień"]
         month_name = month_names[month - 1]

@@ -250,7 +250,7 @@
                 {% endfor %}
             </tr>
             <tr>
-                <th colspan="2"><output id="working-hours">{{ hours }}</output></th> <!-- amount of hours to work in exact month -->
+                <th colspan="2"><input id="working-hours" type="number" value="{{ hours }}"></th> <!-- amount of hours to work in exact month -->
                 {% for worker in workers %}
                     <td colspan="4" class="sum-of-worker-hours">
                         <output id="hours-of-{{ worker }}">0</output> <!-- sum of hours worked by iterated worker -->

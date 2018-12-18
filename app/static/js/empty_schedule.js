@@ -226,7 +226,7 @@ function weeklyRest() {
 function restTime(currentSelector, worker, year, month, day) {
     currentDay = parseInt($(currentSelector).find("input[name='day']").val());
     currentDayHour = parseInt($(currentSelector).find("input[name='b-hour']").val());
-    if ($(currentSelector).find("input[name='event']").val() === "off") {
+    if ($(currentSelector).find("input[name='event']").val() === "off" || $(currentSelector).find("input[name='counted']").val() === "0") {
         restHours = 11;
     } else {
         prevMonthDays = [];
@@ -484,7 +484,7 @@ function getHours() {
         return false;
     };
     jsonDict["main_data"] = ({"year": $("#cur-year").text(), "month": $("#cur-month").text(), "workplace": $("#workplace").text(),
-        "hours": $("#working-hours").text(), "billing_period": $("td[id='billing-period']").find("input[name='billing-period']").val()})
+        "hours": $("#working-hours").val(), "billing_period": $("td[id='billing-period']").find("input[name='billing-period']").val()})
     jsonDict["ind_schedules"] = indSchedules;
     for (let i in jsonDict["main_data"]) {
         console.log(jsonDict["main_data"][i]);
@@ -600,6 +600,15 @@ $(document).ready(function() {
             $(`#hours-left-for-${worker}`).css("background", "#ffffff");
             $(`#left-hours-${worker}`).css("background", "#ffffff");
         };
+    });
+});
+
+
+$(document).ready(function() {
+    $("#working-hours").change(function() {
+        $("td[id^='begin-']").each(function() {
+            $(this).change();
+        });
     });
 });
 

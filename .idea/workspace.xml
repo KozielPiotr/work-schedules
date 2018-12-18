@@ -2,10 +2,9 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="3d1609e3-dc01-4bb1-831a-4c1ecd6bc426" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app.db" beforeDir="false" afterPath="$PROJECT_DIR$/app.db" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/models.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/routes.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/routes.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/static/css/table.css" beforeDir="false" afterPath="$PROJECT_DIR$/app/static/css/table.css" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/static/js/empty_schedule.js" beforeDir="false" afterPath="$PROJECT_DIR$/app/static/js/empty_schedule.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/templates/accept-schedule.html" beforeDir="false" afterPath="$PROJECT_DIR$/app/templates/accept-schedule.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/templates/empty_schedule.html" beforeDir="false" afterPath="$PROJECT_DIR$/app/templates/empty_schedule.html" afterDir="false" />
@@ -21,11 +20,11 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file pinned="false" current-in-tab="true">
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/app/routes.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="516">
-              <caret line="327" column="13" lean-forward="true" selection-start-line="327" selection-start-column="13" selection-end-line="327" selection-end-column="13" />
+            <state relative-caret-position="1669">
+              <caret line="312" column="34" lean-forward="true" selection-start-line="312" selection-start-column="34" selection-end-line="312" selection-end-column="34" />
               <folding>
                 <element signature="e#0#77#0" expanded="true" />
               </folding>
@@ -36,8 +35,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/app/templates/accept-schedule.html">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="323">
-              <caret line="47" column="21" lean-forward="true" selection-start-line="47" selection-start-column="7" selection-end-line="47" selection-end-column="29" />
+            <state relative-caret-position="337">
+              <caret line="252" column="97" selection-start-line="252" selection-start-column="97" selection-end-line="252" selection-end-column="97" />
               <folding>
                 <element signature="n#div#0;n#!!top" />
               </folding>
@@ -48,7 +47,7 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/app/templates/new_schedule.html">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-285">
+            <state relative-caret-position="456">
               <caret line="24" column="48" selection-start-line="24" selection-start-column="48" selection-end-line="24" selection-end-column="48" />
               <folding>
                 <element signature="n#style#0;n#span#0;n#li#0;n#ul#2;n#div#0;n#div#0;n#form#0;n#!!top" expanded="true" />
@@ -61,16 +60,25 @@
         <entry file="file://$PROJECT_DIR$/app/static/js/new_schedule.js">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="133">
-              <caret line="7" column="50" lean-forward="true" selection-start-line="7" selection-start-column="50" selection-end-line="7" selection-end-column="50" />
+              <caret line="7" column="50" selection-start-line="7" selection-start-column="50" selection-end-line="7" selection-end-column="50" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/app/static/js/empty_schedule.js">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="168">
+              <caret line="228" column="137" lean-forward="true" selection-start-line="228" selection-start-column="137" selection-end-line="228" selection-end-column="137" />
             </state>
           </provider>
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/app/static/js/empty_schedule.js">
+        <entry file="file://$PROJECT_DIR$/app/static/css/table.css">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="765">
-              <caret line="486" column="134" selection-start-line="486" selection-start-column="134" selection-end-line="486" selection-end-column="134" />
+            <state relative-caret-position="684">
+              <caret line="75" column="24" lean-forward="true" selection-start-line="75" selection-start-column="24" selection-end-line="75" selection-end-column="24" />
             </state>
           </provider>
         </entry>
@@ -78,8 +86,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/app/templates/empty_schedule.html">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-760">
-              <caret line="51" column="18" selection-start-line="51" selection-start-column="18" selection-end-line="51" selection-end-column="18" />
+            <state relative-caret-position="160">
+              <caret line="213" column="112" lean-forward="true" selection-start-line="213" selection-start-column="112" selection-end-line="213" selection-end-column="112" />
               <folding>
                 <element signature="n#div#0;n#!!top" />
               </folding>
@@ -99,9 +107,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>static_pro</find>
-      <find>,</find>
-      <find>order</find>
       <find>Shop.query.order_by</find>
       <find>shop-user-connect</find>
       <find>shop-worker-connect</find>
@@ -129,6 +134,9 @@
       <find>id=&quot;billi</find>
       <find>monthn</find>
       <find>yearn</find>
+      <find>output</find>
+      <find>working-hours</find>
+      <find>hours-left-for-</find>
     </findStrings>
     <replaceStrings>
       <replace>&lt;td style=&quot;color: #f4f7f8&quot;&gt;&lt;form action=&quot;/action_page.php&quot;&gt;&lt;input list=&quot;zdarzenia&quot; name=&quot;od_data&quot; placeholder=&quot;      &quot; size=&quot;1&quot;&gt;&lt;/form&gt;&lt;/td&gt;</replace>
@@ -213,18 +221,18 @@
         <option value="$PROJECT_DIR$/app/templates/index.html" />
         <option value="$PROJECT_DIR$/app/templates/schedule-to-accept.html" />
         <option value="$PROJECT_DIR$/app/templates/schedules-to-accept.html" />
-        <option value="$PROJECT_DIR$/app/static/css/table.css" />
-        <option value="$PROJECT_DIR$/app/static/js/empty_schedule.js" />
-        <option value="$PROJECT_DIR$/app/templates/accept-schedule.html" />
         <option value="$PROJECT_DIR$/app/models.py" />
-        <option value="$PROJECT_DIR$/app/templates/empty_schedule.html" />
         <option value="$PROJECT_DIR$/app/routes.py" />
+        <option value="$PROJECT_DIR$/app/static/css/table.css" />
+        <option value="$PROJECT_DIR$/app/templates/empty_schedule.html" />
+        <option value="$PROJECT_DIR$/app/templates/accept-schedule.html" />
+        <option value="$PROJECT_DIR$/app/static/js/empty_schedule.js" />
       </list>
     </option>
   </component>
   <component name="ProjectFrameBounds">
-    <option name="x" value="163" />
-    <option name="y" value="91" />
+    <option name="x" value="39" />
+    <option name="y" value="59" />
     <option name="width" value="1657" />
     <option name="height" value="989" />
   </component>
@@ -487,10 +495,11 @@
     </todo-panel>
   </component>
   <component name="ToolWindowManager">
-    <frame x="163" y="91" width="1657" height="989" extended-state="0" />
+    <frame x="39" y="59" width="1657" height="989" extended-state="0" />
+    <editor active="true" />
     <layout>
-      <window_info content_ui="combo" id="Project" order="0" sideWeight="0.49534884" visible="true" weight="0.12851897" />
-      <window_info active="true" id="Structure" order="1" sideWeight="0.5046512" side_tool="true" visible="true" weight="0.12851897" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" sideWeight="0.49418604" visible="true" weight="0.12851897" />
+      <window_info id="Structure" order="1" sideWeight="0.50581396" side_tool="true" visible="true" weight="0.12851897" />
       <window_info id="Favorites" order="2" sideWeight="0.5022625" side_tool="true" weight="0.13991256" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" weight="0.32983682" />
@@ -790,17 +799,54 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/app/routes.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1669">
+          <caret line="312" column="34" lean-forward="true" selection-start-line="312" selection-start-column="34" selection-end-line="312" selection-end-column="34" />
+          <folding>
+            <element signature="e#0#77#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/templates/new_schedule.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="456">
+          <caret line="24" column="48" selection-start-line="24" selection-start-column="48" selection-end-line="24" selection-end-column="48" />
+          <folding>
+            <element signature="n#style#0;n#span#0;n#li#0;n#ul#2;n#div#0;n#div#0;n#form#0;n#!!top" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/static/js/new_schedule.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="133">
+          <caret line="7" column="50" selection-start-line="7" selection-start-column="50" selection-end-line="7" selection-end-column="50" />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/app/static/css/table.css">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="342">
-          <caret line="24" selection-start-line="24" selection-end-line="24" />
+        <state relative-caret-position="684">
+          <caret line="75" column="24" lean-forward="true" selection-start-line="75" selection-start-column="24" selection-end-line="75" selection-end-column="24" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/app/templates/accept-schedule.html">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="323">
-          <caret line="47" column="21" lean-forward="true" selection-start-line="47" selection-start-column="7" selection-end-line="47" selection-end-column="29" />
+        <state relative-caret-position="337">
+          <caret line="252" column="97" selection-start-line="252" selection-start-column="97" selection-end-line="252" selection-end-column="97" />
+          <folding>
+            <element signature="n#div#0;n#!!top" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/templates/empty_schedule.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="160">
+          <caret line="213" column="112" lean-forward="true" selection-start-line="213" selection-start-column="112" selection-end-line="213" selection-end-column="112" />
           <folding>
             <element signature="n#div#0;n#!!top" />
           </folding>
@@ -809,45 +855,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/app/static/js/empty_schedule.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="765">
-          <caret line="486" column="134" selection-start-line="486" selection-start-column="134" selection-end-line="486" selection-end-column="134" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/app/templates/empty_schedule.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-760">
-          <caret line="51" column="18" selection-start-line="51" selection-start-column="18" selection-end-line="51" selection-end-column="18" />
-          <folding>
-            <element signature="n#div#0;n#!!top" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/app/static/js/new_schedule.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="133">
-          <caret line="7" column="50" lean-forward="true" selection-start-line="7" selection-start-column="50" selection-end-line="7" selection-end-column="50" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/app/templates/new_schedule.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-285">
-          <caret line="24" column="48" selection-start-line="24" selection-start-column="48" selection-end-line="24" selection-end-column="48" />
-          <folding>
-            <element signature="n#style#0;n#span#0;n#li#0;n#ul#2;n#div#0;n#div#0;n#form#0;n#!!top" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/app/routes.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="516">
-          <caret line="327" column="13" lean-forward="true" selection-start-line="327" selection-start-column="13" selection-end-line="327" selection-end-column="13" />
-          <folding>
-            <element signature="e#0#77#0" expanded="true" />
-          </folding>
+        <state relative-caret-position="168">
+          <caret line="228" column="137" lean-forward="true" selection-start-line="228" selection-start-column="137" selection-end-line="228" selection-end-column="137" />
         </state>
       </provider>
     </entry>
