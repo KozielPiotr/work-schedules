@@ -24,7 +24,7 @@ def prev_schedule(month, year, month_names, cal, workplace):
             Schedule.version.desc()).first().version
         prev_month_shd = Schedule.query.filter_by(year=prev_year, month=prev_month, workplace=workplace,
                                                   version=prev_month_last_version).first()
-    except(AttributeError):
+    except AttributeError:
         prev_month_shd = None
 
     if prev_month_shd is not None:
@@ -68,16 +68,8 @@ def prev_schedule(month, year, month_names, cal, workplace):
         prev_hours = None
         prev_workers = None
         workers_hours = None
-    prev = {}
-    prev["prev_shdict"] = prev_shdict
-    prev["hours"] = prev_hours
-    prev["workers"] = prev_workers
-    prev["workers_hours"] = workers_hours
-    prev["year"] = prev_year
-    prev["month"] = prev_month
-    prev["month_name"] = prev_month_name
-    prev["year"] = prev_year
-
+    prev = {"prev_shdict": prev_shdict, "hours": prev_hours, "workers": prev_workers, "workers_hours": workers_hours,
+            "year": prev_year, "month": prev_month, "month_name": prev_month_name}
     return prev
 
 
@@ -223,8 +215,7 @@ def worker_to_workplace_workers(workplace):
             workers.append(worker)
     jsondict = []
     for worker in workers:
-        workers_list = {}
-        workers_list["name"] = worker.username
+        workers_list = {"name": worker.username}
         jsondict.append(workers_list)
     return jsonify({"workers": jsondict})
 
@@ -277,7 +268,8 @@ def billing_period():
             bp.query.filter_by(id=1).all()[0].begin = begin
             bp.query.filter_by(id=1).all()[0].duration = duration
             db.session.commit()
-        flash("Zmieniono okres rozliczeniowy na: Początek: %s Długość: %s" % ("{:%d - %m - %Y}".format(begin), duration))
+        flash("Zmieniono okres rozliczeniowy na: Początek: %s Długość: %s" % ("{:%d - %m - %Y}".format(begin),
+                                                                              duration))
         return redirect(url_for("index"))
     return render_template("billing_period.html", title="Grafiki - okres rozliczeniowy", form=form,
                            cur_begin=cur_begin, cur_duration=cur_duration)
@@ -288,6 +280,7 @@ def billing_period():
 I'm not using calendar module's names for months and days because whole app has to be in polish,
     so the code is little more complicated.
 """
+
 
 @app.route("/new-schedule", methods=["GET", "POST"])
 @login_required
@@ -331,7 +324,7 @@ def new_schedule():
 
             prev = prev_schedule(month, year, month_names, cal, workplace)
             print()
-            #try:
+            # try:
             return render_template("empty_schedule.html", title="Grafiki - nowy grafik", workers=workers_to_schd,
                                    shop=workplace, year=year, month=month, mn=month_name, cal=cal, wdn=weekday_names,
                                    hours=hours, Billing_period=Billing_period,
@@ -339,9 +332,9 @@ def new_schedule():
                                    prev_month_name=prev["month_name"], prev_year=prev["year"],
                                    prev_hours=prev["hours"], prev_workers=prev["workers"],
                                    workers_hours=prev["workers_hours"])
-            #except:
-                #flash("Sprawdź, czy jest ustawiony początek okresu rozliczeniowego")
-                #redirect(url_for("new_schedule"))
+            # except:
+            # flash("Sprawdź, czy jest ustawiony początek okresu rozliczeniowego")
+            # redirect(url_for("new_schedule"))
 
     return render_template("new_schedule.html", title="Grafiki - nowy grafik", form=form)
 
@@ -374,11 +367,9 @@ def new_schedule_to_db(action):
         flash("Użytkownik nie ma uprawnień do wyświetlenia tej strony")
         return redirect(url_for("index"))
 
-    def ind_schedules_to_db(data):
+    # adds individual schedules to db
+    def ind_schedules_to_db(data, schedule, billing_period):
         for element in data["ind_schedules"]:
-            print(element["year"])
-            print(element["month"])
-            print(element["day"])
             d = date(int(element["year"]), int(element["month"]), int(element["day"]))
             worker = element["worker"].replace("_", " ")
             b_hour = element["from"]
@@ -395,16 +386,34 @@ def new_schedule_to_db(action):
         db.session.commit()
 
     data = request.json
-    unaccepted_schedule = Schedule.query.filter_by(name="%s-%s-%s" % (data["main_data"]["year"], data["main_data"]["month"],
-                                                                  data["main_data"]["workplace"]), accepted=False).first()
+    unaccepted_schedule = Schedule.query.filter_by(
+        name="%s-%s-%s" % (data["main_data"]["year"], data["main_data"]["month"],
+                           data["main_data"]["workplace"]), accepted=False).first()
 
+    if action == "send_v_0":
+        name = "%s-%s-%s" % (data["main_data"]["year"], data["main_data"]["month"], data["main_data"]["workplace"])
+        year = int(data["main_data"]["year"])
+        month = int(data["main_data"]["month"])
+        workplace = data["main_data"]["workplace"]
+        hours = data["main_data"]["hours"]
+        billing_period = int(data["main_data"]["billing_period"])
+        version = int(data["main_data"]["version"])
+        schedule = Schedule(name=name, year=year, month=month, workplace=workplace, hrs_to_work=hours,
+                            accepted=False, version=version, billing_period=billing_period)
+        db.session.add(schedule)
+        db.session.commit()
 
-    # accepting changes in already existing schedule
-    if unaccepted_schedule is not None and action == "acc":
-        print("Znalazłem niezaakceptowany grafik")
+        ind_schedules_to_db(data, schedule, billing_period)
+
+    # accepts schedule and increase it's version number, deletes unaccepted version from db
+    elif action == "accept_new_v":
+        if current_user.access_level != "0" and current_user.access_level != "1":
+            flash("Użytkownik nie ma uprawnień do wyświetlenia tej strony")
+            return redirect(url_for("index"))
+
         name = unaccepted_schedule.name
         year = unaccepted_schedule.year
-        month= unaccepted_schedule.month
+        month = unaccepted_schedule.month
         workplace = unaccepted_schedule.workplace
         hours = unaccepted_schedule.hrs_to_work
         accepted = True
@@ -419,33 +428,15 @@ def new_schedule_to_db(action):
             db.session.delete(ind_schedule)
         db.session.delete(unaccepted_schedule)
 
-        ind_schedules_to_db(data)
+        ind_schedules_to_db(data, schedule, billing_period)
 
 
-    # adding unaccepted version of schedule
-
-
-    # adding new schedule to db
-    elif unaccepted_schedule is None:
-        print("Nie znalazłem niezaakceptowanego grafiku")
-        name = "%s-%s-%s" % (data["main_data"]["year"], data["main_data"]["month"], data["main_data"]["workplace"])
-        year = int(data["main_data"]["year"])
-        month = int(data["main_data"]["month"])
-        workplace = data["main_data"]["workplace"]
-        hours = data["main_data"]["hours"]
-        billing_period = int(data["main_data"]["billing_period"])
-        schedule = Schedule(name=name, year=year, month=month, workplace=workplace, hrs_to_work=hours,
-                            accepted=False, version=0, billing_period=billing_period)
-        db.session.add(schedule)
-        db.session.commit()
-
-        ind_schedules_to_db(data)
 
     return url_for("index")
-    #except (AttributeError):
-        #return "1"
-    #except:
-        #return "2"
+    # except AttributeError:
+    # return "1"
+    # except:
+    # return "2"
 
 
 # makes list of unaccepted schedule for current user
@@ -457,14 +448,16 @@ def unaccepted_schedules():
         return redirect(url_for("index"))
 
     unaccepted_schedules = []
-    for schedule in Schedule.query.filter_by(accepted=False).order_by(Schedule.workplace, Schedule.year, Schedule.month).all():
+    for schedule in Schedule.query.filter_by(accepted=False).order_by(Schedule.workplace, Schedule.year,
+                                                                      Schedule.month).all():
         for assigned_workplaces in current_user.workers_shop:
             if str(schedule.workplace) == str(assigned_workplaces):
                 unaccepted_schedules.append(schedule)
 
     schedule_number = len(unaccepted_schedules)
 
-    return render_template("schedules-to-accept.html", title="Grafiki - niezaakceptowane grafiki", ua=unaccepted_schedules,
+    return render_template("schedules-to-accept.html", title="Grafiki - niezaakceptowane grafiki",
+                           ua=unaccepted_schedules,
                            sn=schedule_number, Schedule=Schedule)
 
 
@@ -501,9 +494,9 @@ def accept_schedule():
                 begin = Personal_schedule.query.filter_by(date=datetime(year, month, day),
                                                           worker=worker.replace("_", " ")).first().begin_hour
                 end = Personal_schedule.query.filter_by(date=datetime(year, month, day),
-                                                          worker=worker.replace("_", " ")).first().end_hour
+                                                        worker=worker.replace("_", " ")).first().end_hour
                 event = Personal_schedule.query.filter_by(date=datetime(year, month, day),
-                                                        worker=worker.replace("_", " ")).first().event
+                                                          worker=worker.replace("_", " ")).first().event
                 if begin == 0:
                     begin = ""
                 shdict["begin-%s-%d-%02d-%02d" % (worker, year, month, day)] = begin

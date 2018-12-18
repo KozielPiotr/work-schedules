@@ -384,7 +384,6 @@ window.onload = function() {
     $("td[id^='event']").each(function() {
         $(this).change();
     });
-
 };
 
 
@@ -484,11 +483,9 @@ function getHours() {
         return false;
     };
     jsonDict["main_data"] = ({"year": $("#cur-year").text(), "month": $("#cur-month").text(), "workplace": $("#workplace").text(),
-        "hours": $("#working-hours").val(), "billing_period": $("td[id='billing-period']").find("input[name='billing-period']").val()})
+        "hours": $("#working-hours").val(), "billing_period": $("td[id='billing-period']").find("input[name='billing-period']").val(),
+        "version": 0})
     jsonDict["ind_schedules"] = indSchedules;
-    for (let i in jsonDict["main_data"]) {
-        console.log(jsonDict["main_data"][i]);
-    };
     return jsonDict;
 };
 
