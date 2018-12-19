@@ -360,6 +360,7 @@ def new_schedule_find_workers(workplace):
     return jsonify({"workers": jsondict})
 
 
+# adds schedule to db
 @app.route('/schedule-to-db/<action>', methods=['POST'])
 @login_required
 def new_schedule_to_db(action):
@@ -383,7 +384,7 @@ def new_schedule_to_db(action):
                                           end_hour=e_hour, hours_sum=sum, event=event, workplace=workplace,
                                           includes=schedule, billing_period=billing_period, billing_week=billing_week)
             db.session.add(pschedule)
-        db.session.commit()
+        #db.session.commit()
 
     data = request.json
     unaccepted_schedule = Schedule.query.filter_by(
@@ -401,9 +402,9 @@ def new_schedule_to_db(action):
         schedule = Schedule(name=name, year=year, month=month, workplace=workplace, hrs_to_work=hours,
                             accepted=False, version=version, billing_period=billing_period)
         db.session.add(schedule)
-        db.session.commit()
 
         ind_schedules_to_db(data, schedule, billing_period)
+        db.session.commit()
 
     # accepts schedule and increase it's version number, deletes unaccepted version from db
     elif action == "accept_new_v":
@@ -422,13 +423,13 @@ def new_schedule_to_db(action):
         schedule = Schedule(name=name, year=year, month=month, workplace=workplace, hrs_to_work=hours,
                             accepted=accepted, version=version, billing_period=billing_period)
         db.session.add(schedule)
-        db.session.commit()
 
         for ind_schedule in unaccepted_schedule.ind:
             db.session.delete(ind_schedule)
         db.session.delete(unaccepted_schedule)
 
         ind_schedules_to_db(data, schedule, billing_period)
+        db.session.commit()
 
 
 

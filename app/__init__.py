@@ -14,7 +14,7 @@ login.login_view = 'login'
 login.login_message = "Zaloguj się, aby wyświetlić zawartość"
 
 
-from app import routes, models
+from app import routes, models, errors
 
 
 db.create_all()
