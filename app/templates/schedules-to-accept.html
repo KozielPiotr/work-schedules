@@ -37,7 +37,7 @@
         <div class="list-group">
             <h3>Grafiki czekające na zaakceptowanie</h3>
             {% for schedule in ua %}
-                <a href="{{ url_for('accept_schedule', schd=schedule.name) }}" class="list-group-item list-group-item-action">{{ schedule.workplace }} na {{ schedule.month }}.{{ schedule.year }}</a>
+                <a href="{{ url_for('accept_schedule', schd=schedule.name) }}" class="list-group-item list-group-item-action">{{ schedule.workplace }} na {{ schedule.month }}.{{ schedule.year }} v_{{ schedule.version }}</a>
             {% endfor %}
         </div>
     {% endif %}

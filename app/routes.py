@@ -324,17 +324,17 @@ def new_schedule():
 
             prev = prev_schedule(month, year, month_names, cal, workplace)
             print()
-            # try:
-            return render_template("empty_schedule.html", title="Grafiki - nowy grafik", workers=workers_to_schd,
-                                   shop=workplace, year=year, month=month, mn=month_name, cal=cal, wdn=weekday_names,
-                                   hours=hours, Billing_period=Billing_period,
-                                   prev_shdict=prev["prev_shdict"], prev_month=prev["month"],
-                                   prev_month_name=prev["month_name"], prev_year=prev["year"],
-                                   prev_hours=prev["hours"], prev_workers=prev["workers"],
-                                   workers_hours=prev["workers_hours"])
-            # except:
-            # flash("Sprawdź, czy jest ustawiony początek okresu rozliczeniowego")
-            # redirect(url_for("new_schedule"))
+            try:
+                return render_template("empty_schedule.html", title="Grafiki - nowy grafik", workers=workers_to_schd,
+                                       shop=workplace, year=year, month=month, mn=month_name, cal=cal, wdn=weekday_names,
+                                       hours=hours, Billing_period=Billing_period,
+                                       prev_shdict=prev["prev_shdict"], prev_month=prev["month"],
+                                       prev_month_name=prev["month_name"], prev_year=prev["year"],
+                                       prev_hours=prev["hours"], prev_workers=prev["workers"],
+                                       workers_hours=prev["workers_hours"])
+            except:
+                flash("Sprawdź, czy jest ustawiony początek okresu rozliczeniowego")
+            redirect(url_for("new_schedule"))
 
     return render_template("new_schedule.html", title="Grafiki - nowy grafik", form=form)
 
