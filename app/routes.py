@@ -6,9 +6,9 @@ from app.forms import LoginForm, NewUserForm, NewShopForm, UserToShopForm, NewSc
 from app.models import User, Shop, Billing_period, Personal_schedule, Schedule
 import calendar
 from datetime import date, datetime
-from dateutil.relativedelta import relativedelta
 
 
+# prepers dict with data to show schedule for previous month
 def prev_schedule(month, year, month_names, cal, workplace):
     if month == 1:
         prev_month = 12
@@ -71,6 +71,21 @@ def prev_schedule(month, year, month_names, cal, workplace):
     prev = {"prev_shdict": prev_shdict, "hours": prev_hours, "workers": prev_workers, "workers_hours": workers_hours,
             "year": prev_year, "month": prev_month, "month_name": prev_month_name}
     return prev
+
+
+# prepares list of schedule aviable for current user to accept or modify
+def list_of_schedules_acc_mod(mod_acc):
+    schedules = []
+    for schedule in Schedule.query.filter_by(accepted=mod_acc).order_by(Schedule.workplace, Schedule.year,
+                                                                      Schedule.month, Schedule.version).all():
+        for assigned_workplaces in current_user.workers_shop:
+            if str(schedule.workplace) == str(assigned_workplaces):
+                schedules.append(schedule)
+
+    number_of_schedules = len(schedules)
+    list = {"schedules": schedules, "nos": number_of_schedules}
+
+    return list
 
 
 # main page
@@ -306,7 +321,7 @@ def new_schedule():
         year = int(form.year.data)
         month = int(form.month.data)
         hours = form.hours.data
-        month_names = ["Styczeń", "luty", "Marzec", "Kwiecień", "Maj", "Czerwiec", "Lipiec", "Sierpień",
+        month_names = ["Styczeń", "Luty", "Marzec", "Kwiecień", "Maj", "Czerwiec", "Lipiec", "Sierpień",
                        "Wrzesień", "Październik", "Listopad", "Grudzień"]
         month_name = month_names[month - 1]
         cal = calendar.Calendar()
@@ -448,18 +463,10 @@ def unaccepted_schedules():
         flash("Użytkownik nie ma uprawnień do wyświetlenia tej strony")
         return redirect(url_for("index"))
 
-    unaccepted_schedules = []
-    for schedule in Schedule.query.filter_by(accepted=False).order_by(Schedule.workplace, Schedule.year,
-                                                                      Schedule.month).all():
-        for assigned_workplaces in current_user.workers_shop:
-            if str(schedule.workplace) == str(assigned_workplaces):
-                unaccepted_schedules.append(schedule)
+    los = list_of_schedules_acc_mod(mod_acc=False)
 
-    schedule_number = len(unaccepted_schedules)
-
-    return render_template("schedules-to-accept.html", title="Grafiki - niezaakceptowane grafiki",
-                           ua=unaccepted_schedules,
-                           sn=schedule_number, Schedule=Schedule)
+    return render_template("schedules-to-accept.html", title="Grafiki - niezaakceptowane grafiki", ua=los["schedules"],
+                           sn=los["nos"], Schedule=Schedule)
 
 
 # creates modifiable template with unaccepted schedule
@@ -480,7 +487,7 @@ def accept_schedule():
         if str(pers_schedule.worker).replace(" ", "_") not in workers:
             workers.append(str(pers_schedule.worker).replace(" ", "_"))
 
-    month_names = ["Styczeń", "luty", "Marzec", "Kwiecień", "Maj", "Czerwiec", "Lipiec", "Sierpień",
+    month_names = ["Styczeń", "Luty", "Marzec", "Kwiecień", "Maj", "Czerwiec", "Lipiec", "Sierpień",
                    "Wrzesień", "Październik", "Listopad", "Grudzień"]
     weekday_names = ["Poniedziałek", "Wtorek", "Środa", "Czwartek", "Piątek", "Sobota", "Niedziela"]
     month_name = month_names[month - 1]
@@ -512,3 +519,64 @@ def accept_schedule():
                            prev_shdict=prev["prev_shdict"], hours=hours, prev_month=prev["month"],
                            prev_month_name=prev["month_name"], prev_year=prev["year"], prev_hours=prev["hours"],
                            prev_workers=prev["workers"], workers_hours=prev["workers_hours"])
+
+
+# makes list of schedules modifiable by current user
+@app.route("/modifiable-schedules", methods=["GET", "POST"])
+@login_required
+def modifiable_schedules():
+    if (current_user.access_level != "0") and (current_user.access_level != "1") and (current_user.access_level != "2"):
+        flash("Użytkownik nie ma uprawnień do wyświetlenia tej strony")
+        return redirect(url_for("index"))
+
+    los = list_of_schedules_acc_mod(mod_acc=True)
+    month_names = ["Styczeń", "Luty", "Marzec", "Kwiecień", "Maj", "Czerwiec", "Lipiec", "Sierpień",
+                   "Wrzesień", "Październik", "Listopad", "Grudzień"]
+
+    return render_template("schedules-to-modify.html", title="Grafiki - modyfikowalne grafiki", ac=los["schedules"],
+                    sn=los["nos"], Schedule=Schedule, mn = month_names, User=User)
+
+
+# jsonifies data for dynamicly generated filtered list of schedules in modifiable_schedules()
+@app.route("/filter_schedules/<year>/<month>/<workplace>")
+@login_required
+def filter_schedules_to_modify(year, month, workplace):
+    if current_user.access_level != "0" and current_user.access_level != "1" and current_user.access_level != "2":
+        flash("Użytkownik nie ma uprawnień do wyświetlenia tej strony")
+        return redirect(url_for("index"))
+
+    schedules = Schedule.query.filter_by(year=int(year), month=int(month), workplace=workplace).all()
+
+    def find_latest_version_schd(schedules, workplace):
+        versions = []
+        for schedule in schedules:
+            versions.append(schedule.version)
+
+        highest_version = max(versions)
+        filtered = Schedule.query.filter_by(year=int(year), month=int(month), workplace=workplace,
+                                            version=highest_version).first()
+        return filtered
+
+    if workplace != "0":
+        if len(schedules) == 0:
+            return jsonify({"option": 0})
+        else:
+            filtered = find_latest_version_schd(schedules, workplace)
+
+            return jsonify({"option":1, "schedules": [{"name": filtered.name, "year": filtered.year, "month": filtered.month,
+                            "workplace": filtered.workplace, "version": filtered.version}]})
+    elif workplace == "0":
+        workplaces = current_user.workers_shop
+        json_schedules = []
+        for users_workplace in workplaces:
+            schedules = Schedule.query.filter_by(year=int(year), month=int(month), workplace=users_workplace.shopname).all()
+            if len(schedules) > 0:
+                filtered = find_latest_version_schd(schedules, users_workplace.shopname)
+                print(filtered)
+                if filtered is not None:
+                    json_schedules.append({"name": filtered.name, "year": filtered.year, "month": filtered.month,
+                                           "workplace": filtered.workplace, "version": filtered.version})
+        if len(json_schedules) == 0:
+            return jsonify({"option": 0})
+        else:
+            return jsonify({"option": 1, "schedules": json_schedules})
