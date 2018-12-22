@@ -1,11 +1,11 @@
+import calendar
+from datetime import date, datetime
 from flask import render_template, flash, redirect, url_for, request, jsonify
 from flask_login import login_user, logout_user, current_user, login_required
 from werkzeug.urls import url_parse
 from app import app, db
 from app.forms import LoginForm, NewUserForm, NewShopForm, UserToShopForm, NewScheduleForm, BillingPeriod
 from app.models import User, Shop, Billing_period, Personal_schedule, Schedule
-import calendar
-from datetime import date, datetime
 
 
 # prepers dict with data to show schedule for previous month
@@ -52,7 +52,7 @@ def prev_schedule(month, year, month_names, cal, workplace):
                                                             worker=worker.replace("_", " ")).first().end_hour
                     event = Personal_schedule.query.filter_by(date=datetime(prev_year, prev_month, day),
                                                               worker=worker.replace("_", " ")).first().event
-                    sum = Personal_schedule.query.filter_by(date=datetime(prev_year, prev_month, day),
+                    h_sum = Personal_schedule.query.filter_by(date=datetime(prev_year, prev_month, day),
                                                             worker=worker.replace("_", " ")).first().hours_sum
                     billing_week = Personal_schedule.query.filter_by(date=datetime(prev_year, prev_month, day),
                                                                      worker=worker.replace("_",
@@ -61,7 +61,7 @@ def prev_schedule(month, year, month_names, cal, workplace):
                     prev_shdict["begin-%s-%d-%02d-%02d" % (worker, prev_year, prev_month, day)] = begin
                     prev_shdict["end-%s-%d-%02d-%02d" % (worker, prev_year, prev_month, day)] = end
                     prev_shdict["event-%s-%d-%02d-%02d" % (worker, prev_year, prev_month, day)] = event
-                    prev_shdict["sum-%s-%d-%02d-%02d" % (worker, prev_year, prev_month, day)] = sum
+                    prev_shdict["sum-%s-%d-%02d-%02d" % (worker, prev_year, prev_month, day)] = h_sum
                     prev_shdict["billing-week-%s-%d-%02d-%02d" % (worker, prev_year, prev_month, day)] = billing_week
     else:
         prev_shdict = None
@@ -77,7 +77,7 @@ def prev_schedule(month, year, month_names, cal, workplace):
 def list_of_schedules_acc_mod(mod_acc):
     schedules = []
     for schedule in Schedule.query.filter_by(accepted=mod_acc).order_by(Schedule.workplace, Schedule.year,
-                                                                      Schedule.month, Schedule.version).all():
+                                                                        Schedule.month, Schedule.version).all():
         for assigned_workplaces in current_user.workers_shop:
             if str(schedule.workplace) == str(assigned_workplaces):
                 schedules.append(schedule)
@@ -386,20 +386,19 @@ def new_schedule_to_db(action):
     # adds individual schedules to db
     def ind_schedules_to_db(data, schedule, billing_period):
         for element in data["ind_schedules"]:
-            d = date(int(element["year"]), int(element["month"]), int(element["day"]))
+            schd_date = date(int(element["year"]), int(element["month"]), int(element["day"]))
             worker = element["worker"].replace("_", " ")
             b_hour = element["from"]
             e_hour = element["to"]
-            sum = element["sum"]
+            h_sum = element["sum"]
             event = element["event"]
             workplace = element["workplace"]
-            psname = "%s-%s-%s" % (d, worker, workplace)
+            psname = "%s-%s-%s" % (schd_date, worker, workplace)
             billing_week = element["billing_week"]
-            pschedule = Personal_schedule(name=psname, date=d, worker=worker, begin_hour=b_hour,
-                                          end_hour=e_hour, hours_sum=sum, event=event, workplace=workplace,
+            pschedule = Personal_schedule(name=psname, date=schd_date, worker=worker, begin_hour=b_hour,
+                                          end_hour=e_hour, hours_sum=h_sum, event=event, workplace=workplace,
                                           includes=schedule, billing_period=billing_period, billing_week=billing_week)
             db.session.add(pschedule)
-        #db.session.commit()
 
     data = request.json
     unaccepted_schedule = Schedule.query.filter_by(
@@ -534,7 +533,7 @@ def modifiable_schedules():
                    "Wrzesień", "Październik", "Listopad", "Grudzień"]
 
     return render_template("schedules-to-modify.html", title="Grafiki - modyfikowalne grafiki", ac=los["schedules"],
-                    sn=los["nos"], Schedule=Schedule, mn = month_names, User=User)
+                           sn=los["nos"], Schedule=Schedule, mn = month_names, User=User)
 
 
 # jsonifies data for dynamicly generated filtered list of schedules in modifiable_schedules()
@@ -545,8 +544,10 @@ def filter_schedules_to_modify(year, month, workplace):
         flash("Użytkownik nie ma uprawnień do wyświetlenia tej strony")
         return redirect(url_for("index"))
 
-    schedules = Schedule.query.filter_by(year=int(year), month=int(month), workplace=workplace).all()
+    schedules = Schedule.query.filter_by(year=int(year), month=int(month), workplace=workplace, accepted=True).all()
 
+
+    # finds latest version of
     def find_latest_version_schd(schedules, workplace):
         versions = []
         for schedule in schedules:
@@ -554,29 +555,35 @@ def filter_schedules_to_modify(year, month, workplace):
 
         highest_version = max(versions)
         filtered = Schedule.query.filter_by(year=int(year), month=int(month), workplace=workplace,
-                                            version=highest_version).first()
+                                            version=highest_version, accepted=True).first()
         return filtered
 
-    if workplace != "0":
-        if len(schedules) == 0:
-            return jsonify({"option": 0})
-        else:
-            filtered = find_latest_version_schd(schedules, workplace)
 
-            return jsonify({"option":1, "schedules": [{"name": filtered.name, "year": filtered.year, "month": filtered.month,
-                            "workplace": filtered.workplace, "version": filtered.version}]})
-    elif workplace == "0":
-        workplaces = current_user.workers_shop
-        json_schedules = []
-        for users_workplace in workplaces:
-            schedules = Schedule.query.filter_by(year=int(year), month=int(month), workplace=users_workplace.shopname).all()
-            if len(schedules) > 0:
-                filtered = find_latest_version_schd(schedules, users_workplace.shopname)
-                print(filtered)
-                if filtered is not None:
-                    json_schedules.append({"name": filtered.name, "year": filtered.year, "month": filtered.month,
-                                           "workplace": filtered.workplace, "version": filtered.version})
-        if len(json_schedules) == 0:
+    if workplace != "0":
+        print("dla jednego sklepu")
+        print(schedules)
+        if not schedules:
             return jsonify({"option": 0})
-        else:
-            return jsonify({"option": 1, "schedules": json_schedules})
+
+        filtered = find_latest_version_schd(schedules, workplace)
+        return jsonify({"option":1, "schedules": [{"name": filtered.name, "year": filtered.year,
+                                                       "month": filtered.month, "workplace": filtered.workplace,
+                                                       "version": filtered.version}]})
+
+    workplaces = current_user.workers_shop
+    json_schedules = []
+    for users_workplace in workplaces:
+        print(users_workplace)
+        schedules = Schedule.query.filter_by(year=int(year), month=int(month), workplace=users_workplace.shopname,
+                                             accepted=True).all()
+        if schedules:
+            filtered = find_latest_version_schd(schedules, users_workplace.shopname)
+            print(filtered)
+            if filtered is not None:
+                json_schedules.append({"name": filtered.name, "year": filtered.year, "month": filtered.month,
+                                       "workplace": filtered.workplace, "version": filtered.version})
+                print(json_schedules)
+    if not json_schedules:
+        return jsonify({"option": 0})
+    print(json_schedules)
+    return jsonify({"option": 1, "schedules": json_schedules})
