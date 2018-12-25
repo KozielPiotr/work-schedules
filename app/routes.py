@@ -1,3 +1,5 @@
+#-*- coding: utf-8 -*-
+
 import calendar
 from datetime import date, datetime
 from flask import render_template, flash, redirect, url_for, request, jsonify
