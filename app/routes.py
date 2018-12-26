@@ -1,3 +1,6 @@
+"""
+Routes for whole project. Each function is described when it occurs.
+"""
 #-*- coding: utf-8 -*-
 # pylint: disable=no-member
 
@@ -32,7 +35,7 @@ def prev_schedule(month, year, month_names, cal, workplace):
     prev_month_name = month_names[prev_month - 1]
 
     try:
-        prev_month_last_version = Schedule.query.filter_by(year=prev_year, month=prev_month,workplace=workplace,
+        prev_month_last_version = Schedule.query.filter_by(year=prev_year, month=prev_month, workplace=workplace,
                                                            accepted=True).order_by(Schedule.version.desc()).first().\
                                                                                    version
         prev_month_shd = Schedule.query.filter_by(year=prev_year, month=prev_month, workplace=workplace,
@@ -61,7 +64,7 @@ def prev_schedule(month, year, month_names, cal, workplace):
             for day in cal.itermonthdays(prev_year, prev_month):
                 if day > 0:
                     begin = Personal_schedule.query.filter_by(date=datetime(prev_year, prev_month, day),
-                                                              includes_id = prev_schd_id,
+                                                              includes_id=prev_schd_id,
                                                               worker=worker.replace("_", " ")).first().begin_hour
                     end = Personal_schedule.query.filter_by(date=datetime(prev_year, prev_month, day),
                                                             includes_id=prev_schd_id,
@@ -453,11 +456,59 @@ def new_schedule_to_db(action):
         flash("Użytkownik nie ma uprawnień do wyświetlenia tej strony")
         return redirect(url_for("index"))
 
+    def changes(old, new):
+        changes_list = {}
+        old_workers = []
+        for old_p_schedule in old.ind:
+            if old_p_schedule.worker not in old_workers:
+                old_workers.append(str(old_p_schedule.worker))
+        new_workers = []
+        for new_p_schedule in new.ind:
+            if new_p_schedule.worker not in new_workers:
+                new_workers.append(str(new_p_schedule.worker))
+        for worker in old_workers:
+            if worker not in new_workers:
+                changes_list[worker] = "Usunięto z grafiku"
+
+        # Looking for changes in individual schedules
+        for worker in new_workers:
+            worker_changes = [worker]
+            if worker not in old_workers:
+                worker_changes.append("Dodano do grafiku")
+            for pschedule in Personal_schedule.query.filter_by(worker=worker, includes_id=new.id):
+                old_pschedule = Personal_schedule.query.filter_by(name=pschedule.name, includes_id=old.id).first()
+                if old_pschedule is not None:
+                    if pschedule.begin_hour != old_pschedule.begin_hour or pschedule.end_hour != old_pschedule.end_hour \
+                            or pschedule.event != old_pschedule.event:
+                        change_date = pschedule.date.strftime("%d.%m.%Y")
+                        n_b_hour = pschedule.begin_hour
+                        o_b_hour = old_pschedule.begin_hour
+                        n_e_hour = pschedule.end_hour
+                        o_e_hour = old_pschedule.end_hour
+                        n_event = pschedule.event
+                        if n_event == "off":
+                            n_event = "wolne"
+                        elif n_event == "in_work":
+                            n_event = "w pracy"
+                        o_event = old_pschedule.event
+                        if o_event == "off":
+                            o_event = "wolne"
+                        elif o_event == "in_work":
+                            o_event = "w pracy"
+                        msg = "%s było %s-%s %s, a ma być %s-%s %s" % (change_date, o_b_hour, o_e_hour, o_event,
+                                                                       n_b_hour, n_e_hour, n_event)
+                        worker_changes.append(msg)
+            changes_list[worker] = worker_changes
+        for i in changes_list:
+            for j in changes_list[i]:
+                print(j)
+
+
     # adds individual schedules to db
     def ind_schedules_to_db(data, schedule, billing_period):
         """
         Adds individual schedule to database.
-        :param data: json with all information fo every individual schedule
+        :param data: json with all information for every individual schedule
         :param schedule:
         :param billing_period:
         """
@@ -481,7 +532,10 @@ def new_schedule_to_db(action):
         name="%s-%s-%s" % (data["main_data"]["year"], data["main_data"]["month"],
                            data["main_data"]["workplace"]), accepted=False).first()
 
-    if action == "send_v_0" or action == "modify_existing":
+
+    # Creates new unaccepted schedule or unaccepted version of existing schedule
+    if action in ("send_v_0", "modify_existing"):
+        print(action)
         name = "%s-%s-%s" % (data["main_data"]["year"], data["main_data"]["month"], data["main_data"]["workplace"])
         year = int(data["main_data"]["year"])
         month = int(data["main_data"]["month"])
@@ -496,7 +550,13 @@ def new_schedule_to_db(action):
         ind_schedules_to_db(data, schedule, billing_period)
         db.session.commit()
 
-    # accepts schedule and increase it's version number, deletes unaccepted version from db
+        old = Schedule.query.filter_by(name=name, version=version, accepted=True).first()
+        new = schedule
+        if old is not None:
+            changes(old, new)
+
+
+    # Accepts schedule and increase it's version number, deletes unaccepted version from db
     elif action == "accept_new_v":
         if current_user.access_level != "0" and current_user.access_level != "1":
             flash("Użytkownik nie ma uprawnień do wyświetlenia tej strony")
@@ -514,12 +574,17 @@ def new_schedule_to_db(action):
                             accepted=accepted, version=version, billing_period=billing_period)
         db.session.add(schedule)
 
+        ind_schedules_to_db(data, schedule, billing_period)
+        db.session.commit()
+
+        old = unaccepted_schedule
+        new = schedule
+        if old is not None:
+            changes(old, new)
+
         for ind_schedule in unaccepted_schedule.ind:
             db.session.delete(ind_schedule)
         db.session.delete(unaccepted_schedule)
-
-        ind_schedules_to_db(data, schedule, billing_period)
-        db.session.commit()
 
 
 
@@ -535,7 +600,7 @@ def new_schedule_to_db(action):
 @login_required
 def unaccepted_schedules():
     """
-    :return: schows list of every unaccepted schedules wchich current user can accept
+    :return: shows list of every unaccepted schedules wchich current user can accept
     """
     if (current_user.access_level != "0") and (current_user.access_level != "1"):
         flash("Użytkownik nie ma uprawnień do wyświetlenia tej strony")
@@ -607,9 +672,6 @@ def accept_modify_schedule():
                                                         worker=worker.replace("_", " ")).first().end_hour
                 event = Personal_schedule.query.filter_by(date=datetime(year, month, day), includes_id=schedule_id,
                                                           worker=worker.replace("_", " ")).first().event
-                id = Personal_schedule.query.filter_by(date=datetime(year, month, day), includes_id=schedule_id,
-                                                          worker=worker.replace("_", " ")).first().id
-                print(id)
                 if begin == 0:
                     begin = ""
                 shdict["begin-%s-%d-%02d-%02d" % (worker, year, month, day)] = begin
@@ -685,7 +747,7 @@ def filter_schedules_to_modify(year, month, workplace):
             return jsonify({"option": 0})
         uri = url_for("accept_modify_schedule", schd=filtered.name, v=filtered.version, action="to_modify")
         filtered = find_latest_version_schd(schedules, workplace)
-        return jsonify({"option":1, "schedules": [{"url": uri, "name": filtered.name, "year": filtered.year,
+        return jsonify({"option": 1, "schedules": [{"url": uri, "name": filtered.name, "year": filtered.year,
                                                    "month": filtered.month, "workplace": filtered.workplace,
                                                    "version": filtered.version}]})
 
