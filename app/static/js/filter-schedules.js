@@ -9,11 +9,12 @@ $(document).ready(function() {
             response.json().then(function(data) {
                 let listHTML = "";
                 console.log(data.schedules)
-
                 if (data.option === 1) {
                     for (let schedule of data.schedules) {
                     console.log(schedule);
-                    listHTML += `<a href="" class="list-group-item list-group-item-action">`+
+                    let sName = schedule.name.replace(" ","+");
+                    listHTML += `<a href="${schedule.url}"`+
+                                `class="list-group-item list-group-item-action">`+
                                 `${schedule.workplace} na ${schedule.month}.${schedule.year} v_${schedule.version}`+
                                 `</a>`
                     };

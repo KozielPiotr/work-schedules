@@ -544,16 +544,33 @@ def unaccepted_schedules():
 # creates modifiable template with unaccepted schedule
 @app.route("/accept-schedule", methods=["GET", "POST"])
 @login_required
-def accept_schedule():
+def accept_modify_schedule():
     """
     :return: creates template with modifiable version of chosen unaccepted schedule and unmodifiable look
     at previous month schedule
     """
-    if (current_user.access_level != "0") and (current_user.access_level != "1"):
-        flash("Użytkownik nie ma uprawnień do wyświetlenia tej strony")
-        return redirect(url_for("index"))
 
-    schedule = Schedule.query.filter_by(name=request.args.get("schd"), accepted=False).first()
+
+    action = request.args.get("action")
+    schedule = None
+
+    if action == "to_accept":
+        if (current_user.access_level != "0") and (current_user.access_level != "1"):
+            flash("Użytkownik nie ma uprawnień do wyświetlenia tej strony")
+            return redirect(url_for("index"))
+        schedule = Schedule.query.filter_by(name=request.args.get("schd"), version=int(request.args.get("v")),
+                                            accepted=False).first()
+    elif action == "to_modify":
+        if (current_user.access_level != "0") and (current_user.access_level != "1") and\
+                (current_user.access_level != "2"):
+            flash("Użytkownik nie ma uprawnień do wyświetlenia tej strony")
+            return redirect(url_for("index"))
+        schedule = Schedule.query.filter_by(name=request.args.get("schd"), version=int(request.args.get("v")),
+                                                accepted=True).first()
+    if not schedule:
+        flash("Nie ma takiego grafiku")
+        return redirect(url_for("accept_modify_schedule"))
+
     workplace = schedule.workplace
     year = schedule.year
     month = schedule.month
@@ -588,13 +605,20 @@ def accept_schedule():
                     end = ""
                 shdict["end-%s-%d-%02d-%02d" % (worker, year, month, day)] = end
                 shdict["event-%s-%d-%02d-%02d" % (worker, year, month, day)] = event
-
-    return render_template("accept-schedule.html", title="Grafiki - akceptacja grafiku", schedule=schedule,
-                           workplace=workplace, year=year, month=month, workers=workers, month_name=month_name,
-                           wdn=weekday_names, cal=cal, Billing_period=Billing_period, shdict=shdict,
-                           prev_shdict=prev["prev_shdict"], hours=hours, prev_month=prev["month"],
-                           prev_month_name=prev["month_name"], prev_year=prev["year"], prev_hours=prev["hours"],
-                           prev_workers=prev["workers"], workers_hours=prev["workers_hours"])
+    if action == "to_acc":
+        return render_template("accept-schedule.html", title="Grafiki - akceptacja grafiku", schedule=schedule,
+            workplace=workplace, year=year, month=month, workers=workers, month_name=month_name,
+            wdn=weekday_names, cal=cal, Billing_period=Billing_period, shdict=shdict,
+            prev_shdict=prev["prev_shdict"], hours=hours, prev_month=prev["month"],
+            prev_month_name=prev["month_name"], prev_year=prev["year"], prev_hours=prev["hours"],
+            prev_workers=prev["workers"], workers_hours=prev["workers_hours"])
+    elif action == "to_modify":
+        return render_template("modify-schedule.html", title="Grafiki - akceptacja grafiku", schedule=schedule,
+            workplace=workplace, year=year, month=month, workers=workers, month_name=month_name,
+            wdn=weekday_names, cal=cal, Billing_period=Billing_period, shdict=shdict,
+            prev_shdict=prev["prev_shdict"], hours=hours, prev_month=prev["month"],
+            prev_month_name=prev["month_name"], prev_year=prev["year"], prev_hours=prev["hours"],
+            prev_workers=prev["workers"], workers_hours=prev["workers_hours"])
 
 
 # makes list of schedules modifiable by current user
@@ -654,9 +678,9 @@ def filter_schedules_to_modify(year, month, workplace):
         print(schedules)
         if not schedules:
             return jsonify({"option": 0})
-
+        uri = url_for("accept_modify_schedule", schd=filtered.name, v=filtered.version, action="to_modify")
         filtered = find_latest_version_schd(schedules, workplace)
-        return jsonify({"option":1, "schedules": [{"name": filtered.name, "year": filtered.year,
+        return jsonify({"option":1, "schedules": [{"url": uri, "name": filtered.name, "year": filtered.year,
                                                    "month": filtered.month, "workplace": filtered.workplace,
                                                    "version": filtered.version}]})
 
@@ -668,7 +692,8 @@ def filter_schedules_to_modify(year, month, workplace):
         if schedules:
             filtered = find_latest_version_schd(schedules, users_workplace.shopname)
             if filtered is not None:
-                json_schedules.append({"name": filtered.name, "year": filtered.year, "month": filtered.month,
+                uri = url_for("accept_modify_schedule", schd=filtered.name, v=filtered.version, action="to_modify")
+                json_schedules.append({"url": uri, "name": filtered.name, "year": filtered.year, "month": filtered.month,
                                        "workplace": filtered.workplace, "version": filtered.version})
     if not json_schedules:
         return jsonify({"option": 0})
