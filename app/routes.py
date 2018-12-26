@@ -41,6 +41,7 @@ def prev_schedule(month, year, month_names, cal, workplace):
         prev_month_shd = None
 
     if prev_month_shd is not None:
+        prev_schd_id = prev_month_shd.id
         prev_workers = []
         for pers_schedule in prev_month_shd.ind:
             if str(pers_schedule.worker).replace(" ", "_") not in prev_workers:
@@ -60,14 +61,19 @@ def prev_schedule(month, year, month_names, cal, workplace):
             for day in cal.itermonthdays(prev_year, prev_month):
                 if day > 0:
                     begin = Personal_schedule.query.filter_by(date=datetime(prev_year, prev_month, day),
+                                                              includes_id = prev_schd_id,
                                                               worker=worker.replace("_", " ")).first().begin_hour
                     end = Personal_schedule.query.filter_by(date=datetime(prev_year, prev_month, day),
+                                                            includes_id=prev_schd_id,
                                                             worker=worker.replace("_", " ")).first().end_hour
                     event = Personal_schedule.query.filter_by(date=datetime(prev_year, prev_month, day),
+                                                              includes_id=prev_schd_id,
                                                               worker=worker.replace("_", " ")).first().event
                     h_sum = Personal_schedule.query.filter_by(date=datetime(prev_year, prev_month, day),
+                                                              includes_id=prev_schd_id,
                                                               worker=worker.replace("_", " ")).first().hours_sum
                     billing_week = Personal_schedule.query.filter_by(date=datetime(prev_year, prev_month, day),
+                                                                     includes_id=prev_schd_id,
                                                                      worker=worker.replace("_",
                                                                                            " ")).first().billing_week
 
@@ -475,7 +481,7 @@ def new_schedule_to_db(action):
         name="%s-%s-%s" % (data["main_data"]["year"], data["main_data"]["month"],
                            data["main_data"]["workplace"]), accepted=False).first()
 
-    if action == "send_v_0":
+    if action == "send_v_0" or action == "modify_existing":
         name = "%s-%s-%s" % (data["main_data"]["year"], data["main_data"]["month"], data["main_data"]["workplace"])
         year = int(data["main_data"]["year"])
         month = int(data["main_data"]["month"])
@@ -541,7 +547,7 @@ def unaccepted_schedules():
                            sn=los["nos"], Schedule=Schedule)
 
 
-# creates modifiable template with unaccepted schedule
+# creates modifiable template with schedule
 @app.route("/accept-schedule", methods=["GET", "POST"])
 @login_required
 def accept_modify_schedule():
@@ -549,10 +555,10 @@ def accept_modify_schedule():
     :return: creates template with modifiable version of chosen unaccepted schedule and unmodifiable look
     at previous month schedule
     """
-
-
     action = request.args.get("action")
     schedule = None
+    title = "Grafiki"
+    print(action)
 
     if action == "to_accept":
         if (current_user.access_level != "0") and (current_user.access_level != "1"):
@@ -560,21 +566,24 @@ def accept_modify_schedule():
             return redirect(url_for("index"))
         schedule = Schedule.query.filter_by(name=request.args.get("schd"), version=int(request.args.get("v")),
                                             accepted=False).first()
+        title = "Grafiki - akceptacja grafiku"
     elif action == "to_modify":
         if (current_user.access_level != "0") and (current_user.access_level != "1") and\
                 (current_user.access_level != "2"):
             flash("Użytkownik nie ma uprawnień do wyświetlenia tej strony")
             return redirect(url_for("index"))
         schedule = Schedule.query.filter_by(name=request.args.get("schd"), version=int(request.args.get("v")),
-                                                accepted=True).first()
+                                            accepted=True).first()
+        title = "Grafiki - modyfikacja grafiku"
     if not schedule:
         flash("Nie ma takiego grafiku")
         return redirect(url_for("accept_modify_schedule"))
-
+    schedule_id = schedule.id
     workplace = schedule.workplace
     year = schedule.year
     month = schedule.month
     hours = schedule.hrs_to_work
+    version = schedule.version
     workers = []
     for pers_schedule in schedule.ind:
         if str(pers_schedule.worker).replace(" ", "_") not in workers:
@@ -592,12 +601,15 @@ def accept_modify_schedule():
     for worker in workers:
         for day in cal.itermonthdays(year, month):
             if day > 0:
-                begin = Personal_schedule.query.filter_by(date=datetime(year, month, day),
+                begin = Personal_schedule.query.filter_by(date=datetime(year, month, day), includes_id=schedule_id,
                                                           worker=worker.replace("_", " ")).first().begin_hour
-                end = Personal_schedule.query.filter_by(date=datetime(year, month, day),
+                end = Personal_schedule.query.filter_by(date=datetime(year, month, day), includes_id=schedule_id,
                                                         worker=worker.replace("_", " ")).first().end_hour
-                event = Personal_schedule.query.filter_by(date=datetime(year, month, day),
+                event = Personal_schedule.query.filter_by(date=datetime(year, month, day), includes_id=schedule_id,
                                                           worker=worker.replace("_", " ")).first().event
+                id = Personal_schedule.query.filter_by(date=datetime(year, month, day), includes_id=schedule_id,
+                                                          worker=worker.replace("_", " ")).first().id
+                print(id)
                 if begin == 0:
                     begin = ""
                 shdict["begin-%s-%d-%02d-%02d" % (worker, year, month, day)] = begin
@@ -605,20 +617,13 @@ def accept_modify_schedule():
                     end = ""
                 shdict["end-%s-%d-%02d-%02d" % (worker, year, month, day)] = end
                 shdict["event-%s-%d-%02d-%02d" % (worker, year, month, day)] = event
-    if action == "to_acc":
-        return render_template("accept-schedule.html", title="Grafiki - akceptacja grafiku", schedule=schedule,
-            workplace=workplace, year=year, month=month, workers=workers, month_name=month_name,
-            wdn=weekday_names, cal=cal, Billing_period=Billing_period, shdict=shdict,
-            prev_shdict=prev["prev_shdict"], hours=hours, prev_month=prev["month"],
-            prev_month_name=prev["month_name"], prev_year=prev["year"], prev_hours=prev["hours"],
-            prev_workers=prev["workers"], workers_hours=prev["workers_hours"])
-    elif action == "to_modify":
-        return render_template("modify-schedule.html", title="Grafiki - akceptacja grafiku", schedule=schedule,
-            workplace=workplace, year=year, month=month, workers=workers, month_name=month_name,
-            wdn=weekday_names, cal=cal, Billing_period=Billing_period, shdict=shdict,
-            prev_shdict=prev["prev_shdict"], hours=hours, prev_month=prev["month"],
-            prev_month_name=prev["month_name"], prev_year=prev["year"], prev_hours=prev["hours"],
-            prev_workers=prev["workers"], workers_hours=prev["workers_hours"])
+
+    return render_template("accept-schedule.html", action=action, title=title, schedule=schedule, workplace=workplace,
+                           year=year, month=month, workers=workers, month_name=month_name, wdn=weekday_names, cal=cal,
+                           Billing_period=Billing_period, version=version, shdict=shdict, hours=hours,
+                           prev_shdict=prev["prev_shdict"], prev_month=prev["month"], prev_hours=prev["hours"],
+                           prev_month_name=prev["month_name"], prev_year=prev["year"], prev_workers=prev["workers"],
+                           workers_hours=prev["workers_hours"])
 
 
 # makes list of schedules modifiable by current user
@@ -647,7 +652,7 @@ def filter_schedules_to_modify(year, month, workplace):
     :param year: year of schedule
     :param month: month of schedule
     :param workplace: workplace of schedule
-    :param return: matching schedule
+    :return: matching schedule
     """
     if current_user.access_level != "0" and current_user.access_level != "1" and current_user.access_level != "2":
         flash("Użytkownik nie ma uprawnień do wyświetlenia tej strony")

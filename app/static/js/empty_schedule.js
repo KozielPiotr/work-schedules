@@ -27,7 +27,6 @@ function prevEventsCss(selector, selHelper, event, from, to, counted){
         to.css("background", "#FC33FF");
         counted.css("background", "#FC33FF");
         event.css("background", "#FC33FF");
-        console.log("3");
     } else if (event.text()==="L4") {
         from.css("background", "#80D332");
         to.css("background", "#80D332");
@@ -484,7 +483,7 @@ function getHours() {
     };
     jsonDict["main_data"] = ({"year": $("#cur-year").text(), "month": $("#cur-month").text(), "workplace": $("#workplace").text(),
         "hours": $("#working-hours").val(), "billing_period": $("td[id='billing-period']").find("input[name='billing-period']").val(),
-        "version": 0})
+        "version": $("td[id='version']").find("input[name='version']").val()})
     jsonDict["ind_schedules"] = indSchedules;
     return jsonDict;
 };

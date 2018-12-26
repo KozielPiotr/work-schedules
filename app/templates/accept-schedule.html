@@ -141,10 +141,13 @@
 </div>
 
 <hr>
-
 <!-- Schedule for chosen month (editable) -->
 <div id="curr-month-schedule">   <!-- Schedule -->
-    <form method="post" action="/schedule-to-db/accept_new_v">
+    {% if action == "to_accept" %}
+        <form method="post" action="/schedule-to-db/accept_new_v">
+    {% elif action == "to_modify" %}
+        <form method="post" action="/schedule-to-db/modify_existing">
+    {% endif %}
         <div id="check-accept-btns">
             <div id="accept-btn">
                 <button id="submit-schedule-btn" type="submit" class="btn btn-primary btn-sm">Akceptuj grafik</button>
@@ -166,6 +169,9 @@
                 </td>
                 <td id="billing-period">
                     <input name="billing-period">
+                </td>
+                <td id="version">
+                    <input name="version" value="{{ version }}">
                 </td>
             </tr>
             <tr id="workers-names">
