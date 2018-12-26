@@ -28,11 +28,6 @@
 {% endblock %}
 
 {% block content %}
-
-    {% if sn == 0 %}
-        <p>Brak grafików do modyfikacji</p>
-    {% else %}
-
         <div class="list-group">
             <h3>Grafiki możliwe do modyfikacji</h3>
             <form method="post" action="#">
@@ -54,10 +49,6 @@
                 </h5><br>
             </form>
             <div id="list" class="list-group">
-            {% for schedule in ac %}
-                <a href="#" class="list-group-item list-group-item-action">{{ schedule.workplace }} na {{ schedule.month }}.{{ schedule.year }} v_{{ schedule.version }}</a>
-            {% endfor %}
             </div>
         </div>
-    {% endif %}
 {% endblock %}

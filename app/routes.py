@@ -1,4 +1,5 @@
 #-*- coding: utf-8 -*-
+# pylint: disable=no-member
 
 import calendar
 from datetime import date, datetime
@@ -6,12 +7,22 @@ from flask import render_template, flash, redirect, url_for, request, jsonify
 from flask_login import login_user, logout_user, current_user, login_required
 from werkzeug.urls import url_parse
 from app import app, db
-from app.forms import LoginForm, NewUserForm, NewShopForm, UserToShopForm, NewScheduleForm, BillingPeriod
+from app.forms import LoginForm, NewUserForm, NewShopForm, UserToShopForm, NewScheduleForm,\
+    BillingPeriod
 from app.models import User, Shop, Billing_period, Personal_schedule, Schedule
 
 
 # prepers dict with data to show schedule for previous month
 def prev_schedule(month, year, month_names, cal, workplace):
+    """
+    Makes dictionary with all data needed to create template that shows existing schedule
+    :param month: month of schedule
+    :param year: year of schedule
+    :param month_names: names of month in apps language
+    :param cal: calendar module
+    :param workplace: workplace for wchich schedule has to be create
+    :return: dictionary with all needed data
+    """
     if month == 1:
         prev_month = 12
         prev_year = year - 1
@@ -21,9 +32,9 @@ def prev_schedule(month, year, month_names, cal, workplace):
     prev_month_name = month_names[prev_month - 1]
 
     try:
-        prev_month_last_version = Schedule.query.filter_by(year=prev_year, month=prev_month, workplace=workplace,
-                                                           accepted=True).order_by(
-            Schedule.version.desc()).first().version
+        prev_month_last_version = Schedule.query.filter_by(year=prev_year, month=prev_month,workplace=workplace,
+                                                           accepted=True).order_by(Schedule.version.desc()).first().\
+                                                                                   version
         prev_month_shd = Schedule.query.filter_by(year=prev_year, month=prev_month, workplace=workplace,
                                                   version=prev_month_last_version).first()
     except AttributeError:
@@ -55,7 +66,7 @@ def prev_schedule(month, year, month_names, cal, workplace):
                     event = Personal_schedule.query.filter_by(date=datetime(prev_year, prev_month, day),
                                                               worker=worker.replace("_", " ")).first().event
                     h_sum = Personal_schedule.query.filter_by(date=datetime(prev_year, prev_month, day),
-                                                            worker=worker.replace("_", " ")).first().hours_sum
+                                                              worker=worker.replace("_", " ")).first().hours_sum
                     billing_week = Personal_schedule.query.filter_by(date=datetime(prev_year, prev_month, day),
                                                                      worker=worker.replace("_",
                                                                                            " ")).first().billing_week
@@ -75,8 +86,13 @@ def prev_schedule(month, year, month_names, cal, workplace):
     return prev
 
 
-# prepares list of schedule aviable for current user to accept or modify
+# prepares list of schedules aviable for current user to accept or modify
 def list_of_schedules_acc_mod(mod_acc):
+    """
+    Prepares list of schedules aviable for current user to accept or modify.
+    :param mod_acc: Defines if function looks for accepted or unaccepted schedules
+    :return: list of schedules that match to 'mod_acc' criteria
+    """
     schedules = []
     for schedule in Schedule.query.filter_by(accepted=mod_acc).order_by(Schedule.workplace, Schedule.year,
                                                                         Schedule.month, Schedule.version).all():
@@ -85,9 +101,9 @@ def list_of_schedules_acc_mod(mod_acc):
                 schedules.append(schedule)
 
     number_of_schedules = len(schedules)
-    list = {"schedules": schedules, "nos": number_of_schedules}
+    schedules_list = {"schedules": schedules, "nos": number_of_schedules}
 
-    return list
+    return schedules_list
 
 
 # main page
@@ -95,11 +111,17 @@ def list_of_schedules_acc_mod(mod_acc):
 @app.route("/index")
 @login_required
 def index():
+    """
+    Main page.
+    """
     return render_template("index.html", title="Grafiki")
 
 
 @app.route("/test", methods=["GET", "POST"])
 def test():
+    """
+    Test route. Needs to be removed in final version.
+    """
     queries = []
     months = Schedule.query.filter_by(month=11)
     places = Schedule.query.filter_by(workplace="Sklep 1")
@@ -113,6 +135,9 @@ def test():
 # Login page. Checks if user is logged in and if not redirects to log in  page
 @app.route("/login", methods=["GET", "POST"])
 def login():
+    """
+    Logs user in.
+    """
     if current_user.is_authenticated:
         return redirect(url_for("index"))
     form = LoginForm()
@@ -133,6 +158,9 @@ def login():
 @app.route("/logout")
 @login_required
 def logout():
+    """
+    Logs out current user.
+    """
     logout_user()
     return redirect(url_for("index"))
 
@@ -141,6 +169,9 @@ def logout():
 @app.route("/new-user", methods=["GET", "POST"])
 @login_required
 def new_user():
+    """
+    Adds new user to database.
+    """
     if current_user.access_level != "0" and current_user.access_level != "1":
         flash("Użytkownik nie ma uprawnień do wyświetlenia tej strony")
         return redirect(url_for("index"))
@@ -160,6 +191,9 @@ def new_user():
 @app.route("/new-shop", methods=["GET", "POST"])
 @login_required
 def new_shop():
+    """
+    Adds new workplace to database.
+    """
     if current_user.access_level != "0" and current_user.access_level != "1":
         flash("Użytkownik nie ma uprawnień do wyświetlenia tej strony")
         return redirect(url_for("index"))
@@ -176,6 +210,9 @@ def new_shop():
 
 @app.route("/<path:path>")
 def static_proxy(path):
+    """
+    Allows to send files between functions.
+    """
     return app.send_static_file(path)
 
 
@@ -183,6 +220,9 @@ def static_proxy(path):
 @app.route("/workplace-worker-connect", methods=["GET", "POST"])
 @login_required
 def worker_to_workplace():
+    """
+    Allows to manage connections between workers and workplaces.
+    """
     if current_user.access_level != "0" and current_user.access_level != "1":
         flash("Użytkownik nie ma uprawnień do wyświetlenia tej strony")
         return redirect(url_for("index"))
@@ -202,25 +242,30 @@ def worker_to_workplace():
 
     users_number = len(workers_list)
     if form.validate_on_submit():
-        u = User.query.filter_by(username=form.worker.data).first()
-        s = Shop.query.filter_by(shopname=form.workplace.data).first()
-        already_assigned = s.works
-        if u not in already_assigned:
-            s.works.append(u)
+        worker = User.query.filter_by(username=form.worker.data).first()
+        workplace = Shop.query.filter_by(shopname=form.workplace.data).first()
+        already_assigned = workplace.works
+        if worker not in already_assigned:
+            workplace.works.append(worker)
             db.session.commit()
-            flash("Przypisano %s do %s" % (u, s))
+            flash("Przypisano %s do %s" % (worker, workplace))
         else:
-            flash("%s był już przypisany do %s" % (u, s))
+            flash("%s był już przypisany do %s" % (worker, workplace))
         return redirect(url_for("worker_to_workplace"))
     return render_template("worker_to_workplace.html", title="Grafiki - przydzielanie użytkownika do sklepu",
                            form=form, workplaces=workplaces, users_number=users_number)
 
 
-# jsonifies data for dynamicly generated checkboxes in worker_to_workplace()
+# jsonifies data for dynamically generated checkboxes in worker_to_workplace()
 @app.route("/workplace-worker-connect/<workplace>")
 @login_required
 def worker_to_workplace_workers(workplace):
-    if current_user.access_level != "0" and current_user.access_level != "1" and current_user.access_level != "2":
+    """
+    Makes list of workers unassigned to chosen workplace
+    :param workplace: chosen workplace
+    :return: list of workers
+    """
+    if current_user.access_level != "0" and current_user.access_level != "1":
         flash("Użytkownik nie ma uprawnień do wyświetlenia tej strony")
         return redirect(url_for("index"))
     shop = Shop.query.filter_by(shopname=workplace).first()
@@ -237,19 +282,22 @@ def worker_to_workplace_workers(workplace):
     return jsonify({"workers": jsondict})
 
 
-# removes connection between user and shop
+# removes connection between worker and workplace
 @app.route("/remove-user-from-shop", methods=["GET", "POST"])
 @login_required
 def remove_from_shop():
+    """
+    Removes link between worker and workplace.
+    """
     if (current_user.access_level != "0") and (current_user.access_level != "1"):
         flash("Użytkownik nie ma uprawnień do wyświetlenia tej strony")
         return redirect(url_for("index"))
 
     user = request.args.get("user")
     shop = request.args.get("shop")
-    u = User.query.filter_by(username=user).first()
-    s = Shop.query.filter_by(shopname=shop).first()
-    s.works.remove(u)
+    found_user = User.query.filter_by(username=user).first()
+    found_workplace = Shop.query.filter_by(shopname=shop).first()
+    found_workplace.works.remove(found_user)
     db.session.commit()
     flash("Usunięto %s z %s" % (user, shop))
     return redirect(url_for("worker_to_workplace"))
@@ -259,6 +307,9 @@ def remove_from_shop():
 @app.route("/billing-period", methods=["GET", "POST"])
 @login_required
 def billing_period():
+    """
+    Allows to set beginning of counting billing periods and length of it in months.
+    """
     if (current_user.access_level != "0") and (current_user.access_level != "1"):
         flash("Użytkownik nie ma uprawnień do wyświetlenia tej strony")
         return redirect(url_for("index"))
@@ -276,14 +327,14 @@ def billing_period():
     if form.validate_on_submit():
         begin = datetime(int(form.begin_year.data), int(form.begin_month.data), 1)
         duration = form.length_of_billing_period.data
-        if len(Billing_period.query.all()) == 0:
-            bp = Billing_period(begin=begin, duration=duration)
-            db.session.add(bp)
+        if not Billing_period.query.all() == 0:
+            b_p = Billing_period(begin=begin, duration=duration)
+            db.session.add(b_p)
             db.session.commit()
         else:
-            bp = Billing_period
-            bp.query.filter_by(id=1).all()[0].begin = begin
-            bp.query.filter_by(id=1).all()[0].duration = duration
+            b_p = Billing_period
+            b_p.query.filter_by(id=1).all()[0].begin = begin
+            b_p.query.filter_by(id=1).all()[0].duration = duration
             db.session.commit()
         flash("Zmieniono okres rozliczeniowy na: Początek: %s Długość: %s" % ("{:%d - %m - %Y}".format(begin),
                                                                               duration))
@@ -293,15 +344,16 @@ def billing_period():
 
 
 # gets data for new schedule and creates new schedule template
-"""
-I'm not using calendar module's names for months and days because whole app has to be in polish,
-    so the code is little more complicated.
-"""
-
-
 @app.route("/new-schedule", methods=["GET", "POST"])
 @login_required
 def new_schedule():
+    """
+    Creates template with empty, modifiable schedule for chosen year, month and workplace and with unmodifiable
+    schedule for previous month.
+    I'm not using calendar module's names for months and days because whole app has to be in polish,
+    so the code is little more complicated.
+    :return: template with all necessary data for new schedule
+    """
     if current_user.access_level != "0" and current_user.access_level != "1" and current_user.access_level != "2":
         flash("Użytkownik nie ma uprawnień do wyświetlenia tej strony")
         return redirect(url_for("index"))
@@ -360,6 +412,12 @@ def new_schedule():
 @app.route("/new-schedule/<workplace>")
 @login_required
 def new_schedule_find_workers(workplace):
+    """
+    Finds workers assigned to chosen workplace and sends back list with them to template that allow to choose workers
+    that will be in schedule.
+    :param workplace: chosen workplace
+    :return: jsonified list of workers assigned to chosen workplace
+    """
     if current_user.access_level != "0" and current_user.access_level != "1" and current_user.access_level != "2":
         flash("Użytkownik nie ma uprawnień do wyświetlenia tej strony")
         return redirect(url_for("index"))
@@ -381,12 +439,22 @@ def new_schedule_find_workers(workplace):
 @app.route('/schedule-to-db/<action>', methods=['POST'])
 @login_required
 def new_schedule_to_db(action):
+    """
+    Adds new (unaccepted) schedule do database or replaces unaccepted version with accepted one
+    :param action: tells function if it has to add new version to db or replace existing one with it's accepted version.
+    """
     if current_user.access_level != "0" and current_user.access_level != "1" and current_user.access_level != "2":
         flash("Użytkownik nie ma uprawnień do wyświetlenia tej strony")
         return redirect(url_for("index"))
 
     # adds individual schedules to db
     def ind_schedules_to_db(data, schedule, billing_period):
+        """
+        Adds individual schedule to database.
+        :param data: json with all information fo every individual schedule
+        :param schedule:
+        :param billing_period:
+        """
         for element in data["ind_schedules"]:
             schd_date = date(int(element["year"]), int(element["month"]), int(element["day"]))
             worker = element["worker"].replace("_", " ")
@@ -460,6 +528,9 @@ def new_schedule_to_db(action):
 @app.route("/unaccepted_schedules", methods=["GET", "POST"])
 @login_required
 def unaccepted_schedules():
+    """
+    :return: schows list of every unaccepted schedules wchich current user can accept
+    """
     if (current_user.access_level != "0") and (current_user.access_level != "1"):
         flash("Użytkownik nie ma uprawnień do wyświetlenia tej strony")
         return redirect(url_for("index"))
@@ -474,6 +545,10 @@ def unaccepted_schedules():
 @app.route("/accept-schedule", methods=["GET", "POST"])
 @login_required
 def accept_schedule():
+    """
+    :return: creates template with modifiable version of chosen unaccepted schedule and unmodifiable look
+    at previous month schedule
+    """
     if (current_user.access_level != "0") and (current_user.access_level != "1"):
         flash("Użytkownik nie ma uprawnień do wyświetlenia tej strony")
         return redirect(url_for("index"))
@@ -526,22 +601,30 @@ def accept_schedule():
 @app.route("/modifiable-schedules", methods=["GET", "POST"])
 @login_required
 def modifiable_schedules():
+    """
+    :return: renders template with form that allows to filter all accepted schedules and chose one to modify
+    """
     if (current_user.access_level != "0") and (current_user.access_level != "1") and (current_user.access_level != "2"):
         flash("Użytkownik nie ma uprawnień do wyświetlenia tej strony")
         return redirect(url_for("index"))
 
-    los = list_of_schedules_acc_mod(mod_acc=True)
     month_names = ["Styczeń", "Luty", "Marzec", "Kwiecień", "Maj", "Czerwiec", "Lipiec", "Sierpień",
                    "Wrzesień", "Październik", "Listopad", "Grudzień"]
 
-    return render_template("schedules-to-modify.html", title="Grafiki - modyfikowalne grafiki", ac=los["schedules"],
-                           sn=los["nos"], Schedule=Schedule, mn = month_names, User=User)
+    return render_template("schedules-to-modify.html", title="Grafiki - modyfikowalne grafiki", mn=month_names)
 
 
 # jsonifies data for dynamicly generated filtered list of schedules in modifiable_schedules()
 @app.route("/filter_schedules/<year>/<month>/<workplace>")
 @login_required
 def filter_schedules_to_modify(year, month, workplace):
+    """
+    Finds schedule that matches filter criteria.
+    :param year: year of schedule
+    :param month: month of schedule
+    :param workplace: workplace of schedule
+    :param return: matching schedule
+    """
     if current_user.access_level != "0" and current_user.access_level != "1" and current_user.access_level != "2":
         flash("Użytkownik nie ma uprawnień do wyświetlenia tej strony")
         return redirect(url_for("index"))
@@ -551,6 +634,11 @@ def filter_schedules_to_modify(year, month, workplace):
 
     # finds latest version of
     def find_latest_version_schd(schedules, workplace):
+        """
+        Only latest version can be modified.
+        :param schedules: all schedules for chosen workplace
+        :param workplace: chosen workplace
+        """
         versions = []
         for schedule in schedules:
             versions.append(schedule.version)
@@ -569,23 +657,19 @@ def filter_schedules_to_modify(year, month, workplace):
 
         filtered = find_latest_version_schd(schedules, workplace)
         return jsonify({"option":1, "schedules": [{"name": filtered.name, "year": filtered.year,
-                                                       "month": filtered.month, "workplace": filtered.workplace,
-                                                       "version": filtered.version}]})
+                                                   "month": filtered.month, "workplace": filtered.workplace,
+                                                   "version": filtered.version}]})
 
     workplaces = current_user.workers_shop
     json_schedules = []
     for users_workplace in workplaces:
-        print(users_workplace)
         schedules = Schedule.query.filter_by(year=int(year), month=int(month), workplace=users_workplace.shopname,
                                              accepted=True).all()
         if schedules:
             filtered = find_latest_version_schd(schedules, users_workplace.shopname)
-            print(filtered)
             if filtered is not None:
                 json_schedules.append({"name": filtered.name, "year": filtered.year, "month": filtered.month,
                                        "workplace": filtered.workplace, "version": filtered.version})
-                print(json_schedules)
     if not json_schedules:
         return jsonify({"option": 0})
-    print(json_schedules)
     return jsonify({"option": 1, "schedules": json_schedules})
