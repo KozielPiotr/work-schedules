@@ -10,7 +10,7 @@ from flask import render_template, flash, redirect, url_for, request, jsonify
 from flask_login import login_user, logout_user, current_user, login_required
 from werkzeug.urls import url_parse
 from app import app, db
-from app.forms import LoginForm, NewUserForm, NewShopForm, UserToShopForm, NewScheduleForm,\
+from app.forms import LoginForm, NewScheduleForm,\
     BillingPeriod
 from app.models import User, Shop, Billing_period, Personal_schedule, Schedule
 
@@ -23,7 +23,7 @@ def prev_schedule(month, year, month_names, cal, workplace):
     :param year: year of schedule
     :param month_names: names of month in apps language
     :param cal: calendar module
-    :param workplace: workplace for wchich schedule has to be create
+    :param workplace: workplace for which schedule has to be create
     :return: dictionary with all needed data
     """
     if month == 1:
@@ -174,95 +174,12 @@ def logout():
     return redirect(url_for("index"))
 
 
-#  New user
-@app.route("/new-user", methods=["GET", "POST"])
-@login_required
-def new_user():
-    """
-    Adds new user to database.
-    """
-    if current_user.access_level != "0" and current_user.access_level != "1":
-        flash("Użytkownik nie ma uprawnień do wyświetlenia tej strony")
-        return redirect(url_for("index"))
-
-    form = NewUserForm()
-    if form.validate_on_submit():
-        user = User(username=form.username.data, access_level=form.access_level.data)
-        user.set_password(form.password.data)
-        db.session.add(user)
-        db.session.commit()
-        flash("Nowy użytkownik zarejestrowany")
-        return redirect(url_for("index"))
-    return render_template("new_user.html", title="Grafiki - nowy użytkownik", form=form)
-
-
-# New shop
-@app.route("/new-shop", methods=["GET", "POST"])
-@login_required
-def new_shop():
-    """
-    Adds new workplace to database.
-    """
-    if current_user.access_level != "0" and current_user.access_level != "1":
-        flash("Użytkownik nie ma uprawnień do wyświetlenia tej strony")
-        return redirect(url_for("index"))
-
-    form = NewShopForm()
-    if form.validate_on_submit():
-        shop = Shop(shopname=form.shopname.data)
-        db.session.add(shop)
-        db.session.commit()
-        flash("Stworzono nowy sklep")
-        return redirect(url_for("index"))
-    return render_template("new_shop.html", title="Grafiki - nowy sklep", form=form)
-
-
 @app.route("/<path:path>")
 def static_proxy(path):
     """
     Allows to send files between functions.
     """
     return app.send_static_file(path)
-
-
-# Assigns user to the shop
-@app.route("/workplace-worker-connect", methods=["GET", "POST"])
-@login_required
-def worker_to_workplace():
-    """
-    Allows to manage connections between workers and workplaces.
-    """
-    if current_user.access_level != "0" and current_user.access_level != "1":
-        flash("Użytkownik nie ma uprawnień do wyświetlenia tej strony")
-        return redirect(url_for("index"))
-
-    form = UserToShopForm()
-    workplaces = Shop.query.order_by(Shop.shopname).all()
-    workplaces_list = []
-    for workplace in workplaces:
-        workplaces_list.append((str(workplace), str(workplace)))
-    form.workplace.choices = workplaces_list
-
-    workers = User.query.order_by(User.username).all()
-    workers_list = []
-    for worker in workers:
-        workers_list.append((str(worker), str(worker)))
-    form.worker.choices = workers_list
-
-    users_number = len(workers_list)
-    if form.validate_on_submit():
-        worker = User.query.filter_by(username=form.worker.data).first()
-        workplace = Shop.query.filter_by(shopname=form.workplace.data).first()
-        already_assigned = workplace.works
-        if worker not in already_assigned:
-            workplace.works.append(worker)
-            db.session.commit()
-            flash("Przypisano %s do %s" % (worker, workplace))
-        else:
-            flash("%s był już przypisany do %s" % (worker, workplace))
-        return redirect(url_for("worker_to_workplace"))
-    return render_template("worker_to_workplace.html", title="Grafiki - przydzielanie użytkownika do sklepu",
-                           form=form, workplaces=workplaces, users_number=users_number)
 
 
 # jsonifies data for dynamically generated checkboxes in worker_to_workplace()
@@ -748,8 +665,8 @@ def filter_schedules_to_modify(year, month, workplace):
         uri = url_for("accept_modify_schedule", schd=filtered.name, v=filtered.version, action="to_modify")
         filtered = find_latest_version_schd(schedules, workplace)
         return jsonify({"option": 1, "schedules": [{"url": uri, "name": filtered.name, "year": filtered.year,
-                                                   "month": filtered.month, "workplace": filtered.workplace,
-                                                   "version": filtered.version}]})
+                                                    "month": filtered.month, "workplace": filtered.workplace,
+                                                    "version": filtered.version}]})
 
     workplaces = current_user.workers_shop
     json_schedules = []
