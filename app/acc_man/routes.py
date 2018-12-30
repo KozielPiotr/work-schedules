@@ -1,13 +1,15 @@
 """
 Managing users accounts, workplaces and connections between them
 - new_user: creates new user
-- new_workplace: creates new
+- new_workplace: creates new workplace
+- worker_to_workplace: assigns user to the workplace
+- worker_to_workplace_workers: jsonifies data for dynamically generated checkboxes in worker_to_workplace()
 """
 
 #-*- coding: utf-8 -*-
 # pylint: disable=no-member
 
-from flask import flash, redirect, url_for, render_template
+from flask import flash, redirect, url_for, render_template, jsonify, request
 from flask_login import login_required, current_user
 from app import db
 from app.acc_man import bp
@@ -15,7 +17,7 @@ from app.acc_man.forms import NewUserForm, NewWorkplaceForm, UserToShopForm
 from app.models import User, Shop
 
 
-#  New user
+# New user
 @bp.route("/new-user", methods=["GET", "POST"])
 @login_required
 def new_user():
@@ -34,7 +36,7 @@ def new_user():
         db.session.commit()
         flash("Nowy użytkownik zarejestrowany")
         return redirect(url_for("acc.new_user"))
-    return render_template("new_user.html", title="Grafiki - nowy użytkownik", form=form)
+    return render_template("acc_man/new_user.html", title="Grafiki - nowy użytkownik", form=form)
 
 
 # New workplace
@@ -55,10 +57,10 @@ def new_workplace():
         db.session.commit()
         flash("Stworzono nowy sklep")
         return redirect(url_for("index"))
-    return render_template("new_workplace.html", title="Grafiki - nowy sklep", form=form)
+    return render_template("acc_man/new_workplace.html", title="Grafiki - nowy sklep", form=form)
 
 
-# Assigns user to the shop
+# Assigns user to the workplace
 @bp.route("/workplace-worker-connect", methods=["GET", "POST"])
 @login_required
 def worker_to_workplace():
@@ -94,5 +96,52 @@ def worker_to_workplace():
         else:
             flash("%s był już przypisany do %s" % (worker, workplace))
         return redirect(url_for("acc.worker_to_workplace"))
-    return render_template("worker_to_workplace.html", title="Grafiki - przydzielanie użytkownika do sklepu",
+    return render_template("acc_man/worker_to_workplace.html", title="Grafiki - przydzielanie użytkownika do sklepu",
                            form=form, workplaces=workplaces, users_number=users_number)
+
+
+# Jsonifies data for dynamically generated checkboxes in worker_to_workplace()
+@bp.route("/workplace-worker-connect/<workplace>")
+@login_required
+def worker_to_workplace_workers(workplace):
+    """
+    Makes list of workers unassigned to chosen workplace
+    :param workplace: chosen workplace
+    :return: list of workers
+    """
+    if current_user.access_level != "0" and current_user.access_level != "1":
+        flash("Użytkownik nie ma uprawnień do wyświetlenia tej strony")
+        return redirect(url_for("index"))
+    shop = Shop.query.filter_by(shopname=workplace).first()
+    workers_appended = shop.works.all()
+    workers_all = User.query.order_by(User.username).all()
+    workers = []
+    for worker in workers_all:
+        if worker not in workers_appended:
+            workers.append(worker)
+    jsondict = []
+    for worker in workers:
+        workers_list = {"name": worker.username}
+        jsondict.append(workers_list)
+    return jsonify({"workers": jsondict})
+
+
+# removes connection between worker and workplace
+@bp.route("/remove-user-from-shop", methods=["GET", "POST"])
+@login_required
+def remove_from_shop():
+    """
+    Removes link between worker and workplace.
+    """
+    if (current_user.access_level != "0") and (current_user.access_level != "1"):
+        flash("Użytkownik nie ma uprawnień do wyświetlenia tej strony")
+        return redirect(url_for("index"))
+
+    user = request.args.get("user")
+    workplace = request.args.get("workplace")
+    found_user = User.query.filter_by(username=user).first()
+    found_workplace = Shop.query.filter_by(shopname=workplace).first()
+    found_workplace.works.remove(found_user)
+    db.session.commit()
+    flash("Usunięto %s z %s" % (user, workplace))
+    return redirect(url_for("acc.worker_to_workplace"))

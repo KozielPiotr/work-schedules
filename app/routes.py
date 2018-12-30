@@ -10,8 +10,7 @@ from flask import render_template, flash, redirect, url_for, request, jsonify
 from flask_login import login_user, logout_user, current_user, login_required
 from werkzeug.urls import url_parse
 from app import app, db
-from app.forms import LoginForm, NewScheduleForm,\
-    BillingPeriod
+from app.forms import LoginForm, NewScheduleForm, BillingPeriod
 from app.models import User, Shop, Billing_period, Personal_schedule, Schedule
 
 
@@ -180,53 +179,6 @@ def static_proxy(path):
     Allows to send files between functions.
     """
     return app.send_static_file(path)
-
-
-# jsonifies data for dynamically generated checkboxes in worker_to_workplace()
-@app.route("/workplace-worker-connect/<workplace>")
-@login_required
-def worker_to_workplace_workers(workplace):
-    """
-    Makes list of workers unassigned to chosen workplace
-    :param workplace: chosen workplace
-    :return: list of workers
-    """
-    if current_user.access_level != "0" and current_user.access_level != "1":
-        flash("Użytkownik nie ma uprawnień do wyświetlenia tej strony")
-        return redirect(url_for("index"))
-    shop = Shop.query.filter_by(shopname=workplace).first()
-    workers_appended = shop.works.all()
-    workers_all = User.query.order_by(User.username).all()
-    workers = []
-    for worker in workers_all:
-        if worker not in workers_appended:
-            workers.append(worker)
-    jsondict = []
-    for worker in workers:
-        workers_list = {"name": worker.username}
-        jsondict.append(workers_list)
-    return jsonify({"workers": jsondict})
-
-
-# removes connection between worker and workplace
-@app.route("/remove-user-from-shop", methods=["GET", "POST"])
-@login_required
-def remove_from_shop():
-    """
-    Removes link between worker and workplace.
-    """
-    if (current_user.access_level != "0") and (current_user.access_level != "1"):
-        flash("Użytkownik nie ma uprawnień do wyświetlenia tej strony")
-        return redirect(url_for("index"))
-
-    user = request.args.get("user")
-    shop = request.args.get("shop")
-    found_user = User.query.filter_by(username=user).first()
-    found_workplace = Shop.query.filter_by(shopname=shop).first()
-    found_workplace.works.remove(found_user)
-    db.session.commit()
-    flash("Usunięto %s z %s" % (user, shop))
-    return redirect(url_for("worker_to_workplace"))
 
 
 # gets beginning and duration of billing period
