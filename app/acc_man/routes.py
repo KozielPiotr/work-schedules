@@ -1,14 +1,17 @@
 """
 Managing users accounts, workplaces and connections between them
+- new_user: creates new user
+- new_workplace: creates new
 """
 
 #-*- coding: utf-8 -*-
+# pylint: disable=no-member
 
 from flask import flash, redirect, url_for, render_template
 from flask_login import login_required, current_user
 from app import db
 from app.acc_man import bp
-from app.acc_man.forms import NewUserForm, NewShopForm, UserToShopForm
+from app.acc_man.forms import NewUserForm, NewWorkplaceForm, UserToShopForm
 from app.models import User, Shop
 
 
@@ -35,9 +38,9 @@ def new_user():
 
 
 # New workplace
-@bp.route("/new-shop", methods=["GET", "POST"])
+@bp.route("/new-workplace", methods=["GET", "POST"])
 @login_required
-def new_shop():
+def new_workplace():
     """
     Adds new workplace to database.
     """
@@ -45,14 +48,14 @@ def new_shop():
         flash("Użytkownik nie ma uprawnień do wyświetlenia tej strony")
         return redirect(url_for("index"))
 
-    form = NewShopForm()
+    form = NewWorkplaceForm()
     if form.validate_on_submit():
-        shop = Shop(shopname=form.shopname.data)
-        db.session.add(shop)
+        workplace = Shop(shopname=form.workplace_name.data)
+        db.session.add(workplace)
         db.session.commit()
         flash("Stworzono nowy sklep")
         return redirect(url_for("index"))
-    return render_template("new_shop.html", title="Grafiki - nowy sklep", form=form)
+    return render_template("new_workplace.html", title="Grafiki - nowy sklep", form=form)
 
 
 # Assigns user to the shop

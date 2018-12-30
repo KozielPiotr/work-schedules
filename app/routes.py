@@ -662,8 +662,8 @@ def filter_schedules_to_modify(year, month, workplace):
         print(schedules)
         if not schedules:
             return jsonify({"option": 0})
-        uri = url_for("accept_modify_schedule", schd=filtered.name, v=filtered.version, action="to_modify")
         filtered = find_latest_version_schd(schedules, workplace)
+        uri = url_for("accept_modify_schedule", schd=filtered.name, v=filtered.version, action="to_modify")
         return jsonify({"option": 1, "schedules": [{"url": uri, "name": filtered.name, "year": filtered.year,
                                                     "month": filtered.month, "workplace": filtered.workplace,
                                                     "version": filtered.version}]})

@@ -24,8 +24,8 @@ class NewUserForm(FlaskForm):
             raise ValidationError("Nazwa użytkownika zajęta")
 
 
-class NewShopForm(FlaskForm):
-    shopname = StringField("Kod sklepu", validators=[DataRequired(message="Pole wymagane")])
+class NewWorkplaceForm(FlaskForm):
+    workplace_name = StringField("Kod sklepu", validators=[DataRequired(message="Pole wymagane")])
     submit = SubmitField("Stwórz sklep")
 
     def validate_shopname(self, shopname):
