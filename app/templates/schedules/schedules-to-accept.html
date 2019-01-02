@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+{% extends "main/base.html" %}
 
 {% block styles %}
 <style>
@@ -37,7 +37,7 @@
         <div class="list-group">
             <h3>Grafiki czekające na zaakceptowanie</h3>
             {% for schedule in ua %}
-                <a href="{{ url_for('accept_modify_schedule', schd=schedule.name, v=schedule.version, action='to_accept') }}" class="list-group-item list-group-item-action">{{ schedule.workplace }} na {{ schedule.month }}.{{ schedule.year }} v_{{ schedule.version }}</a>
+                <a href="{{ url_for('schedules.accept_modify_schedule', schd=schedule.name, v=schedule.version, action='to_accept') }}" class="list-group-item list-group-item-action">{{ schedule.workplace }} na {{ schedule.month }}.{{ schedule.year }} v_{{ schedule.version }}</a>
             {% endfor %}
         </div>
     {% endif %}

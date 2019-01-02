@@ -27,8 +27,11 @@ app.register_blueprint(auth_bp)
 from app.billing_period import bp as b_per_bp
 app.register_blueprint(b_per_bp)
 
-from app import routes, models
+from app.schedules import bp as schedules_bp
+app.register_blueprint(schedules_bp)
 
+from app.main import bp as main_bp
+app.register_blueprint(main_bp)
 
 db.create_all()
 

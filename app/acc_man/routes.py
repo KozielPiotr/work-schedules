@@ -26,7 +26,7 @@ def new_user():
     """
     if current_user.access_level != "0" and current_user.access_level != "1":
         flash("Użytkownik nie ma uprawnień do wyświetlenia tej strony")
-        return redirect(url_for("index"))
+        return redirect(url_for("main.index"))
 
     form = NewUserForm()
     if form.validate_on_submit():
@@ -48,7 +48,7 @@ def new_workplace():
     """
     if current_user.access_level != "0" and current_user.access_level != "1":
         flash("Użytkownik nie ma uprawnień do wyświetlenia tej strony")
-        return redirect(url_for("index"))
+        return redirect(url_for("main.index"))
 
     form = NewWorkplaceForm()
     if form.validate_on_submit():
@@ -56,7 +56,7 @@ def new_workplace():
         db.session.add(workplace)
         db.session.commit()
         flash("Stworzono nowy sklep")
-        return redirect(url_for("index"))
+        return redirect(url_for("main.index"))
     return render_template("acc_man/new_workplace.html", title="Grafiki - nowy sklep", form=form)
 
 
@@ -69,7 +69,7 @@ def worker_to_workplace():
     """
     if current_user.access_level != "0" and current_user.access_level != "1":
         flash("Użytkownik nie ma uprawnień do wyświetlenia tej strony")
-        return redirect(url_for("index"))
+        return redirect(url_for("main.index"))
 
     form = UserToShopForm()
     workplaces = Shop.query.order_by(Shop.shopname).all()
@@ -111,7 +111,7 @@ def worker_to_workplace_workers(workplace):
     """
     if current_user.access_level != "0" and current_user.access_level != "1":
         flash("Użytkownik nie ma uprawnień do wyświetlenia tej strony")
-        return redirect(url_for("index"))
+        return redirect(url_for("main.index"))
     shop = Shop.query.filter_by(shopname=workplace).first()
     workers_appended = shop.works.all()
     workers_all = User.query.order_by(User.username).all()
@@ -135,7 +135,7 @@ def remove_from_shop():
     """
     if (current_user.access_level != "0") and (current_user.access_level != "1"):
         flash("Użytkownik nie ma uprawnień do wyświetlenia tej strony")
-        return redirect(url_for("index"))
+        return redirect(url_for("main.index"))
 
     user = request.args.get("user")
     workplace = request.args.get("workplace")

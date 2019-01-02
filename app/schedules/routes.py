@@ -1,16 +1,28 @@
 """
-Routes for whole project. Each function is described when it occurs.
+Routes for whole schedules part of project.
+- prev_schedule(): prepers dict with data to show schedule for previous month
+- list_of_schedules_acc_mod(): prepares list of schedules aviable for current user to accept or modify
+- new_schedule_find_workers(): jsonifies data for dynamicly generated checkboxes in new_schedule()
+- new_schedule_to_db(): adds schedule to database
+- unaccepted_schedules(): makes list of unaccepted schedule for current user
+- accept_modify_schedule(): creates modifiable template with schedule
+- modifiable_schedules(): makes list of schedules modifiable by current user
+- filter_schedules_to_modify(): jsonifies data for dynamicly generated filtered list of schedules in
+  modifiable_schedules()
 """
+
 #-*- coding: utf-8 -*-
 # pylint: disable=no-member
 
 import calendar
-from datetime import date, datetime
-from flask import render_template, flash, redirect, url_for, request, jsonify
+from datetime import datetime, date
+from flask import flash, redirect, url_for, render_template, jsonify, request
 from flask_login import current_user, login_required
-from app import app, db
-from app.forms import NewScheduleForm
-from app.models import User, Shop, Billing_period, Personal_schedule, Schedule
+from app import db
+from app.models import Personal_schedule, Schedule
+from app.schedules import bp
+from app.models import User, Shop, Billing_period
+from app.schedules.forms import NewScheduleForm
 
 
 # prepers dict with data to show schedule for previous month
@@ -113,42 +125,8 @@ def list_of_schedules_acc_mod(mod_acc):
     return schedules_list
 
 
-# main page
-@app.route("/")
-@app.route("/index")
-@login_required
-def index():
-    """
-    Main page.
-    """
-    return render_template("index.html", title="Grafiki")
-
-
-@app.route("/test", methods=["GET", "POST"])
-def test():
-    """
-    Test route. Needs to be removed in final version.
-    """
-    queries = []
-    months = Schedule.query.filter_by(month=11)
-    places = Schedule.query.filter_by(workplace="Sklep 1")
-    for month in months:
-        if month in places:
-            queries.append(month.name)
-    print(queries)
-    return "%s"
-
-
-@app.route("/<path:path>")
-def static_proxy(path):
-    """
-    Allows to send files between functions.
-    """
-    return app.send_static_file(path)
-
-
 # gets data for new schedule and creates new schedule template
-@app.route("/new-schedule", methods=["GET", "POST"])
+@bp.route("/new-schedule", methods=["GET", "POST"])
 @login_required
 def new_schedule():
     """
@@ -160,7 +138,7 @@ def new_schedule():
     """
     if current_user.access_level != "0" and current_user.access_level != "1" and current_user.access_level != "2":
         flash("Użytkownik nie ma uprawnień do wyświetlenia tej strony")
-        return redirect(url_for("index"))
+        return redirect(url_for("main.index"))
 
     workplaces = []
     workers_list = []
@@ -189,7 +167,7 @@ def new_schedule():
         check_schedule = Schedule.query.filter_by(name=schedule_name).first()
         if check_schedule is not None:
             flash("Taki grafik już istnieje")
-            redirect(url_for("index"))
+            redirect(url_for("main.index"))
         else:
             workers_to_schd = []
             for worker in form.workers.data:
@@ -198,9 +176,9 @@ def new_schedule():
             prev = prev_schedule(month, year, month_names, cal, workplace)
             print()
             try:
-                return render_template("empty_schedule.html", title="Grafiki - nowy grafik", workers=workers_to_schd,
-                                       shop=workplace, year=year, month=month, mn=month_name, cal=cal, wdn=weekday_names,
-                                       hours=hours, Billing_period=Billing_period,
+                return render_template("schedules/empty_schedule.html", title="Grafiki - nowy grafik",
+                                       workers=workers_to_schd, shop=workplace, year=year, month=month, mn=month_name,
+                                       cal=cal, wdn=weekday_names, hours=hours, Billing_period=Billing_period,
                                        prev_shdict=prev["prev_shdict"], prev_month=prev["month"],
                                        prev_month_name=prev["month_name"], prev_year=prev["year"],
                                        prev_hours=prev["hours"], prev_workers=prev["workers"],
@@ -209,11 +187,11 @@ def new_schedule():
                 flash("Sprawdź, czy jest ustawiony początek okresu rozliczeniowego")
             redirect(url_for("new_schedule"))
 
-    return render_template("new_schedule.html", title="Grafiki - nowy grafik", form=form)
+    return render_template("schedules/new_schedule.html", title="Grafiki - nowy grafik", form=form)
 
 
 # jsonifies data for dynamicly generated checkboxes in new_schedule()
-@app.route("/new-schedule/<workplace>")
+@bp.route("/new-schedule/<workplace>")
 @login_required
 def new_schedule_find_workers(workplace):
     """
@@ -224,7 +202,7 @@ def new_schedule_find_workers(workplace):
     """
     if current_user.access_level != "0" and current_user.access_level != "1" and current_user.access_level != "2":
         flash("Użytkownik nie ma uprawnień do wyświetlenia tej strony")
-        return redirect(url_for("index"))
+        return redirect(url_for("main.index"))
 
     shop = Shop.query.filter_by(shopname=workplace).first()
     workers = shop.works.all()
@@ -240,7 +218,7 @@ def new_schedule_find_workers(workplace):
 
 
 # adds schedule to db
-@app.route('/schedule-to-db/<action>', methods=['POST'])
+@bp.route('/schedule-to-db/<action>', methods=['POST'])
 @login_required
 def new_schedule_to_db(action):
     """
@@ -249,7 +227,7 @@ def new_schedule_to_db(action):
     """
     if current_user.access_level != "0" and current_user.access_level != "1" and current_user.access_level != "2":
         flash("Użytkownik nie ma uprawnień do wyświetlenia tej strony")
-        return redirect(url_for("index"))
+        return redirect(url_for("main.index"))
 
     def changes(old, new):
         changes_list = {}
@@ -298,7 +276,6 @@ def new_schedule_to_db(action):
             for j in changes_list[i]:
                 print(j)
 
-
     # adds individual schedules to db
     def ind_schedules_to_db(data, schedule, billing_period):
         """
@@ -327,7 +304,6 @@ def new_schedule_to_db(action):
         name="%s-%s-%s" % (data["main_data"]["year"], data["main_data"]["month"],
                            data["main_data"]["workplace"]), accepted=False).first()
 
-
     # Creates new unaccepted schedule or unaccepted version of existing schedule
     if action in ("send_v_0", "modify_existing"):
         print(action)
@@ -350,12 +326,11 @@ def new_schedule_to_db(action):
         if old is not None:
             changes(old, new)
 
-
     # Accepts schedule and increase it's version number, deletes unaccepted version from db
     elif action == "accept_new_v":
         if current_user.access_level != "0" and current_user.access_level != "1":
             flash("Użytkownik nie ma uprawnień do wyświetlenia tej strony")
-            return redirect(url_for("index"))
+            return redirect(url_for("main.index"))
 
         name = unaccepted_schedule.name
         year = unaccepted_schedule.year
@@ -380,10 +355,9 @@ def new_schedule_to_db(action):
         for ind_schedule in unaccepted_schedule.ind:
             db.session.delete(ind_schedule)
         db.session.delete(unaccepted_schedule)
+        db.session.commit()
 
-
-
-    return url_for("index")
+    return url_for("main.index")
     # except AttributeError:
     # return "1"
     # except:
@@ -391,24 +365,24 @@ def new_schedule_to_db(action):
 
 
 # makes list of unaccepted schedule for current user
-@app.route("/unaccepted_schedules", methods=["GET", "POST"])
+@bp.route("/unaccepted_schedules", methods=["GET", "POST"])
 @login_required
 def unaccepted_schedules():
     """
-    :return: shows list of every unaccepted schedules wchich current user can accept
+    :return: shows list of every unaccepted schedules which current user can accept
     """
     if (current_user.access_level != "0") and (current_user.access_level != "1"):
         flash("Użytkownik nie ma uprawnień do wyświetlenia tej strony")
-        return redirect(url_for("index"))
+        return redirect(url_for("main.index"))
 
     los = list_of_schedules_acc_mod(mod_acc=False)
 
-    return render_template("schedules-to-accept.html", title="Grafiki - niezaakceptowane grafiki", ua=los["schedules"],
-                           sn=los["nos"], Schedule=Schedule)
+    return render_template("schedules/schedules-to-accept.html", title="Grafiki - niezaakceptowane grafiki",
+                           ua=los["schedules"], sn=los["nos"], Schedule=Schedule)
 
 
 # creates modifiable template with schedule
-@app.route("/accept-schedule", methods=["GET", "POST"])
+@bp.route("/accept-schedule", methods=["GET", "POST"])
 @login_required
 def accept_modify_schedule():
     """
@@ -423,7 +397,7 @@ def accept_modify_schedule():
     if action == "to_accept":
         if (current_user.access_level != "0") and (current_user.access_level != "1"):
             flash("Użytkownik nie ma uprawnień do wyświetlenia tej strony")
-            return redirect(url_for("index"))
+            return redirect(url_for("main.index"))
         schedule = Schedule.query.filter_by(name=request.args.get("schd"), version=int(request.args.get("v")),
                                             accepted=False).first()
         title = "Grafiki - akceptacja grafiku"
@@ -431,13 +405,13 @@ def accept_modify_schedule():
         if (current_user.access_level != "0") and (current_user.access_level != "1") and\
                 (current_user.access_level != "2"):
             flash("Użytkownik nie ma uprawnień do wyświetlenia tej strony")
-            return redirect(url_for("index"))
+            return redirect(url_for("main.index"))
         schedule = Schedule.query.filter_by(name=request.args.get("schd"), version=int(request.args.get("v")),
                                             accepted=True).first()
         title = "Grafiki - modyfikacja grafiku"
     if not schedule:
         flash("Nie ma takiego grafiku")
-        return redirect(url_for("accept_modify_schedule"))
+        return redirect(url_for("schedules.accept_modify_schedule"))
     schedule_id = schedule.id
     workplace = schedule.workplace
     year = schedule.year
@@ -475,16 +449,16 @@ def accept_modify_schedule():
                 shdict["end-%s-%d-%02d-%02d" % (worker, year, month, day)] = end
                 shdict["event-%s-%d-%02d-%02d" % (worker, year, month, day)] = event
 
-    return render_template("accept-schedule.html", action=action, title=title, schedule=schedule, workplace=workplace,
-                           year=year, month=month, workers=workers, month_name=month_name, wdn=weekday_names, cal=cal,
-                           Billing_period=Billing_period, version=version, shdict=shdict, hours=hours,
-                           prev_shdict=prev["prev_shdict"], prev_month=prev["month"], prev_hours=prev["hours"],
-                           prev_month_name=prev["month_name"], prev_year=prev["year"], prev_workers=prev["workers"],
-                           workers_hours=prev["workers_hours"])
+    return render_template("schedules/accept-schedule.html", action=action, title=title, schedule=schedule,
+                           workplace=workplace, year=year, month=month, workers=workers, month_name=month_name,
+                           wdn=weekday_names, cal=cal, Billing_period=Billing_period, version=version, shdict=shdict,
+                           hours=hours, prev_shdict=prev["prev_shdict"], prev_month=prev["month"],
+                           prev_hours=prev["hours"], prev_month_name=prev["month_name"], prev_year=prev["year"],
+                           prev_workers=prev["workers"], workers_hours=prev["workers_hours"])
 
 
 # makes list of schedules modifiable by current user
-@app.route("/modifiable-schedules", methods=["GET", "POST"])
+@bp.route("/modifiable-schedules", methods=["GET", "POST"])
 @login_required
 def modifiable_schedules():
     """
@@ -492,16 +466,17 @@ def modifiable_schedules():
     """
     if (current_user.access_level != "0") and (current_user.access_level != "1") and (current_user.access_level != "2"):
         flash("Użytkownik nie ma uprawnień do wyświetlenia tej strony")
-        return redirect(url_for("index"))
+        return redirect(url_for("main.index"))
 
     month_names = ["Styczeń", "Luty", "Marzec", "Kwiecień", "Maj", "Czerwiec", "Lipiec", "Sierpień",
                    "Wrzesień", "Październik", "Listopad", "Grudzień"]
 
-    return render_template("schedules-to-modify.html", title="Grafiki - modyfikowalne grafiki", mn=month_names)
+    return render_template("schedules/schedules-to-modify.html", title="Grafiki - modyfikowalne grafiki",
+                           mn=month_names)
 
 
 # jsonifies data for dynamicly generated filtered list of schedules in modifiable_schedules()
-@app.route("/filter_schedules/<year>/<month>/<workplace>")
+@bp.route("/filter_schedules/<year>/<month>/<workplace>")
 @login_required
 def filter_schedules_to_modify(year, month, workplace):
     """
@@ -513,7 +488,7 @@ def filter_schedules_to_modify(year, month, workplace):
     """
     if current_user.access_level != "0" and current_user.access_level != "1" and current_user.access_level != "2":
         flash("Użytkownik nie ma uprawnień do wyświetlenia tej strony")
-        return redirect(url_for("index"))
+        return redirect(url_for("main.index"))
 
     schedules = Schedule.query.filter_by(year=int(year), month=int(month), workplace=workplace, accepted=True).all()
 
@@ -541,7 +516,7 @@ def filter_schedules_to_modify(year, month, workplace):
         if not schedules:
             return jsonify({"option": 0})
         filtered = find_latest_version_schd(schedules, workplace)
-        uri = url_for("accept_modify_schedule", schd=filtered.name, v=filtered.version, action="to_modify")
+        uri = url_for("schedules.accept_modify_schedule", schd=filtered.name, v=filtered.version, action="to_modify")
         return jsonify({"option": 1, "schedules": [{"url": uri, "name": filtered.name, "year": filtered.year,
                                                     "month": filtered.month, "workplace": filtered.workplace,
                                                     "version": filtered.version}]})
@@ -554,7 +529,8 @@ def filter_schedules_to_modify(year, month, workplace):
         if schedules:
             filtered = find_latest_version_schd(schedules, users_workplace.shopname)
             if filtered is not None:
-                uri = url_for("accept_modify_schedule", schd=filtered.name, v=filtered.version, action="to_modify")
+                uri = url_for("schedules.accept_modify_schedule", schd=filtered.name, v=filtered.version,
+                              action="to_modify")
                 json_schedules.append({"url": uri, "name": filtered.name, "year": filtered.year, "month": filtered.month,
                                        "workplace": filtered.workplace, "version": filtered.version})
     if not json_schedules:

@@ -1,4 +1,9 @@
+"""
+Allows to set beginning of counting billing periods and length of it in months.
+"""
+
 #-*- coding: utf-8 -*-
+# pylint: disable=no-member
 
 from datetime import datetime
 from flask import flash, redirect, url_for, render_template
@@ -18,7 +23,7 @@ def billing_period():
     """
     if (current_user.access_level != "0") and (current_user.access_level != "1"):
         flash("Użytkownik nie ma uprawnień do wyświetlenia tej strony")
-        return redirect(url_for("index"))
+        return redirect(url_for("main.index"))
 
     form = BillingPeriod()
 
@@ -42,6 +47,6 @@ def billing_period():
         db.session.commit()
         flash("Zmieniono okres rozliczeniowy na: Początek: %s Długość: %s" % ("{:%d - %m - %Y}".format(begin),
                                                                               duration))
-        return redirect(url_for("index"))
+        return redirect(url_for("main.index"))
     return render_template("billing_period/billing_period.html", title="Grafiki - okres rozliczeniowy", form=form,
                            cur_begin=cur_begin, cur_duration=cur_duration)

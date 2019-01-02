@@ -22,7 +22,7 @@
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav navbar-right">
                     <li class="nav-item active">
-                        <a href="{{ url_for('index') }}" class="nav-link m-2 menu-item nav-active">Główna</a>
+                        <a href="{{ url_for('main.index') }}" class="nav-link m-2 menu-item nav-active">Główna</a>
                     </li>
                     <li class="nav-item">
                         {% if current_user.is_anonymous %}

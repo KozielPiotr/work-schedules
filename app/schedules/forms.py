@@ -1,21 +1,15 @@
 #-*- coding: utf-8 -*-
 
+
 from flask_wtf import FlaskForm
-from wtforms import BooleanField, SubmitField, SelectField, IntegerField, SelectMultipleField
+from wtforms import SubmitField, SelectField, IntegerField, SelectMultipleField
 from wtforms.validators import DataRequired
 from wtforms.widgets import ListWidget, CheckboxInput
-
-class BooleanSubField(BooleanField):
-    def process_data(self, value):
-        if isinstance(value, BooleanField):
-            self.data = value.data
-        else:
-            self.data = bool(value)
-
 
 class MultiCheckboxField(SelectMultipleField):
     widget = ListWidget(prefix_label=False)
     option_widget = CheckboxInput()
+
 
 class NewScheduleForm(FlaskForm):
     workplace = SelectField("Sklep: ")
