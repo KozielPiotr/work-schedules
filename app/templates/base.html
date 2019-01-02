@@ -26,9 +26,9 @@
                     </li>
                     <li class="nav-item">
                         {% if current_user.is_anonymous %}
-                        <a href="{{ url_for('login') }}" class="nav-link m-2 menu-item">Zaloguj</a>
+                        <a href="{{ url_for('auth.login') }}" class="nav-link m-2 menu-item">Zaloguj</a>
                         {% else %}
-                        <a href="{{ url_for('logout') }}" class="nav-link m-2 menu-item">Wyloguj {{ current_user.username }}</a>
+                        <a href="{{ url_for('auth.logout') }}" class="nav-link m-2 menu-item">Wyloguj {{ current_user.username }}</a>
                         {% endif %}
                     </li>
                 </ul>

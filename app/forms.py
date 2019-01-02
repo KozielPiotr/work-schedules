@@ -1,16 +1,12 @@
 #-*- coding: utf-8 -*-
 
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, BooleanField, SubmitField, SelectField, IntegerField, SelectMultipleField
+from wtforms import BooleanField, SubmitField, SelectField, IntegerField, SelectMultipleField
 from wtforms.validators import DataRequired
 from wtforms.widgets import ListWidget, CheckboxInput
 
 
-class LoginForm(FlaskForm):
-    username = StringField("Użytkownik", validators=[DataRequired(message="Pole wymagane")])
-    password = PasswordField("Hasło", validators=[DataRequired(message="Pole wymagane")])
-    remember_me = BooleanField("Zapamiętaj")
-    submit = SubmitField("Zaloguj")
+
 
 
 class BooleanSubField(BooleanField):
