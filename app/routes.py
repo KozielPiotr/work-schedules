@@ -9,7 +9,7 @@ from datetime import date, datetime
 from flask import render_template, flash, redirect, url_for, request, jsonify
 from flask_login import current_user, login_required
 from app import app, db
-from app.forms import NewScheduleForm, BillingPeriod
+from app.forms import NewScheduleForm
 from app.models import User, Shop, Billing_period, Personal_schedule, Schedule
 
 
@@ -145,46 +145,6 @@ def static_proxy(path):
     Allows to send files between functions.
     """
     return app.send_static_file(path)
-
-
-# gets beginning and duration of billing period
-@app.route("/billing-period", methods=["GET", "POST"])
-@login_required
-def billing_period():
-    """
-    Allows to set beginning of counting billing periods and length of it in months.
-    """
-    if (current_user.access_level != "0") and (current_user.access_level != "1"):
-        flash("Użytkownik nie ma uprawnień do wyświetlenia tej strony")
-        return redirect(url_for("index"))
-    form = BillingPeriod()
-    if Billing_period.query.filter_by(id=1).first() is None:
-        cur_begin = 1
-    else:
-        cur_begin = "{: %d - %m - %Y}".format(Billing_period.query.filter_by(id=1).first().begin)
-
-    if Billing_period.query.filter_by(id=1).first() is None:
-        cur_duration = 3
-    else:
-        cur_duration = Billing_period.query.filter_by(id=1).first().duration
-
-    if form.validate_on_submit():
-        begin = datetime(int(form.begin_year.data), int(form.begin_month.data), 1)
-        duration = form.length_of_billing_period.data
-        if not Billing_period.query.all() == 0:
-            b_p = Billing_period(begin=begin, duration=duration)
-            db.session.add(b_p)
-            db.session.commit()
-        else:
-            b_p = Billing_period
-            b_p.query.filter_by(id=1).all()[0].begin = begin
-            b_p.query.filter_by(id=1).all()[0].duration = duration
-            db.session.commit()
-        flash("Zmieniono okres rozliczeniowy na: Początek: %s Długość: %s" % ("{:%d - %m - %Y}".format(begin),
-                                                                              duration))
-        return redirect(url_for("index"))
-    return render_template("billing_period.html", title="Grafiki - okres rozliczeniowy", form=form,
-                           cur_begin=cur_begin, cur_duration=cur_duration)
 
 
 # gets data for new schedule and creates new schedule template
