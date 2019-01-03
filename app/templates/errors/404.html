@@ -1,7 +1,7 @@
-{% extends "base.html" %}
+{% extends "main/base.html" %}
 
 {% block content %}
     <h1>Ni ma</h1>
     <p>Albo się tworzy, albo Beema nie dowiózł pakietów.</p>
-    <p><a href="{{ url_for('index') }}">Strona główna</a></p>
+    <p><a href="{{ url_for('main.index') }}">Strona główna</a></p>
 {% endblock %}

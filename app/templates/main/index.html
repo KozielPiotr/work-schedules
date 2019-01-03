@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+{% extends "main/base.html" %}
 
 {% block styles %}
 <link href="{{ url_for('static', filename='css/table.css') }}" rel="stylesheet">
@@ -15,10 +15,10 @@
             <div class="card-body">
                 <h5 class="card-title">Administrator</h5>
             <ul class="list-group list-group-flush">
-                <li class="list-group-item"><a href="{{ url_for('billing_period') }}" class="btn btn-primary btn-lg btn-block">Określenie okresu rozliczeniowego</a></li>
-                <li class="list-group-item"><a href="{{ url_for('new_user') }}" class="btn btn-primary btn-lg btn-block">Nowy użytkownik</a></li>
-                <li class="list-group-item"><a href="{{ url_for('new_shop') }}" class="btn btn-primary btn-lg btn-block">Nowy sklep</a></li>
-                <li class="list-group-item"><a href="{{ url_for('worker_to_workplace') }}" class="btn btn-primary btn-lg btn-block">Powiązania użytkownik - sklep</a></li>
+                <li class="list-group-item"><a href="{{ url_for('b_per.billing_period') }}" class="btn btn-primary btn-lg btn-block">Określenie okresu rozliczeniowego</a></li>
+                <li class="list-group-item"><a href="{{ url_for('acc.new_user') }}" class="btn btn-primary btn-lg btn-block">Nowy użytkownik</a></li>
+                <li class="list-group-item"><a href="{{ url_for('acc.new_workplace') }}" class="btn btn-primary btn-lg btn-block">Nowy sklep</a></li>
+                <li class="list-group-item"><a href="{{ url_for('acc.worker_to_workplace') }}" class="btn btn-primary btn-lg btn-block">Powiązania użytkownik - sklep</a></li>
             </ul>
             </div>
         </div>
@@ -28,7 +28,7 @@
             <div class="card-body">
                 <h5 class="card-title">Kierownik działu</h5>
             <ul class="list-group list-group-flush">
-                <li class="list-group-item"><a href="{{ url_for('unaccepted_schedules') }}" class="btn btn-primary btn-lg btn-block">Akceptowanie grafików</a></li>
+                <li class="list-group-item"><a href="{{ url_for('schedules.unaccepted_schedules') }}" class="btn btn-primary btn-lg btn-block">Akceptowanie grafików</a></li>
             </ul>
             </div>
         </div>
@@ -38,8 +38,8 @@
             <div class="card-body">
                 <h5 class="card-title ">Kierownik</h5>
             <ul class="list-group list-group-flush">
-                <li class="list-group-item"><a href="{{ url_for('new_schedule') }}" class="btn btn-primary btn-lg btn-block">Nowy grafik</a></li>
-                <li class="list-group-item"><a href="{{ url_for('modifiable_schedules') }}" class="btn btn-primary btn-lg btn-block">Modyfikuj grafik</a></li>
+                <li class="list-group-item"><a href="{{ url_for('schedules.new_schedule') }}" class="btn btn-primary btn-lg btn-block">Nowy grafik</a></li>
+                <li class="list-group-item"><a href="{{ url_for('schedules.modifiable_schedules') }}" class="btn btn-primary btn-lg btn-block">Modyfikuj grafik</a></li>
             </ul>
             </div>
         </div>

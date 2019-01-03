@@ -1,13 +1,14 @@
 #-*- coding: utf-8 -*-
 
-from app import db, login
 from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
+from app import db, login
+
 
 
 workplaces = db.Table("workplaces",
-                     db.Column("worker", db.Integer, db.ForeignKey("user.id")),
-                     db.Column("workplace", db.Integer, db.ForeignKey("shop.id")))
+                      db.Column("worker", db.Integer, db.ForeignKey("user.id")),
+                      db.Column("workplace", db.Integer, db.ForeignKey("shop.id")))
 
 
 class User(UserMixin, db.Model):
@@ -51,7 +52,7 @@ class Schedule(db.Model):
     month = db.Column(db.Integer)
     workplace = db.Column(db.String)
     hrs_to_work = db.Column(db.Integer, index=True, nullable=False, default=0)
-    accepted = db.Column(db.Boolean, index=True, nullable=False, default = False)
+    accepted = db.Column(db.Boolean, index=True, nullable=False, default=False)
     billing_period = db.Column(db.Integer, index=True, nullable=False, default=0)
     version = db.Column(db.Integer, index=True, nullable=False, default=0)
     ind = db.relationship("Personal_schedule", backref="includes")
@@ -70,5 +71,3 @@ class Personal_schedule(db.Model):
     billing_period = db.Column(db.Integer, index=True, nullable=False, default=0)
     billing_week = db.Column(db.Integer, index=True, nullable=False, default=0)
     includes_id = db.Column(db.Integer, db.ForeignKey("schedule.id"))
-
-

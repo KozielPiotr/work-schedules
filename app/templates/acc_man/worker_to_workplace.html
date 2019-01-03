@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+{% extends "main/base.html" %}
 
 {% block styles %}
 <style>
@@ -47,7 +47,7 @@ caption {
                 </button>
                 <div class="dropdown-menu" aria-labelledby="{{ workplace }}">
                     {% for worker in workplace.works %}
-                        <a href="{{ url_for('remove_from_shop', user=worker, shop=workplace) }}" class="btn btn-secondary btn-sm btn-block">{{ worker }}</a>
+                        <a href="{{ url_for('acc.remove_from_shop', user=worker, workplace=workplace) }}" class="btn btn-secondary btn-sm btn-block">{{ worker }}</a>
                     {% endfor %}
                 </div>
             </div>
