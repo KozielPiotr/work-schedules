@@ -7,8 +7,9 @@ Routes for whole schedules part of project.
 - unaccepted_schedules(): makes list of unaccepted schedule for current user
 - accept_modify_schedule(): creates modifiable template with schedule
 - modifiable_schedules(): makes list of schedules modifiable by current user
-- filter_schedules_to_modify(): jsonifies data for dynamicly generated filtered list of schedules in
+- filter_schedules_to_modify(): jsonifies data for dynamically generated filtered list of schedules in
   modifiable_schedules()
+- remove_schedule(): removes schedule from db
 """
 
 #-*- coding: utf-8 -*-
@@ -19,9 +20,8 @@ from datetime import datetime, date
 from flask import flash, redirect, url_for, render_template, jsonify, request
 from flask_login import current_user, login_required
 from app import db
-from app.models import Personal_schedule, Schedule
 from app.schedules import bp
-from app.models import User, Shop, Billing_period
+from app.models import User, Shop, Billing_period, Schedule, Personal_schedule
 from app.schedules.forms import NewScheduleForm
 
 
@@ -472,10 +472,10 @@ def modifiable_schedules():
                    "Wrzesień", "Październik", "Listopad", "Grudzień"]
 
     return render_template("schedules/schedules-to-modify.html", title="Grafiki - modyfikowalne grafiki",
-                           mn=month_names)
+                           mn=month_names, Schedule=Schedule)
 
 
-# jsonifies data for dynamicly generated filtered list of schedules in modifiable_schedules()
+# jsonifies data for dynamically generated filtered list of schedules in modifiable_schedules()
 @bp.route("/filter_schedules/<year>/<month>/<workplace>")
 @login_required
 def filter_schedules_to_modify(year, month, workplace):
@@ -492,7 +492,6 @@ def filter_schedules_to_modify(year, month, workplace):
 
     schedules = Schedule.query.filter_by(year=int(year), month=int(month), workplace=workplace, accepted=True).all()
 
-
     # finds latest version of
     def find_latest_version_schd(schedules, workplace):
         """
@@ -508,7 +507,6 @@ def filter_schedules_to_modify(year, month, workplace):
         filtered = Schedule.query.filter_by(year=int(year), month=int(month), workplace=workplace,
                                             version=highest_version, accepted=True).first()
         return filtered
-
 
     if workplace != "0":
         print("dla jednego sklepu")
@@ -531,8 +529,36 @@ def filter_schedules_to_modify(year, month, workplace):
             if filtered is not None:
                 uri = url_for("schedules.accept_modify_schedule", schd=filtered.name, v=filtered.version,
                               action="to_modify")
-                json_schedules.append({"url": uri, "name": filtered.name, "year": filtered.year, "month": filtered.month,
-                                       "workplace": filtered.workplace, "version": filtered.version})
+                json_schedules.append({"url": uri, "name": filtered.name, "year": filtered.year,
+                                       "month": filtered.month, "workplace": filtered.workplace,
+                                       "version": filtered.version})
     if not json_schedules:
         return jsonify({"option": 0})
     return jsonify({"option": 1, "schedules": json_schedules})
+
+
+# removes schedule from db
+@bp.route('/remove-schedule/<schedule>', methods=["GET", "POST"])
+@login_required
+def remove_schedule(schedule):
+    """
+    Removes schedule with passed id from db
+    """
+    if current_user.access_level != "0" and current_user.access_level != "1" and current_user.access_level != "2":
+        flash("Użytkownik nie ma uprawnień do wyświetlenia tej strony")
+        return redirect(url_for("main.index"))
+
+    schedule_to_remove = Schedule.query.filter_by(id=schedule).first()
+
+    if schedule_to_remove is not None:
+        for pers_schedule in schedule_to_remove.ind:
+            db.session.delete(pers_schedule)
+        db.session.delete(schedule_to_remove)
+        db.session.commit()
+        flash("Usunięto niezaakceptowaną propozycję grafiku %s na %s.%s v_%s" % (schedule_to_remove.workplace, schedule_to_remove.month,
+                                                    schedule_to_remove.year, schedule_to_remove.version))
+        return redirect(url_for("schedules.modifiable_schedules"))
+    else:
+        flash("Nie ma takiego grafiku")
+        return redirect(url_for("schedules.modifiable_schedules"))
+

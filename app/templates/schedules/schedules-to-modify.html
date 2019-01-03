@@ -28,27 +28,42 @@
 {% endblock %}
 
 {% block content %}
-        <div class="list-group">
-            <h3>Grafiki możliwe do modyfikacji</h3>
-            <form method="post" action="#">
-                <h5>Rok: <input id="year" type="number" value="2018"><br><br>
-                    Miesiąc:
-                    <select id="month">
-                        {% for number in range(1,13) %}
-                            <option value="{{ number }}">{{ mn[number-1] }}</option>
-                        {% endfor %}
-                    </select><br><br>
-                    Sklep:
-                    <select id="workplace">
-                            <option value="0">Wszystkie</option>
-                        {% for user_workplace in current_user.workers_shop %}
-                            <option value="{{ user_workplace }}">{{ user_workplace }}</option>
-                        {% endfor %}
-                    </select><br><br>
-                    <button id="find-schedules" type="button">Szukaj</button>
-                </h5><br>
-            </form>
-            <div id="list" class="list-group">
-            </div>
-        </div>
+<div class="list-group">
+    <h3>Grafiki możliwe do modyfikacji</h3>
+    <form method="post" action="#">
+        <h5>Rok: <input id="year" type="number" value="2018"><br><br>
+            Miesiąc:
+            <select id="month">
+                {% for number in range(1,13) %}
+                    <option value="{{ number }}">{{ mn[number-1] }}</option>
+                {% endfor %}
+            </select><br><br>
+            Sklep:
+            <select id="workplace">
+                    <option value="0">Wszystkie</option>
+                {% for user_workplace in current_user.workers_shop %}
+                    <option value="{{ user_workplace }}">{{ user_workplace }}</option>
+                {% endfor %}
+            </select><br><br>
+            <button id="find-schedules" type="button">Szukaj</button>
+        </h5><br>
+    </form>
+    <div id="list" class="list-group">
+    </div>
+</div>
+<hr>
+<br>
+<div class="list-group">
+    <h3>Grafiki wysłane do modyfikacji, a jeszcze niezaakceptowane</h3>
+    <h4>Kliknij, żeby usunąć</h4>
+    {% for workplace in current_user.workers_shop %}
+        <div id="list-2" class="list-group">
+        {% for schedule in Schedule.query.filter_by(workplace=workplace.shopname, accepted=False).all() %}<br>
+            <a href="{{ url_for('schedules.remove_schedule', schedule=schedule.id) }}" class="list-group-item list-group-item-action">
+                {{ schedule.workplace }} na {{ schedule.month }}.{{ schedule.year }} v_{{ schedule.version}}
+            </a>`
+        {% endfor %}
+    {% endfor %}
+
+</div>
 {% endblock %}
