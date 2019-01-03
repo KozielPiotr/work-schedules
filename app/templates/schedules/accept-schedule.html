@@ -148,17 +148,26 @@
     {% elif action == "to_modify" %}
         <form method="post" action="/schedule-to-db/modify_existing">
     {% endif %}
-        <div id="check-accept-btns">
-            <div id="accept-btn">
+        <div class="menu">
+            <div class="btn-group" role="group">
                 <button id="submit-schedule-btn" type="submit" class="btn btn-primary btn-sm">Akceptuj grafik</button>
             </div>
-            <div id="check-btn">
+            <div class="btn-group" role="group">
                 <button id="check-schedule-btn" type="button" class="btn btn-primary btn-sm">Sprawdź poprawność grafiku</button>
             </div>
+            {% if action == "to_accept" %}
+                <div class="btn-group" role="group">
+                    <button type="button" class="btn btn-primary btn-sm">
+                        <a href="{{ url_for('schedules.remove_schedule', schedule=id) }}" class="btn-primary btn-sm">Odrzuć grafik</a>
+                    </button>
+                </div>
+            {% endif %}
         </div>
 
         <table class="new-schedule-table table-bordered">
-            <caption class="caption">Tworzenie grafiku dla <b>{{ workplace }}</b> na rok <b><span id="cur-year">{{ year }}</span></b>, miesiąc <b><span id="cur-month">{{ month }}</span>{{ month_name }}</b>, <b><span id="month-of-billing-period"></span></b> miesiąc okresu rozliczeniowego.</caption>
+            <caption class="caption">
+                Tworzenie grafiku dla <b>{{ workplace }}</b> na rok <b><span id="cur-year">{{ year }}</span></b>, miesiąc <b><span id="cur-month">{{ month }}</span>{{ month_name }}</b>, <b><span id="month-of-billing-period"></span></b> miesiąc okresu rozliczeniowego.
+            </caption>
     <!-- headers with shop, month, workers -->
             <thead>
             <tr id="hidden-data">

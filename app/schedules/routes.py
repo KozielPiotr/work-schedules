@@ -454,7 +454,7 @@ def accept_modify_schedule():
                            wdn=weekday_names, cal=cal, Billing_period=Billing_period, version=version, shdict=shdict,
                            hours=hours, prev_shdict=prev["prev_shdict"], prev_month=prev["month"],
                            prev_hours=prev["hours"], prev_month_name=prev["month_name"], prev_year=prev["year"],
-                           prev_workers=prev["workers"], workers_hours=prev["workers_hours"])
+                           prev_workers=prev["workers"], workers_hours=prev["workers_hours"], id=schedule.id)
 
 
 # makes list of schedules modifiable by current user
@@ -557,8 +557,8 @@ def remove_schedule(schedule):
         db.session.commit()
         flash("Usunięto niezaakceptowaną propozycję grafiku %s na %s.%s v_%s" % (schedule_to_remove.workplace, schedule_to_remove.month,
                                                     schedule_to_remove.year, schedule_to_remove.version))
-        return redirect(url_for("schedules.modifiable_schedules"))
+        return redirect(url_for("main.index"))
     else:
         flash("Nie ma takiego grafiku")
-        return redirect(url_for("schedules.modifiable_schedules"))
+        return redirect(url_for("main.index"))
 
