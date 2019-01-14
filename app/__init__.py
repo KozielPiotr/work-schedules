@@ -33,5 +33,6 @@ app.register_blueprint(schedules_bp)
 from app.main import bp as main_bp
 app.register_blueprint(main_bp)
 
+from app import models
 db.create_all()
 

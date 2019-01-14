@@ -5,7 +5,7 @@ $(document).ready(function() {
         let year = $("#year").val();
         let month = $("#month").val();
         let workplace = $("#workplace").val();
-        fetch("/filter_schedules/" + year + "/" + month + "/" + workplace).then(function(response) {
+        fetch("/filter-schedules/" + year + "/" + month + "/" + workplace).then(function(response) {
             response.json().then(function(data) {
                 let listHTML = "";
                 console.log(data.schedules)

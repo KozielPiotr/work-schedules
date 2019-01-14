@@ -155,6 +155,9 @@
             <div class="btn-group" role="group">
                 <button id="check-schedule-btn" type="button" class="btn btn-primary btn-sm">Sprawdź poprawność grafiku</button>
             </div>
+            <div class="btn-group" role="group">
+                <button id="add-user-btn" type="button" class="btn btn-primary btn-sm">Dodaj pracownika</button>
+            </div>
             {% if action == "to_accept" %}
                 <div class="btn-group" role="group">
                     <button type="button" class="btn btn-primary btn-sm">
@@ -181,6 +184,9 @@
                 </td>
                 <td id="version">
                     <input name="version" value="{{ version }}">
+                </td>
+                <td id="schedule-id">
+                    <input name="id" value="{{ id }}">
                 </td>
             </tr>
             <tr id="workers-names">

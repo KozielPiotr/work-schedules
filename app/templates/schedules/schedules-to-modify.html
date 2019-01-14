@@ -61,7 +61,7 @@
         {% for schedule in Schedule.query.filter_by(workplace=workplace.shopname, accepted=False).all() %}<br>
             <a href="{{ url_for('schedules.remove_schedule', schedule=schedule.id) }}" class="list-group-item list-group-item-action">
                 {{ schedule.workplace }} na {{ schedule.month }}.{{ schedule.year }} v_{{ schedule.version}}
-            </a>`
+            </a>
         {% endfor %}
     {% endfor %}
 

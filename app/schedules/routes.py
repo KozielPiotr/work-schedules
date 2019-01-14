@@ -10,6 +10,7 @@ Routes for whole schedules part of project.
 - filter_schedules_to_modify(): jsonifies data for dynamically generated filtered list of schedules in
   modifiable_schedules()
 - remove_schedule(): removes schedule from db
+- add_user_to_schedule(): adds user to existing schedule
 """
 
 #-*- coding: utf-8 -*-
@@ -392,7 +393,6 @@ def accept_modify_schedule():
     action = request.args.get("action")
     schedule = None
     title = "Grafiki"
-    print(action)
 
     if action == "to_accept":
         if (current_user.access_level != "0") and (current_user.access_level != "1"):
@@ -476,7 +476,7 @@ def modifiable_schedules():
 
 
 # jsonifies data for dynamically generated filtered list of schedules in modifiable_schedules()
-@bp.route("/filter_schedules/<year>/<month>/<workplace>")
+@bp.route("/filter-schedules/<year>/<month>/<workplace>")
 @login_required
 def filter_schedules_to_modify(year, month, workplace):
     """
@@ -555,10 +555,54 @@ def remove_schedule(schedule):
             db.session.delete(pers_schedule)
         db.session.delete(schedule_to_remove)
         db.session.commit()
-        flash("Usunięto niezaakceptowaną propozycję grafiku %s na %s.%s v_%s" % (schedule_to_remove.workplace, schedule_to_remove.month,
-                                                    schedule_to_remove.year, schedule_to_remove.version))
-        return redirect(url_for("main.index"))
-    else:
-        flash("Nie ma takiego grafiku")
+        flash("Usunięto niezaakceptowaną propozycję grafiku %s na %s.%s v_%s" % (schedule_to_remove.workplace,
+                                                                                 schedule_to_remove.month,
+                                                                                 schedule_to_remove.year,
+                                                                                 schedule_to_remove.version))
         return redirect(url_for("main.index"))
 
+    flash("Nie ma takiego grafiku")
+    return redirect(url_for("main.index"))
+
+
+# adds user to existing schedule
+@bp.route('/add-user-to-schedule/<schedule_id>/<worker>', methods=["GET", "POST"])
+@login_required
+def add_user_to_schedule(schedule_id, worker):
+    """
+    :param schedule_id: schedule, to which worker should be appended
+    :param worker: worker that will be added to schedule
+    :return: redirects to template with new worker added
+    """
+
+    schedule = Schedule.query.filter_by(id=schedule_id).first()
+    worker = worker
+    cal = calendar.Calendar()
+    workplace = schedule.workplace
+
+    schedule_workers = []
+    for ind_schedule in schedule.ind:
+        if ind_schedule.worker not in schedule_workers:
+            schedule_workers.append(ind_schedule.worker)
+
+    workers = []
+    for employee in Shop.query.filter_by(shopname=workplace).first().works.all():
+        workers.append(str(employee))
+
+    if worker in workers and worker not in schedule_workers:
+        for day in cal.itermonthdays(schedule.year, schedule.month):
+            if day > 0:
+                schedule_date = date(schedule.year, schedule.month, day)
+                name = "%s-%s-%s" % (schedule_date, worker, schedule.workplace)
+                pers_schedule = Personal_schedule(name=name, date=schedule_date, worker=worker, begin_hour=0, end_hour=0,
+                                                  hours_sum=0, event="off", workplace=workplace,
+                                                  includes_id=schedule.id)
+                db.session.add(pers_schedule)
+        db.session.commit()
+    elif worker not in workers:
+        flash("Taki pracownik nie jest przypisany do tego miejsa pracy")
+    elif worker in schedule_workers:
+        flash("Taki pracownik jest już w tym grafiku")
+
+    return redirect(url_for("schedules.accept_modify_schedule", action="to_accept", schd=schedule.name,
+                            v=schedule.version))

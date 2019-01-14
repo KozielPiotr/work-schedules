@@ -68,6 +68,6 @@ class Personal_schedule(db.Model):
     hours_sum = db.Column(db.Integer)
     event = db.Column(db.String)
     workplace = db.Column(db.String)
-    billing_period = db.Column(db.Integer, index=True, nullable=False, default=0)
-    billing_week = db.Column(db.Integer, index=True, nullable=False, default=0)
+    billing_period = db.Column(db.Integer, index=True, nullable=True, default=0)
+    billing_week = db.Column(db.Integer, index=True, nullable=True, default=0)
     includes_id = db.Column(db.Integer, db.ForeignKey("schedule.id"))

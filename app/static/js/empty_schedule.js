@@ -499,6 +499,19 @@ $(document).ready(function() {
 });
 
 
+//adds worker to schedule
+$(document).ready(function() {
+    $("#add-user-btn").click(function() {
+        let id = $("td[id='schedule-id']").find("input[name='id']").val();
+        let worker = prompt("Wpisz imię i nazwisko pracownika");
+
+        window.location.replace("/add-user-to-schedule/" + id + "/" + worker);
+        //fetch("/add-user-to-schedule/" + id + "/" + worker).then(function(response) {
+        //console.log(response);
+    });
+});
+
+
 //counts sum of hours worked by worker in day
 $(document).ready(function() {
     $("td[id^='begin-'], td[id^='end-'], td[id^='event-']").change(function() {
