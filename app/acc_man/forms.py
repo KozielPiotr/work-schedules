@@ -6,9 +6,6 @@ from wtforms.validators import DataRequired, ValidationError, EqualTo
 from app.models import User, Shop
 
 
-
-
-
 class NewUserForm(FlaskForm):
     username = StringField("Nazwa użytkownika", validators=[DataRequired(message="Pole wymagane")])
     password = PasswordField("Hasło", validators=[DataRequired(message="Pole wymagane")])
@@ -38,3 +35,4 @@ class UserToShopForm(FlaskForm):
     workplace = SelectField("Wybierz sklep")
     worker = SelectField("Wybierz użytkownika")
     submit = SubmitField("Przydziel")
+

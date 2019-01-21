@@ -175,7 +175,6 @@ def new_schedule():
                 workers_to_schd.append(str(worker).replace(" ", "_"))
 
             prev = prev_schedule(month, year, month_names, cal, workplace)
-            print()
             try:
                 return render_template("schedules/empty_schedule.html", title="Grafiki - nowy grafik",
                                        workers=workers_to_schd, shop=workplace, year=year, month=month, mn=month_name,
