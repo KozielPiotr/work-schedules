@@ -566,12 +566,13 @@ def remove_schedule(schedule):
 
 
 # adds user to existing schedule
-@bp.route('/add-user-to-schedule/<schedule_id>/<worker>', methods=["GET", "POST"])
+@bp.route('/add-user-to-schedule/<schedule_id>/<worker>/<action>', methods=["GET", "POST"])
 @login_required
-def add_user_to_schedule(schedule_id, worker):
+def add_user_to_schedule(schedule_id, worker, action):
     """
     :param schedule_id: schedule, to which worker should be appended
     :param worker: worker that will be added to schedule
+    :param action: determines if modifying or accepting schedule
     :return: redirects to template with new worker added
     """
 
@@ -604,5 +605,5 @@ def add_user_to_schedule(schedule_id, worker):
     elif worker in schedule_workers:
         flash("Taki pracownik jest już w tym grafiku")
 
-    return redirect(url_for("schedules.accept_modify_schedule", action="to_accept", schd=schedule.name,
+    return redirect(url_for("schedules.accept_modify_schedule", action=action, schd=schedule.name,
                             v=schedule.version))

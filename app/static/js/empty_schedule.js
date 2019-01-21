@@ -504,10 +504,9 @@ $(document).ready(function() {
     $("#add-user-btn").click(function() {
         let id = $("td[id='schedule-id']").find("input[name='id']").val();
         let worker = prompt("Wpisz imię i nazwisko pracownika");
+        let action = $("td[id='action']").find("input[name='action']").val();
 
-        window.location.replace("/add-user-to-schedule/" + id + "/" + worker);
-        //fetch("/add-user-to-schedule/" + id + "/" + worker).then(function(response) {
-        //console.log(response);
+        window.location.replace("/add-user-to-schedule/" + id + "/" + worker + "/" + action);
     });
 });
 
