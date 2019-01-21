@@ -2,6 +2,7 @@
 Routes for whole schedules part of project.
 - prev_schedule(): prepers dict with data to show schedule for previous month
 - list_of_schedules_acc_mod(): prepares list of schedules aviable for current user to accept or modify
+- find_latest_version_schd(): finds latest version of schedule
 - new_schedule_find_workers(): jsonifies data for dynamicly generated checkboxes in new_schedule()
 - new_schedule_to_db(): adds schedule to database
 - unaccepted_schedules(): makes list of unaccepted schedule for current user
@@ -11,6 +12,8 @@ Routes for whole schedules part of project.
   modifiable_schedules()
 - remove_schedule(): removes schedule from db
 - add_user_to_schedule(): adds user to existing schedule
+- choose_show_schedule(): generates form to choose schedule to show
+- show_schedule() : generates uneditable template with chosen schedule
 """
 
 #-*- coding: utf-8 -*-
@@ -124,6 +127,23 @@ def list_of_schedules_acc_mod(mod_acc):
     schedules_list = {"schedules": schedules, "nos": number_of_schedules}
 
     return schedules_list
+
+
+# finds latest version of schedule
+def find_latest_version_schd(schedules, workplace, year, month):
+    """
+    Only latest version can be modified.
+    :param schedules: all schedules for chosen workplace
+    :param workplace: chosen workplace
+    """
+    versions = []
+    for schedule in schedules:
+        versions.append(schedule.version)
+
+    highest_version = max(versions)
+    filtered = Schedule.query.filter_by(year=int(year), month=int(month), workplace=workplace,
+                                        version=highest_version, accepted=True).first()
+    return filtered
 
 
 # gets data for new schedule and creates new schedule template
@@ -475,9 +495,9 @@ def modifiable_schedules():
 
 
 # jsonifies data for dynamically generated filtered list of schedules in modifiable_schedules()
-@bp.route("/filter-schedules/<year>/<month>/<workplace>")
+@bp.route("/filter-schedules/<year>/<month>/<workplace>/<action>")
 @login_required
-def filter_schedules_to_modify(year, month, workplace):
+def filter_schedules_to_modify(year, month, workplace, action):
     """
     Finds schedule that matches filter criteria.
     :param year: year of schedule
@@ -485,35 +505,24 @@ def filter_schedules_to_modify(year, month, workplace):
     :param workplace: workplace of schedule
     :return: matching schedule
     """
-    if current_user.access_level != "0" and current_user.access_level != "1" and current_user.access_level != "2":
+    if action == "modify" and current_user.access_level != "0" and current_user.access_level != "1"\
+            and current_user.access_level != "2":
         flash("Użytkownik nie ma uprawnień do wyświetlenia tej strony")
         return redirect(url_for("main.index"))
 
     schedules = Schedule.query.filter_by(year=int(year), month=int(month), workplace=workplace, accepted=True).all()
 
-    # finds latest version of
-    def find_latest_version_schd(schedules, workplace):
-        """
-        Only latest version can be modified.
-        :param schedules: all schedules for chosen workplace
-        :param workplace: chosen workplace
-        """
-        versions = []
-        for schedule in schedules:
-            versions.append(schedule.version)
-
-        highest_version = max(versions)
-        filtered = Schedule.query.filter_by(year=int(year), month=int(month), workplace=workplace,
-                                            version=highest_version, accepted=True).first()
-        return filtered
 
     if workplace != "0":
-        print("dla jednego sklepu")
-        print(schedules)
         if not schedules:
             return jsonify({"option": 0})
-        filtered = find_latest_version_schd(schedules, workplace)
-        uri = url_for("schedules.accept_modify_schedule", schd=filtered.name, v=filtered.version, action="to_modify")
+        filtered = find_latest_version_schd(schedules, workplace, year, month)
+        uri = "#"
+        if action == "modify":
+            uri = url_for("schedules.accept_modify_schedule", schd=filtered.name, v=filtered.version,
+                          action="to_modify")
+        elif action == "show":
+            uri = url_for("schedules.show_schedule", schd=filtered.name, v=filtered.version)
         return jsonify({"option": 1, "schedules": [{"url": uri, "name": filtered.name, "year": filtered.year,
                                                     "month": filtered.month, "workplace": filtered.workplace,
                                                     "version": filtered.version}]})
@@ -524,10 +533,14 @@ def filter_schedules_to_modify(year, month, workplace):
         schedules = Schedule.query.filter_by(year=int(year), month=int(month), workplace=users_workplace.shopname,
                                              accepted=True).all()
         if schedules:
-            filtered = find_latest_version_schd(schedules, users_workplace.shopname)
+            filtered = find_latest_version_schd(schedules, users_workplace.shopname, year, month)
             if filtered is not None:
-                uri = url_for("schedules.accept_modify_schedule", schd=filtered.name, v=filtered.version,
-                              action="to_modify")
+                uri = "#"
+                if action == "modify":
+                    uri = url_for("schedules.accept_modify_schedule", schd=filtered.name, v=filtered.version,
+                                  action="to_modify")
+                elif action == "show":
+                    uri = url_for("schedules.show_schedule", schd=filtered.name, v=filtered.version)
                 json_schedules.append({"url": uri, "name": filtered.name, "year": filtered.year,
                                        "month": filtered.month, "workplace": filtered.workplace,
                                        "version": filtered.version})
@@ -606,3 +619,77 @@ def add_user_to_schedule(schedule_id, worker, action):
 
     return redirect(url_for("schedules.accept_modify_schedule", action=action, schd=schedule.name,
                             v=schedule.version))
+
+
+# generates form to choose schedule to show
+@bp.route('/choose_show_schedule', methods=["GET", "POST"])
+@login_required
+def choose_show_schedule():
+    """
+    :return: generates form to choose schedule to show
+    """
+    title = "Grafiki - podgląd grafiku"
+    month_names = ["Styczeń", "Luty", "Marzec", "Kwiecień", "Maj", "Czerwiec", "Lipiec", "Sierpień",
+                   "Wrzesień", "Październik", "Listopad", "Grudzień"]
+
+    return render_template("schedules/choose_show_schedule.html", title=title, mn=month_names)
+
+
+# generates uneditable template with chosen schedule
+@bp.route('/show_schedule', methods=["GET", "POST"])
+@login_required
+def show_schedule():
+    """
+    :return: template with view of chosen schedule
+    """
+    cal = calendar.Calendar()
+
+    schd = request.args.get("schd")
+    version = request.args.get("v")
+    month_names = ["Styczeń", "Luty", "Marzec", "Kwiecień", "Maj", "Czerwiec", "Lipiec", "Sierpień",
+                   "Wrzesień", "Październik", "Listopad", "Grudzień"]
+    weekday_names = ["Poniedziałek", "Wtorek", "Środa", "Czwartek", "Piątek", "Sobota", "Niedziela"]
+    schedule = Schedule.query.filter_by(name=schd, version=version, accepted=True).first()
+
+    schd_id = schedule.id
+    year = schedule.year
+    month = schedule.month
+    workplace = schedule.workplace
+    hours = schedule.hrs_to_work
+    schd_dict = {"year": year, "month": month, "workplace": workplace, "hours": hours}
+
+    workers = []
+    for ind_sched in schedule.ind:
+        if str(ind_sched.worker) not in workers:
+            workers.append(str(ind_sched.worker))
+    schd_dict["workers"] = workers
+
+    workers_hours = {}
+    for worker in workers:
+        worker_hours = 0
+        for ind_sched in schedule.ind:
+            if ind_sched.worker == str(worker).replace("_", " "):
+                worker_hours += ind_sched.hours_sum
+            workers_hours[worker] = worker_hours
+        for day in cal.itermonthdays(year, month):
+            if day > 0:
+                begin = Personal_schedule.query.filter_by(date=datetime(year, month, day), includes_id=schd_id,
+                                                          worker=worker.replace("_", " ")).first().begin_hour
+                end = Personal_schedule.query.filter_by(date=datetime(year, month, day), includes_id=schd_id,
+                                                        worker=worker.replace("_", " ")).first().end_hour
+                event = Personal_schedule.query.filter_by(date=datetime(year, month, day), includes_id=schd_id,
+                                                          worker=worker.replace("_", " ")).first().event
+                h_sum = Personal_schedule.query.filter_by(date=datetime(year, month, day), includes_id=schd_id,
+                                                          worker=worker.replace("_", " ")).first().hours_sum
+                billing_week = Personal_schedule.query.filter_by(date=datetime(year, month, day), includes_id=schd_id,
+                                                                 worker=worker.replace("_", " ")).first().billing_week
+
+                schd_dict["begin-%s-%d-%02d-%02d" % (worker, year, month, day)] = begin
+                schd_dict["end-%s-%d-%02d-%02d" % (worker, year, month, day)] = end
+                schd_dict["event-%s-%d-%02d-%02d" % (worker, year, month, day)] = event
+                schd_dict["sum-%s-%d-%02d-%02d" % (worker, year, month, day)] = h_sum
+                schd_dict["billing-week-%s-%d-%02d-%02d" % (worker, year, month, day)] = billing_week
+    schd_dict["workers_hours"] = workers_hours
+
+    return render_template("schedules/show_schedule.html", schd_dict=schd_dict, mn=month_names, cal=cal,
+                           wdn=weekday_names)

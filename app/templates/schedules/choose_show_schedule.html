@@ -29,8 +29,8 @@
 
 {% block content %}
 <div class="list-group">
-    <h3>Grafiki możliwe do modyfikacji</h3>
-    <form method="post" action="modify">
+    <h3>Wybierz grafik:</h3>
+    <form method="post" action="show">
         <h5>Rok: <input id="year" type="number"><br><br>
             Miesiąc:
             <select id="month">
@@ -50,21 +50,5 @@
     </form>
     <div id="list" class="list-group">
     </div>
-</div>
-<hr>
-<br>
-<div class="list-group">
-    <h3>Grafiki wysłane do modyfikacji, a jeszcze niezaakceptowane</h3>
-    <h4>Kliknij, żeby usunąć</h4>
-    {% for workplace in current_user.workers_shop %}
-        <div id="list-2" class="list-group">
-        {% for schedule in Schedule.query.filter_by(workplace=workplace.shopname, accepted=False).all() %}<br>
-            <a href="{{ url_for('schedules.remove_schedule', schedule=schedule.id) }}" class="list-group-item list-group-item-action">
-                {{ schedule.workplace }} na {{ schedule.month }}.{{ schedule.year }} v_{{ schedule.version}}
-            </a>
-        {% endfor %}
-        </div>
-    {% endfor %}
-
 </div>
 {% endblock %}

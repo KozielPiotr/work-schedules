@@ -144,9 +144,9 @@
 <!-- Schedule for chosen month (editable) -->
 <div id="curr-month-schedule">   <!-- Schedule -->
     {% if action == "to_accept" %}
-        <form method="post" action="/schedule-to-db/accept_new_v">
+        <form method="post" action="/schedule-to-db/accept_new_v" novalidate>
     {% elif action == "to_modify" %}
-        <form method="post" action="/schedule-to-db/modify_existing">
+        <form method="post" action="/schedule-to-db/modify_existing" novalidate>
     {% endif %}
         <div class="menu">
             <div class="btn-group" role="group">
