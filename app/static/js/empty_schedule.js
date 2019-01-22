@@ -207,7 +207,7 @@ function weeklyRest() {
                 };
             };
             if (weeklyBreak === false) {
-                weeklyHoursErrors.push(`\n${workers[worker]}: Niezachowana 35 godzinna przerwa w tygodniu ${firstDay.getDate()}.${firstDay.getMonth()+1}.${firstDay.getFullYear()} - ${lastDay.getDate()}.${lastDay.getMonth()+1}.${firstDay.getFullYear()}`);
+                weeklyHoursErrors.push(`\n${workers[worker]}: Niezachowana 35 godzinna przerwa w tygodniu ${firstDay.getDate()}.${firstDay.getMonth()+1}.${firstDay.getFullYear()} - ${lastDay.getDate()-1}.${lastDay.getMonth()+1}.${firstDay.getFullYear()}`);
             };
         };
     };
@@ -241,13 +241,21 @@ function restTime(currentSelector, worker, year, month, day) {
             });
             prevDay = Math.max(...prevMonthDays);
             prevDayHour = $(`td[id="prev-end-${worker}-${year}-${month-1}-${prevDay}"]`).text();
+            if (month-2 === -1) {
+                prevDayHour = $(`td[id="prev-end-${worker}-${year-1}-12-${prevDay}"]`).text();
+                restStart = new Date(year, 11, prevDay, prevDayHour);
+                console.log("grudzień")
+            };
             restStart = new Date(year, (month-2), prevDay, prevDayHour);
             restStop = new Date(year, (month-1), currentDay, currentDayHour);
+            console.log(prevDay, month-2)
+            console.log(restStart)
         };
         if (isNaN(prevDayHour)) {
             restHours = 11;
         } else {
             restHours = (restStop-restStart)/3600000;
+            console.log(restHours)
         };
     };
     return restHours
