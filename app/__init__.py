@@ -30,6 +30,9 @@ app.register_blueprint(b_per_bp)
 from app.schedules import bp as schedules_bp
 app.register_blueprint(schedules_bp)
 
+from app.xlsx import bp as xlsx_bp
+app.register_blueprint(xlsx_bp)
+
 from app.main import bp as main_bp
 app.register_blueprint(main_bp)
 

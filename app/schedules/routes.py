@@ -522,7 +522,9 @@ def filter_schedules_to_modify(year, month, workplace, action):
             uri = url_for("schedules.accept_modify_schedule", schd=filtered.name, v=filtered.version,
                           action="to_modify")
         elif action == "show":
-            uri = url_for("schedules.show_schedule", schd=filtered.name, v=filtered.version)
+            uri = url_for("schedules.show_schedule", schd=filtered.name, version=filtered.version, action=action)
+        elif action == "xlsx":
+            uri = url_for("xlsx.to_xlsx", schd=filtered.name, v=filtered.version, action=action)
         return jsonify({"option": 1, "schedules": [{"url": uri, "name": filtered.name, "year": filtered.year,
                                                     "month": filtered.month, "workplace": filtered.workplace,
                                                     "version": filtered.version}]})
@@ -540,7 +542,9 @@ def filter_schedules_to_modify(year, month, workplace, action):
                     uri = url_for("schedules.accept_modify_schedule", schd=filtered.name, v=filtered.version,
                                   action="to_modify")
                 elif action == "show":
-                    uri = url_for("schedules.show_schedule", schd=filtered.name, v=filtered.version)
+                    uri = url_for("schedules.show_schedule", schd=filtered.name, version=filtered.version, action=action)
+                elif action == "xlsx":
+                    uri = url_for("xlsx.to_xlsx", schd=filtered.name, v=filtered.version, action=action)
                 json_schedules.append({"url": uri, "name": filtered.name, "year": filtered.year,
                                        "month": filtered.month, "workplace": filtered.workplace,
                                        "version": filtered.version})
@@ -628,27 +632,17 @@ def choose_show_schedule():
     """
     :return: generates form to choose schedule to show
     """
+    action = request.args.get("action")
     title = "Grafiki - podgląd grafiku"
     month_names = ["Styczeń", "Luty", "Marzec", "Kwiecień", "Maj", "Czerwiec", "Lipiec", "Sierpień",
                    "Wrzesień", "Październik", "Listopad", "Grudzień"]
 
-    return render_template("schedules/choose_show_schedule.html", title=title, mn=month_names)
+    return render_template("schedules/choose_show_schedule.html", title=title, mn=month_names, action = action)
 
 
-# generates uneditable template with chosen schedule
-@bp.route('/show_schedule', methods=["GET", "POST"])
-@login_required
-def show_schedule():
-    """
-    :return: template with view of chosen schedule
-    """
+def show_schedule_helper(schd, version):
     cal = calendar.Calendar()
 
-    schd = request.args.get("schd")
-    version = request.args.get("v")
-    month_names = ["Styczeń", "Luty", "Marzec", "Kwiecień", "Maj", "Czerwiec", "Lipiec", "Sierpień",
-                   "Wrzesień", "Październik", "Listopad", "Grudzień"]
-    weekday_names = ["Poniedziałek", "Wtorek", "Środa", "Czwartek", "Piątek", "Sobota", "Niedziela"]
     schedule = Schedule.query.filter_by(name=schd, version=version, accepted=True).first()
 
     schd_id = schedule.id
@@ -656,7 +650,8 @@ def show_schedule():
     month = schedule.month
     workplace = schedule.workplace
     hours = schedule.hrs_to_work
-    schd_dict = {"year": year, "month": month, "workplace": workplace, "hours": hours}
+    version = schedule.version
+    schd_dict = {"year": year, "month": month, "workplace": workplace, "hours": hours, "version": version}
 
     workers = []
     for ind_sched in schedule.ind:
@@ -690,6 +685,22 @@ def show_schedule():
                 schd_dict["sum-%s-%d-%02d-%02d" % (worker, year, month, day)] = h_sum
                 schd_dict["billing-week-%s-%d-%02d-%02d" % (worker, year, month, day)] = billing_week
     schd_dict["workers_hours"] = workers_hours
+    return schd_dict
+
+
+# generates uneditable template with chosen schedule
+@bp.route('/show_schedule/<schd>/<version>', methods=["GET", "POST"])
+@login_required
+def show_schedule(schd, version):
+    """
+    :return: template with view of chosen schedule
+    """
+    cal = calendar.Calendar()
+    schd_dict = show_schedule_helper(schd, version)
+    month_names = ["Styczeń", "Luty", "Marzec", "Kwiecień", "Maj", "Czerwiec", "Lipiec", "Sierpień",
+                   "Wrzesień", "Październik", "Listopad", "Grudzień"]
+    weekday_names = ["Poniedziałek", "Wtorek", "Środa", "Czwartek", "Piątek", "Sobota", "Niedziela"]
 
     return render_template("schedules/show_schedule.html", schd_dict=schd_dict, mn=month_names, cal=cal,
                            wdn=weekday_names)
+

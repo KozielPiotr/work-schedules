@@ -1,0 +1,11 @@
+{% extends "main/base.html" %}
+
+{% block content %}
+<p>
+    W katalogu <span style="font-weight: bold;">{{ path }}</span> jest plik
+    <a href="{{ path }}/{{ filename }}"><span style="font-weight: bold;">{{ filename }}</span></a>
+</p>
+<p>
+    Funkcjonalność ściągnięcia pliku z linka nadjeżdża z prędkością Beemy ;)
+</p>
+{% endblock %}

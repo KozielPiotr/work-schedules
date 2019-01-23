@@ -49,7 +49,8 @@
             <div class="card-body">
                 <h5 class="card-title ">Użytkownik</h5>
             <ul class="list-group list-group-flush">
-                <li class="list-group-item"><a href="{{ url_for('schedules.choose_show_schedule') }}" class="btn btn-primary btn-lg btn-block">Wyświetl grafik</a></li>
+                <li class="list-group-item"><a href="{{ url_for('schedules.choose_show_schedule', action = 'show') }}" class="btn btn-primary btn-lg btn-block">Wyświetl grafik</a></li>
+                <li class="list-group-item"><a href="{{ url_for('schedules.choose_show_schedule', action = 'xlsx') }}" class="btn btn-primary btn-lg btn-block">Eksportuj grafik do arkusza</a></li>
                 <li class="list-group-item"><a href="{{ url_for('auth.password_change', user=current_user) }}" class="btn btn-primary btn-lg btn-block">Zmiana hasła</a></li>
             </ul>
             </div>
