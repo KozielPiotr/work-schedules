@@ -78,13 +78,13 @@ def to_xlsx():
     i = 1
     while i <= 3:
         for val in [workplace, year, month_name]:
-            a = ws.cell(row=start_cell.row+i, column=2)
-            a.value = val
-            a.fill = header_style
+            cel = ws.cell(row=start_cell.row+i, column=2)
+            cel.value = val
+            cel.fill = header_style
             if i == 3:
-                a.border = bottom_med_border_style
+                cel.border = bottom_med_border_style
             else:
-                a.border = thin_border_style
+                cel.border = thin_border_style
             i += 1
 
     ws.merge_cells(start_row=2, start_column=3, end_row=4, end_column=3)

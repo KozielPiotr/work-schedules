@@ -13,6 +13,7 @@ Routes for whole schedules part of project.
 - remove_schedule(): removes schedule from db
 - add_user_to_schedule(): adds user to existing schedule
 - choose_show_schedule(): generates form to choose schedule to show
+- show_schedule_helper(): creates dictionary with all data from chosen schedule
 - show_schedule() : generates uneditable template with chosen schedule
 """
 
@@ -637,10 +638,16 @@ def choose_show_schedule():
     month_names = ["Styczeń", "Luty", "Marzec", "Kwiecień", "Maj", "Czerwiec", "Lipiec", "Sierpień",
                    "Wrzesień", "Październik", "Listopad", "Grudzień"]
 
-    return render_template("schedules/choose_show_schedule.html", title=title, mn=month_names, action = action)
+    return render_template("schedules/choose_show_schedule.html", title=title, mn=month_names, action=action)
 
 
 def show_schedule_helper(schd, version):
+    """
+    Creates dictionary with data for chosen schedule
+    :param schd: name of schedule
+    :param version: version of schedule
+    :return: dict with schedule data
+    """
     cal = calendar.Calendar()
 
     schedule = Schedule.query.filter_by(name=schd, version=version, accepted=True).first()
@@ -703,4 +710,3 @@ def show_schedule(schd, version):
 
     return render_template("schedules/show_schedule.html", schd_dict=schd_dict, mn=month_names, cal=cal,
                            wdn=weekday_names)
-
