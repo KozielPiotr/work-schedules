@@ -9,19 +9,41 @@ from openpyxl import Workbook
 from openpyxl.styles import PatternFill, Alignment
 from openpyxl.styles.borders import Border, Side
 from openpyxl.utils import column_index_from_string as cifs
-from openpyxl.worksheet.dimensions import ColumnDimension
-from flask import request, render_template
+from flask import request, redirect, url_for, current_app, send_from_directory
+from flask_login import login_required
 from app.xlsx import bp
 from app import schedules
 
 
 @bp.route("/xlsx", methods=["GET", "POST"])
+@login_required
 def to_xlsx():
     """
     Creates xlsx file with schedule
     :return: redirects to template with generated link to created xlsx file with schedule
     """
     cal = calendar.Calendar()
+
+    # getting dict with schedule data
+    sched = request.args.get("schd")
+    sched_v = request.args.get("v")
+    sched_dict = schedules.routes.show_schedule_helper(sched, sched_v)
+
+    # preparing data for xlsx file
+    workplace = sched_dict["workplace"]
+    year = sched_dict["year"]
+    month = sched_dict["month"]
+    version = sched_dict["version"]
+
+    month_names = ["Styczeń", "Luty", "Marzec", "Kwiecień", "Maj", "Czerwiec", "Lipiec", "Sierpień",
+                   "Wrzesień", "Październik", "Listopad", "Grudzień"]
+    weekday_names = ["Poniedziałek", "Wtorek", "Środa", "Czwartek", "Piątek", "Sobota", "Niedziela"]
+    month_name = month_names[month-1]
+
+    # starting work with file
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "grafik_na_%s" % month_name
 
     # style patterns for file
     header_style = PatternFill(fgColor="b4bbc1", fill_type="solid")
@@ -49,27 +71,6 @@ def to_xlsx():
     alignment_style = Alignment(horizontal="center",
                                 vertical="center",
                                 wrapText=True)
-
-    # getting dict with schedule data
-    sched = request.args.get("schd")
-    sched_v = request.args.get("v")
-    sched_dict = schedules.routes.show_schedule_helper(sched, sched_v)
-
-    # preparing data for xlsx file
-    workplace = sched_dict["workplace"]
-    year = sched_dict["year"]
-    month = sched_dict["month"]
-    version = sched_dict["version"]
-
-    month_names = ["Styczeń", "Luty", "Marzec", "Kwiecień", "Maj", "Czerwiec", "Lipiec", "Sierpień",
-                   "Wrzesień", "Październik", "Listopad", "Grudzień"]
-    weekday_names = ["Poniedziałek", "Wtorek", "Środa", "Czwartek", "Piątek", "Sobota", "Niedziela"]
-    month_name = month_names[month-1]
-
-    # starting work with file
-    wb = Workbook()
-    ws = wb.active
-    ws.title = "grafik_na_%s" % (month_name)
 
     start_cell = ws.cell(row=1, column=1)
 
@@ -139,15 +140,15 @@ def to_xlsx():
                     color = PatternFill(fgColor="b4bbc1", fill_type="solid")
                 event = sched_dict["event-%s-%d-%02d-%02d" % (worker, sched_dict["year"], sched_dict["month"],
                                                               day[0])]
-                sum = sched_dict["sum-%s-%d-%02d-%02d" % (worker, sched_dict["year"], sched_dict["month"],
-                                                          day[0])]
+                sum_val = sched_dict["sum-%s-%d-%02d-%02d" % (worker, sched_dict["year"], sched_dict["month"],
+                                                              day[0])]
                 if event in ["UW", "UNŻ", "UO", "UOJ", "UR"]:
                     color = u_style
                 elif event == "L4":
                     color = l4_style
 
                 cel = ws.cell(row=start.row+c_r, column=c_c+4)
-                if sum == 0:
+                if sum_val == 0:
                     cel.value = "--"
                 else:
                     cel.value = sched_dict["begin-%s-%d-%02d-%02d" % (worker, sched_dict["year"], sched_dict["month"],
@@ -155,7 +156,7 @@ def to_xlsx():
                 cel.fill = color
                 cel.border = thin_border_style
                 cel = ws.cell(row=start.row + c_r, column=c_c + 5)
-                if sum == 0:
+                if sum_val == 0:
                     cel.value = "--"
                 else:
                     cel.value = sched_dict["end-%s-%d-%02d-%02d" % (worker, sched_dict["year"], sched_dict["month"],
@@ -163,7 +164,7 @@ def to_xlsx():
                 cel.border = thin_border_style
                 cel.fill = color
                 cel = ws.cell(row=start.row + c_r, column=c_c + 6)
-                cel.value = sum
+                cel.value = sum_val
                 cel.border = thin_border_style
                 cel.fill = color
                 cel = ws.cell(row=start.row + c_r, column=c_c + 7)
@@ -242,16 +243,19 @@ def to_xlsx():
         for col in range(1, ws.max_column+1):
             ws.cell(row=row, column=col).alignment = alignment_style
 
-    dimension_style = ColumnDimension(worksheet = ws,
-                                      bestFit=True)
-
-
-
+    # saving file
     filename = "%s_grafik_na_%02d_%s_v_%s.xlsx" % (workplace.replace(" ", "_"), month, year, version)
-    print(filename)
-    path = "xlsx_schedules/%s/%s/%s" % (year, month, workplace.replace(" ", "_"))
+    path = "app/xlsx_schedules/%s/%s/%s" % (year, month, workplace.replace(" ", "_"))
     if not os.path.exists(path):
         os.makedirs(path)
     wb.save("%s/%s" % (path, filename))
+    return redirect(url_for("xlsx.download_schedule", year=year, month=month, workplace=workplace, filename=filename))
 
-    return render_template("xlsx/download_xlsx.html", path=path, filename=filename, weekday_names=weekday_names)
+
+@bp.route("/xlsx_download/<year>/<month>/<workplace>/<path:filename>", methods=["GET", "POST"])
+@login_required
+def download_schedule(year, month, workplace, filename):
+    path = "/xlsx_schedules/%s/%s/%s/" % (year, month, workplace.replace(" ", "_"))
+    to_file = current_app.root_path+path
+
+    return send_from_directory(directory=to_file, filename=filename)
