@@ -2,4 +2,4 @@ __pycache__/
 app.db
 .idea/
 BACK_app.db
-.app/xlsx_files/
+app/xlsx_files/
