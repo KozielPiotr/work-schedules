@@ -161,9 +161,9 @@
 
             {% if action == "to_accept" %}
                 <div class="btn-group" role="group">
-                    <button type="button" class="btn btn-primary btn-sm">
-                        <a href="{{ url_for('schedules.remove_schedule', schedule=id) }}" class="btn-primary btn-sm">Odrzuć grafik</a>
-                    </button>
+                    <a href="{{ url_for('schedules.remove_schedule', schedule=id) }}">
+                        <button id="remove-schedule-btn" type="button" class="btn btn-primary btn-sm">Odrzuć grafik</button>
+                    </a>
                 </div>
             {% endif %}
         </div>

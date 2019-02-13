@@ -1,0 +1,36 @@
+{% extends "main/base.html" %}
+
+{% block styles %}
+<style>
+    .list-group {
+        width: 40%;
+        text-align: center;
+        vertical-align: middle;
+        margin: 0 auto;
+        float: none;
+        margin-bottom: 10px;
+        background-color: #ced4da;
+        border-radius: 0.25rem;
+    }
+
+    input[type=file] {
+        margin: 0 auto;
+    }
+</style>
+{% endblock %}
+
+
+{% block content %}
+<div class="list-group">
+    <h3>Wybierz grafik:</h3>
+    <form action="" method="post" enctype="multipart/form-data">
+        {{ form.hidden_tag() }}
+        <p>
+            <span id="input-file">{{ form.file.label }} {{ form.file }}</span>
+        </p>
+        <p>
+            {{ form.submit }}
+        </p>
+    </form>
+</div>
+{% endblock %}

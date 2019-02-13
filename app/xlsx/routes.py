@@ -1,17 +1,23 @@
 """
 Creates xlsx files based on accepted versions of schedule and loads xlsx files to create new schedules
 - to_xlsx(): Creates xlsx file with schedule
+- download_schedule(): Allows to download file with schedule
+- upload_from_file(): Uploads chosen .xlsx file with schedule
 """
+
+#-*- coding: utf-8 -*-
 
 import os
 import calendar
-from openpyxl import Workbook
+from openpyxl import Workbook, load_workbook
 from openpyxl.styles import PatternFill, Alignment
 from openpyxl.styles.borders import Border, Side
 from openpyxl.utils import column_index_from_string as cifs
-from flask import request, redirect, url_for, current_app, send_from_directory
+from flask import request, redirect, url_for, current_app, send_from_directory, render_template, flash, abort
 from flask_login import login_required
+from werkzeug.utils import secure_filename
 from app.xlsx import bp
+from app.xlsx.forms import UploadFile
 from app import schedules
 
 
@@ -245,7 +251,7 @@ def to_xlsx():
 
     # saving file
     filename = "%s_grafik_na_%02d_%s_v_%s.xlsx" % (workplace.replace(" ", "_"), month, year, version)
-    path = "app/xlsx_schedules/%s/%s/%s" % (year, month, workplace.replace(" ", "_"))
+    path = "app/xlsx_files/download/%s/%s/%s" % (year, month, workplace.replace(" ", "_"))
     if not os.path.exists(path):
         os.makedirs(path)
     wb.save("%s/%s" % (path, filename))
@@ -255,7 +261,47 @@ def to_xlsx():
 @bp.route("/xlsx_download/<year>/<month>/<workplace>/<path:filename>", methods=["GET", "POST"])
 @login_required
 def download_schedule(year, month, workplace, filename):
-    path = "/xlsx_schedules/%s/%s/%s/" % (year, month, workplace.replace(" ", "_"))
+    """
+    Allows to download file with schedule. Params creates path to file.
+    :param year: schedule's year
+    :param month: schedule's month
+    :param workplace: schedule's workplace
+    :param filename: name of file with schedule
+    :return: downloading file
+    """
+    path = "/xlsx_files/download/%s/%s/%s/" % (year, month, workplace.replace(" ", "_"))
     to_file = current_app.root_path+path
 
     return send_from_directory(directory=to_file, filename=filename)
+
+@bp.route("/upload-from-file/", methods=["GET", "POST"])
+@login_required
+def upload_from_file():
+    """
+    Uploads chosen .xlsx file with schedule
+    :return: template with form to choose schedule file
+    """
+    form = UploadFile()
+    if form.validate_on_submit():
+        if "file" not in request.files:
+            flash("Nie wybrano pliku")
+            return redirect(request.url)
+
+        file = request.files["file"]
+
+        if file.filename == "":
+            flash("Nie wybrano pliku")
+            return redirect(request.url)
+
+        if file and file.filename.rsplit('.', 1)[1].lower() == "xlsx":
+            filename = secure_filename(file.filename)
+            path = "app/xlsx_files/upload/"
+            if not os.path.exists(path):
+                os.makedirs(path)
+                file.save("%s%s"%(path, filename))
+        else:
+            flash("Nieprawidłowy rodzaj pliku. Plik musi być w formacie xlsx.")
+            return redirect(request.url)
+        flash("załadowano plik z grafikiem")
+        return abort(404)
+    return render_template("xlsx/upload_from_file.html", form=form)
