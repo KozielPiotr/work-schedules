@@ -2,13 +2,14 @@
 Creates xlsx files based on accepted versions of schedule and loads xlsx files to create new schedules
 - to_xlsx(): Creates xlsx file with schedule
 - download_schedule(): Allows to download file with schedule
-- upload_from_file(): Uploads chosen .xlsx file with schedule
+- upload_file(): Uploads chosen .xlsx file with schedule
 """
 
 #-*- coding: utf-8 -*-
 
 import os
 import calendar
+import datetime
 from openpyxl import Workbook, load_workbook
 from openpyxl.styles import PatternFill, Alignment
 from openpyxl.styles.borders import Border, Side
@@ -16,9 +17,10 @@ from openpyxl.utils import column_index_from_string as cifs
 from flask import request, redirect, url_for, current_app, send_from_directory, render_template, flash, abort
 from flask_login import login_required
 from werkzeug.utils import secure_filename
+from app import schedules
 from app.xlsx import bp
 from app.xlsx.forms import UploadFile
-from app import schedules
+from app.models import User, Shop, Billing_period, Schedule, Personal_schedule
 
 
 @bp.route("/xlsx", methods=["GET", "POST"])
@@ -274,13 +276,20 @@ def download_schedule(year, month, workplace, filename):
 
     return send_from_directory(directory=to_file, filename=filename)
 
-@bp.route("/upload-from-file/", methods=["GET", "POST"])
+
+@bp.route("/upload-file", methods=["GET", "POST"])
 @login_required
-def upload_from_file():
+def upload_file():
     """
     Uploads chosen .xlsx file with schedule
     :return: template with form to choose schedule file
+    :form validate return: redirection to function that creates dictionary based on uploaded file with schedule
     """
+    year = request.args.get("year")
+    month = request.args.get("month")
+    workplace = request.args.get("workplace")
+    hours = request.args.get("hours")
+    title = "Grafiki - wybór pliku z grafikiem"
     form = UploadFile()
     if form.validate_on_submit():
         if "file" not in request.files:
@@ -298,10 +307,150 @@ def upload_from_file():
             path = "app/xlsx_files/upload/"
             if not os.path.exists(path):
                 os.makedirs(path)
-                file.save("%s%s"%(path, filename))
+            file.save("%s%s" % (path, filename))
+            return redirect(url_for("xlsx.create_dict_from_file", path=path, filename=filename, year=year, month=month,
+                                    workplace=workplace, hours=hours))
         else:
             flash("Nieprawidłowy rodzaj pliku. Plik musi być w formacie xlsx.")
             return redirect(request.url)
-        flash("załadowano plik z grafikiem")
-        return abort(404)
-    return render_template("xlsx/upload_from_file.html", form=form)
+
+    return render_template("xlsx/upload_from_file.html", title=title, form=form)
+
+
+@bp.route("/create_from_file", methods=["GET", "POST"])
+@login_required
+def create_dict_from_file():
+    """
+    Loads file with schedule and makes dictionary with data required to fulfill template
+    :return: ?
+    """
+    def wrong_file(val):
+        flash("W pliku nie znaleziono grafiku dla wybranego %s." % val)
+        return redirect(url_for("xlsx.upload_file", month=month, year=year, workplace=workplace))
+
+    path = request.args.get("path")
+    filename = request.args.get("filename")
+    file_path = path+filename
+    year = int(request.args.get("year"))
+    month = int(request.args.get("month"))
+    workplace = request.args.get("workplace")
+    hours = request.args.get("hours")
+    db_workplace = Shop.query.filter_by(shopname=workplace).first()
+    month_names = ["Styczeń", "Luty", "Marzec", "Kwiecień", "Maj", "Czerwiec", "Lipiec", "Sierpień",
+                   "Wrzesień", "Październik", "Listopad", "Grudzień"]
+    month_name = month_names[month-1]
+    weekday_names = ["Poniedziałek", "Wtorek", "Środa", "Czwartek", "Piątek", "Sobota", "Niedziela"]
+    cal = calendar.Calendar()
+    prev = schedules.routes.prev_schedule(month, year, month_names, cal, workplace)
+    wb = load_workbook(file_path, data_only=True)
+
+    # finding sheet
+    sheets = wb.sheetnames
+    sh = None
+    for sheet in sheets:
+        sheet_month = sheet.lower().replace("grafik_", "").lower()
+        if sheet_month.capitalize() == month_name:
+            sh = wb[sheet]
+    if sh is None:
+        flash("W pliku nie znaleziono grafiku na wybrany miesiąc.")
+        return redirect(url_for("xlsx.upload_file", month=month, year=year, workplace=workplace))
+
+    # finding month cell
+    month_cell = None
+    for row in range(int(sh.max_row)):
+        for col in range(int(sh.max_column)):
+            current_cell = sh.cell(row=row+1, column=col+1)
+            if type(current_cell.value) is str and current_cell.value.lower().replace(" ", "") == month_name.lower():
+                month_cell = current_cell
+    if month_cell is None:
+        return wrong_file("miesiąca")
+
+    # finding year
+    year_cell = None
+    for row in range(int(sh.max_row)):
+        for col in range(int(sh.max_column)):
+            current_cell = sh.cell(row=row+1, column=col+1)
+            if type(current_cell.value) is int and current_cell.value == year:
+                year_cell = current_cell
+    if year_cell is None:
+        return wrong_file("roku")
+
+    # finding workplace
+    workplace_cell = None
+    for row in range(int(sh.max_row)):
+        for col in range(int(sh.max_column)):
+            current_cell = sh.cell(row=row + 1, column=col + 1)
+            if type(current_cell.value) is str and current_cell.value.lower() == workplace.lower():
+                workplace_cell = current_cell
+    if workplace_cell is None:
+        return wrong_file("sklepu")
+
+    # finding workers
+    workers = {}
+    wrong_workers = []
+    db_workers = []
+    worker_row = workplace_cell.row
+    worker_col = cifs(workplace_cell.column) + 2
+    name_cell = sh.cell(row=worker_row, column=worker_col)
+    surename_cell = sh.cell(row=worker_row+1, column=worker_col)
+    while name_cell.value is not None and surename_cell.value is not None:
+        name = name_cell.value.replace(" ", "") + " " + surename_cell.value.replace(" ", "")
+        workers[name] = surename_cell
+        #workers.append(name)
+        worker_col += 4
+        name_cell = sh.cell(row=worker_row, column=worker_col)
+        surename_cell = sh.cell(row=worker_row + 1, column=worker_col)
+    for worker in db_workplace.works.all():
+        db_workers.append(str(worker))
+    for worker in workers:
+        if worker not in db_workers:
+            wrong_workers.append(worker)
+    if len(wrong_workers) > 0:
+        flash("Sprawdź plik. Pracownicy nieprzypisani do sklepu: %s" % wrong_workers)
+
+    # building dictionary with data for each day for each worker
+    shdict = {}
+    events = ("off", "in_work", "UW", "UNŻ", "L4", "UO", "UOJ", "UR", "UB")
+    for worker in workers:
+        for day in cal.itermonthdays(year, month):
+            if day > 0:
+
+                # begin hour
+                begin = sh.cell(row=workers[worker].row+1+day, column=cifs(workers[worker].column)).value
+                if begin is None:
+                    begin = ""
+                shdict["begin-%s-%d-%02d-%02d" % (worker.replace(" ", "_"), year, month, day)] = begin
+                print("Po zmianie = " + worker)
+
+                # end hour
+                end = sh.cell(row=workers[worker].row+1+day, column=cifs(workers[worker].column)+1).value
+                if end is None:
+                    end = ""
+                shdict["end-%s-%d-%02d-%02d" % (worker.replace(" ", "_"), year, month, day)] = end
+
+                # event
+                event = begin = sh.cell(row=workers[worker].row+1+day, column=cifs(workers[worker].column)+3).value
+                if event is None:
+                    event = "in_work"
+                elif event == "X":
+                    event = "off"
+                if event not in events:
+                    flash("Niewłaściwe oznaczenie zdarzenia w dniu %02d-%02d-%04d u pracownika %s." % (day, month, year,
+                          worker))
+                    return redirect(url_for("xlsx.upload_file", month=month, year=year, workplace=workplace))
+                shdict["event-%s-%d-%02d-%02d" % (worker.replace(" ", "_"), year, month, day)] = event
+
+    flash("Wczytałem grafik na %s %s" % (month_name.lower(), year))
+    for i in shdict:
+        print(i, shdict[i], type(shdict[i]))
+
+    workers_to_schd = []
+    for worker in workers:
+        workers_to_schd.append(str(worker.replace(" ", "_")))
+    print(workers_to_schd)
+
+    return render_template("xlsx/empty_schedule.html", title="grafiki", workplace=workplace, year=year, month=month,
+                           workers=workers_to_schd, month_name=month_name, wdn=weekday_names, cal=cal,
+                           Billing_period=Billing_period, shdict=shdict, hours=hours, prev_shdict=prev["prev_shdict"],
+                           prev_month=prev["month"], prev_hours=prev["hours"], prev_month_name=prev["month_name"],
+                           prev_year=prev["year"], prev_workers=prev["workers"], workers_hours=prev["workers_hours"])
