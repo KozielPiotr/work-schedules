@@ -35,6 +35,7 @@ def load_user(id):
 class Shop(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     shopname = db.Column(db.String(64), index=True, unique=True)
+    guidelines = db.relationship("Guidelines", backref="guide")
 
     def __repr__(self):
         return "{}".format(self.shopname)
@@ -71,3 +72,12 @@ class Personal_schedule(db.Model):
     billing_period = db.Column(db.Integer, index=True, nullable=True, default=0)
     billing_week = db.Column(db.Integer, index=True, nullable=True, default=0)
     includes_id = db.Column(db.Integer, db.ForeignKey("schedule.id"))
+
+
+class Guidelines(db.Model):
+    id = db.Column(db.Integer, primary_key=True, unique=True, index=True, nullable=False)
+    workplace = db.Column(db.String, db.ForeignKey("shop.id"))
+    year = db.Column(db.Integer, index=True, nullable=False)
+    month = db.Column(db.Integer, index=True, nullable=False)
+    day = db.Column(db.Integer, index=True, nullable=False)
+    no_of_workers = db.Column(db.Integer, index=True, nullable=False)

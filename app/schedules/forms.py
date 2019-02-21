@@ -21,3 +21,12 @@ class NewScheduleForm(FlaskForm):
     workers = MultiCheckboxField("Pracownicy: ")
     hours = IntegerField("Ilość roboczogodzin")
     submit = SubmitField("Nowy grafik", [DataRequired(message="Wprowadź ilość godzin")])
+
+
+class SelectGuideline(FlaskForm):
+    year = IntegerField("Rok: ", [DataRequired(message="Wprowadź rok")])
+    month = SelectField("Miesiąc: ", choices=(("1", "Styczeń"), ("2", "Luty"), ("3", "Marzec"), ("4", "Kwiecień"),
+                                              ("5", "Maj"), ("6", "Czerweiec"), ("7", "Lipiec"), ("8", "Sierpień"),
+                                              ("9", "Wrzesień"), ("10", "Październik"), ("11", "Listopad"),
+                                              ("12", "Grudzień")))
+    workplace = SelectField("Sklep: ")

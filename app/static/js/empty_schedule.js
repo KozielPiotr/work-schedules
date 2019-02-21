@@ -325,6 +325,7 @@ window.onload = function() {
         monthNumberInBp = duration;
     };
     $("#month-of-billing-period").text(monthNumberInBp);
+    firstDayOfCurBp = new Date(curYear, curMonth-monthNumberInBp)
 
     //counts in which billing week is current shift
         //makes list of all days in month
@@ -391,10 +392,18 @@ window.onload = function() {
     $("td[id^='event']").each(function() {
         $(this).change();
     });
+
+    // adds CSS to TRs
+    $(".weekday-number-th").each(function() {
+        if (parseInt($(this).text())+1 === parseInt(firstDayOfCurBp.getDay())) {
+            $(this).closest("tr").find("th, td").attr("style", "border-top: 6px solid black !important");
+
+        };
+    });
 };
 
 
-//gets data of all days in month and prepers dict for json
+//gets data of all days in month and preepers dict for json
 function getHours() {
     let indSchedules = [];
     let jsonDict = {};

@@ -14,7 +14,7 @@ from flask_login import login_required, current_user
 from app import db
 from app.acc_man import bp
 from app.acc_man.forms import NewUserForm, NewWorkplaceForm, UserToShopForm
-from app.models import User, Shop
+from app.models import User, Shop, Guidelines
 
 
 # New user

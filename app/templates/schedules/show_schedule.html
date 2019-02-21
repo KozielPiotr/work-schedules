@@ -39,6 +39,7 @@
                     <tr>
                         <th class="prev-dayname-th">{{ wdn[day[1]] }}</th>  <!-- day of the week (name) -->
                         <th class="prev-daynumber-th">{{ day[0] }}</th>  <!-- day of the week (number) -->
+                        <th class="weekday-number-th"> {{ day[1] }}</th> <!-- number of weekday (for JS) -->
                         {%- for worker in schd_dict["workers"] -%}
                             <td id="prev-begin-{{ worker }}-{{ prev_year }}-{{ prev_month }}-{{ day[0] }}">
                                 {{ schd_dict["begin-%s-%d-%02d-%02d" % (worker, schd_dict["year"], schd_dict["month"], day[0])] }}

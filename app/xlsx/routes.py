@@ -402,11 +402,16 @@ def create_dict_from_file():
         surename_cell = sh.cell(row=worker_row + 1, column=worker_col)
     for worker in db_workplace.works.all():
         db_workers.append(str(worker))
+
+    workers_to_schd = []
     for worker in workers:
-        if worker not in db_workers:
-            wrong_workers.append(worker)
+        workers_to_schd.append(str(worker.replace(" ", "_")))
+    for worker in workers_to_schd:
+        if worker.replace("_", " ") not in db_workers:
+            wrong_workers.append(worker.replace("_", " "))
     if len(wrong_workers) > 0:
         flash("Sprawdź plik. Pracownicy nieprzypisani do sklepu: %s" % wrong_workers)
+        return redirect(url_for("xlsx.upload_file", month=month, year=year, workplace=workplace))
 
     # building dictionary with data for each day for each worker
     shdict = {}
@@ -420,7 +425,6 @@ def create_dict_from_file():
                 if begin is None:
                     begin = ""
                 shdict["begin-%s-%d-%02d-%02d" % (worker.replace(" ", "_"), year, month, day)] = begin
-                print("Po zmianie = " + worker)
 
                 # end hour
                 end = sh.cell(row=workers[worker].row+1+day, column=cifs(workers[worker].column)+1).value
@@ -441,13 +445,6 @@ def create_dict_from_file():
                 shdict["event-%s-%d-%02d-%02d" % (worker.replace(" ", "_"), year, month, day)] = event
 
     flash("Wczytałem grafik na %s %s" % (month_name.lower(), year))
-    for i in shdict:
-        print(i, shdict[i], type(shdict[i]))
-
-    workers_to_schd = []
-    for worker in workers:
-        workers_to_schd.append(str(worker.replace(" ", "_")))
-    print(workers_to_schd)
 
     return render_template("xlsx/empty_schedule.html", title="grafiki", workplace=workplace, year=year, month=month,
                            workers=workers_to_schd, month_name=month_name, wdn=weekday_names, cal=cal,

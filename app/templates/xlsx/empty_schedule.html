@@ -78,6 +78,7 @@
                     <tr>
                         <th class="prev-dayname-th">{{ wdn[day[1]] }}</th>  <!-- day of the week (name) -->
                         <th class="prev-daynumber-th">{{ day[0] }}</th>  <!-- day of the week (number) -->
+                        <th class="weekday-number-th"> {{ day[1] }}</th> <!-- number of weekday (for JS) -->
                         {%- for worker in prev_workers -%}
                             <td id="prev-begin-{{ worker }}-{{ prev_year }}-{{ prev_month }}-{{ day[0] }}">
                                 {{ prev_shdict["begin-%s-%d-%02d-%02d" % (worker, prev_year, prev_month, day[0])] }}
@@ -162,15 +163,7 @@
                 </a>
             </div>
         </div>
-        <div>
-            {% for day in cal.itermonthdays2(year, month) %}
-                {% if day[0] > 0 %}
-                    {% for worker in workers %}
-                        <p>{{ 'begin-%s-%d-%02d-%02d' % (worker, year, month, day[0]) }}</p>
-                    {% endfor %}
-                {% endif %}
-            {% endfor %}
-        </div>
+
         <table class="new-schedule-table table-bordered">
             <caption class="caption">Tworzenie grafiku dla <b><span id="workplace">{{ workplace }}</span></b> na rok <b><span id="cur-year">{{ year }}</span></b>, miesiąc <b><span id="cur-month">{{ month }}</span>{{ month_name }}</b>, <b><span id="month-of-billing-period"></span></b> miesiąc okresu rozliczeniowego.</caption>
     <!-- headers with shop, month, workers -->
@@ -216,6 +209,7 @@
                     <tr class="days">
                         <th class="dayname-th">{{ wdn[day[1]] }}</th>  <!-- day of the week (name) -->
                         <th class="daynumber-th">{{ day[0] }}</th>  <!-- day of the week (number) -->
+                        <th class="weekday-number-th"> {{ day[1] }}</th> <!-- number of weekday (for JS) -->
                         {% for worker in workers %}
                             <td id="begin-{{ worker }}-{{ year }}-{{ month }}-{{ day[0] }}">
                                 <input type="hidden" value="{{ worker }}-{{ year }}-{{ month }}-{{ day[0] }}" name="helper">

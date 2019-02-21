@@ -32,7 +32,7 @@ input[type="number"] {
     -moz-appearance: textfield;
 }
 
-td[id*="to-json"], #hidden-data, #cur-month {
+td[id*="to-json"], #hidden-data, #cur-month, .weekday-number-th {
     display: none;
 }
 
@@ -41,7 +41,7 @@ td[id*="counted"] {
 }
 
 .table-bordered {
-    border: 1px solid #000000 !important;
+    border: 1px solid #000000;
     background: white;
 }
 

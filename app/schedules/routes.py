@@ -15,6 +15,8 @@ Routes for whole schedules part of project.
 - choose_show_schedule(): generates form to choose schedule to show
 - show_schedule_helper(): creates dictionary with all data from chosen schedule
 - show_schedule() : generates uneditable template with chosen schedule
+- select_guideline(): form to select for which year, month and workplace guideline would be created
+- create_guieline(): creates guideline
 """
 
 #-*- coding: utf-8 -*-
@@ -26,8 +28,8 @@ from flask import flash, redirect, url_for, render_template, jsonify, request
 from flask_login import current_user, login_required
 from app import db
 from app.schedules import bp
-from app.models import User, Shop, Billing_period, Schedule, Personal_schedule
-from app.schedules.forms import NewScheduleForm
+from app.models import User, Shop, Billing_period, Schedule, Personal_schedule, Guidelines
+from app.schedules.forms import NewScheduleForm, SelectGuideline
 
 
 # prepers dict with data to show schedule for previous month
@@ -327,7 +329,6 @@ def new_schedule_to_db(action):
 
     # Creates new unaccepted schedule or unaccepted version of existing schedule
     if action in ("send_v_0", "modify_existing"):
-        print(action)
         name = "%s-%s-%s" % (data["main_data"]["year"], data["main_data"]["month"], data["main_data"]["workplace"])
         year = int(data["main_data"]["year"])
         month = int(data["main_data"]["month"])
@@ -710,3 +711,57 @@ def show_schedule(schd, version):
 
     return render_template("schedules/show_schedule.html", schd_dict=schd_dict, mn=month_names, cal=cal,
                            wdn=weekday_names)
+
+
+# form to select for which year, month and workplace guideline would be created
+@bp.route('/select-guideline', methods=["GET", "POST"])
+@login_required
+def select_guideline():
+    """
+    Allows to select for which schedule guidelines will be created
+    :return: template for choose year, month and workplace
+    """
+    if (current_user.access_level != "0") and (current_user.access_level != "1"):
+        flash("Użytkownik nie ma uprawnień do wyświetlenia tej strony")
+        return redirect(url_for("main.index"))
+
+    title = "Grafiki - wytyczne"
+    month_names = ["Styczeń", "Luty", "Marzec", "Kwiecień", "Maj", "Czerwiec", "Lipiec", "Sierpień",
+                   "Wrzesień", "Październik", "Listopad", "Grudzień"]
+
+    form = SelectGuideline()
+    workplaces = []
+    for workplace in current_user.workers_shop:
+        workplaces.append((str(workplace), str(workplace)))
+    form.workplace.choices = workplaces
+
+    if form.validate_on_submit():
+        year = form.year.data
+        month = form.month.data
+        workplace = form.workplace.data
+        return redirect(url_for("schedules.create_guideline", y=year, m=month, w=workplace))
+
+    return render_template("schedules/select-guideline.html", title=title, mn=month_names, form=form)
+
+
+# creating guideline
+@bp.route('/create-guideline', methods=["GET", "POST"])
+@login_required
+def create_guideline():
+    """
+    Template with calendar where user can input guidelines
+    :return: template for guidelines
+    """
+    if (current_user.access_level != "0") and (current_user.access_level != "1"):
+        flash("Użytkownik nie ma uprawnień do wyświetlenia tej strony")
+        return redirect(url_for("main.index"))
+
+    year = int(request.args.get("y"))
+    month = int(request.args.get("m"))
+    workplace = request.args.get("w")
+    month_names = ["Styczeń", "Luty", "Marzec", "Kwiecień", "Maj", "Czerwiec", "Lipiec", "Sierpień",
+                   "Wrzesień", "Październik", "Listopad", "Grudzień"]
+    weekday_names = ["Poniedziałek", "Wtorek", "Środa", "Czwartek", "Piątek", "Sobota", "Niedziela"]
+    cal = calendar.Calendar()
+    return render_template("schedules/create-guideline.html", year=year, month=month, workplace=workplace,
+                           mn=month_names, wdn=weekday_names, cal=cal)

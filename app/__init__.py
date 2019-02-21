@@ -38,4 +38,3 @@ app.register_blueprint(main_bp)
 
 from app import models
 db.create_all()
-
