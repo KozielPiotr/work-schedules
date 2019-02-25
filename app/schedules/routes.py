@@ -758,10 +758,43 @@ def create_guideline():
 
     year = int(request.args.get("y"))
     month = int(request.args.get("m"))
-    workplace = request.args.get("w")
+    #workplace = request.args.get("w")
+    workplace = Shop.query.filter_by(shopname=request.args.get("w")).first()
     month_names = ["Styczeń", "Luty", "Marzec", "Kwiecień", "Maj", "Czerwiec", "Lipiec", "Sierpień",
                    "Wrzesień", "Październik", "Listopad", "Grudzień"]
     weekday_names = ["Poniedziałek", "Wtorek", "Środa", "Czwartek", "Piątek", "Sobota", "Niedziela"]
     cal = calendar.Calendar()
+
     return render_template("schedules/create-guideline.html", year=year, month=month, workplace=workplace,
-                           mn=month_names, wdn=weekday_names, cal=cal)
+                           mn=month_names, wdn=weekday_names, cal=cal, Guidelines=Guidelines)
+
+
+# sends guidelines to db
+@bp.route('/guidelines-to-db', methods=["GET", "POST"])
+@login_required
+def guidelines_to_db():
+    """
+    Adds records with guidelines to db
+    """
+    if (current_user.access_level != "0") and (current_user.access_level != "1"):
+        flash("Użytkownik nie ma uprawnień do wyświetlenia tej strony")
+        return redirect(url_for("main.index"))
+
+    cal = calendar.Calendar()
+    data = request.json
+    year = int(data["year"])
+    month = int(data["month"])
+    workplace = Shop.query.filter_by(shopname=data["workplace"]).first()
+    for day in cal.itermonthdays(year, month):
+        if day > 0:
+            guideline = Guidelines.query.filter_by(guide=workplace, year=year, month=month, day=day).first()
+            if guideline:
+                guideline.no_of_workers = data[str(day)]
+                db.session.add(guideline)
+            else:
+                guideline = Guidelines(guide=workplace, year=year, month=month, day=day,
+                                       no_of_workers=data[str(day)])
+                db.session.add(guideline)
+    db.session.commit()
+
+    return url_for("main.index")

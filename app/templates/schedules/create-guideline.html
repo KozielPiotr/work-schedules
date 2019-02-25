@@ -1,11 +1,12 @@
 {% extends "main/base.html" %}
 {% block styles %}
 <link href="{{ url_for('static', filename='css/table.css') }}" rel="stylesheet">
+<script src="{{ url_for('static', filename='js/create-guideline.js') }}"></script>
 {% endblock %}
 
 {% block content %}
 <div id="curr-month-schedule">   <!-- Schedule -->
-    <form method="post" action="/schedule-to-db/send_v_0" novalidate>
+    <form method="post" action="/guidelines-to-db" novalidate>
         <div class="menu">
             <div class="btn-group" role="group">
                 <button id="submit-guidelines-btn" type="submit" class="btn btn-primary btn-sm">Zatwierdź wytyczne</button>
@@ -13,8 +14,7 @@
         </div>
         <table class="new-schedule-table table-bordered">
             <caption class="caption">
-                Tworzenie wytycznych dla <b><span id="workplace">{{ workplace }}</span></b> na rok <b><span id="cur-year">{{ year }}</span></b>, miesiąc <b><span id="cur-month">{{ month }}</span>{{ mn[month-1] }}</b>.<br>
-                <b>ZATWIERDZENIE WYWALI BŁĄD, FUNKCJA JESZCZE NIENAPISANA</b>
+                Tworzenie wytycznych dla <b><span id="workplace">{{ workplace }}</span></b> na rok <b><span id="cur-year">{{ year }}</span></b>, miesiąc <b><span id="cur-month">{{ month }}</span>{{ mn[month-1] }}</b>.
             </caption>
     <!-- headers with shop, month, workers -->
             <tr>
@@ -27,7 +27,11 @@
                         <th class="dayname-th">{{ wdn[day[1]] }}</th>  <!-- day of the week (name) -->
                         <th class="daynumber-th">{{ day[0] }}</th>  <!-- day of the week (number) -->
                         <td>
-                            <input type="number" name="guideline" value="" placeholder="0" min="0" class="hoursInput">
+                            {% if Guidelines.query.filter_by(year=year, month=month, guide=workplace, day=day[0]).first().no_of_workers %}
+                                <input type="number" name="workers" value="{{ Guidelines.query.filter_by(year=year, month=month, workplace=workplace.id, day=day[0]).first().no_of_workers }}" placeholder="0" min="0" class="hoursInput">
+                            {% else %}
+                                <input type="number" name="workers" value="0" placeholder="0" min="0" class="hoursInput">
+                            {% endif %}
                         </td>
                     </tr>
                 {% endif %}
