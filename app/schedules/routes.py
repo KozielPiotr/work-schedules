@@ -205,10 +205,10 @@ def new_schedule():
                                        prev_shdict=prev["prev_shdict"], prev_month=prev["month"],
                                        prev_month_name=prev["month_name"], prev_year=prev["year"],
                                        prev_hours=prev["hours"], prev_workers=prev["workers"],
-                                       workers_hours=prev["workers_hours"])
+                                       workers_hours=prev["workers_hours"], Shop=Shop, Guidelines=Guidelines)
             except:
                 flash("Sprawdź, czy jest ustawiony początek okresu rozliczeniowego")
-            redirect(url_for("new_schedule"))
+                redirect(url_for("schedules.new_schedule"))
 
     return render_template("schedules/new_schedule.html", title="Grafiki - nowy grafik", form=form)
 
@@ -475,7 +475,8 @@ def accept_modify_schedule():
                            wdn=weekday_names, cal=cal, Billing_period=Billing_period, version=version, shdict=shdict,
                            hours=hours, prev_shdict=prev["prev_shdict"], prev_month=prev["month"],
                            prev_hours=prev["hours"], prev_month_name=prev["month_name"], prev_year=prev["year"],
-                           prev_workers=prev["workers"], workers_hours=prev["workers_hours"], id=schedule.id)
+                           prev_workers=prev["workers"], workers_hours=prev["workers_hours"], id=schedule.id,
+                           Guidelines=Guidelines, Shop=Shop)
 
 
 # makes list of schedules modifiable by current user

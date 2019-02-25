@@ -1,3 +1,4 @@
+
 {% extends "main/base.html" %}
 
 {% block styles %}
@@ -186,6 +187,7 @@
                 {% for worker in workers %}
                     <th class="worker-name" rowspan="2" colspan="4">{{ worker | replace("_", " ") }}</th>
                 {% endfor %}
+                <th rowspan="3">Wytyczne</th>
             </tr>
             <tr>
                 <th>{{ mn }}</th>
@@ -236,6 +238,11 @@
                                     <option value="UB">UB</option>
                                 </select>
                             </td>
+                            {% if loop.last %}
+                                <td class="guideline">
+                                    {{ Guidelines.query.filter_by(year=year, month=month, day=day[0], guide=Shop.query.filter_by(shopname=shop).first()).first().no_of_workers }}
+                                </td>
+                            {% endif %}
                             <td id="to-json-{{ worker }}-{{ year }}-{{ month }}-{{ day[0] }}">
                                 <input type="hidden" value="{{ worker }}-{{ year }}-{{ month }}-{{ day[0] }}" name="helper">
                                 <input name="year" value="{{ year }}">
