@@ -400,6 +400,26 @@ window.onload = function() {
 
         };
     });
+
+    //checks if guidelines are fulfilled
+    $("tr[class='main-tr days']").each(function() {
+        let inWork = 0
+        $(this).find("select[name='event']").each(function(){
+            if ($(this).val() === "in_work") {
+                inWork += 1
+            };
+        });
+        let guideline = $(this).find("td[class='guideline']").text()
+        let diff = inWork - guideline
+        $(this).find("td[class='difference']").text(diff)
+        if (diff < 0) {
+            $(this).find("td[class='difference']").css("background", "#ff0000")
+        } else if (diff > 0) {
+            $(this).find("td[class='difference']").css("background", "#00ff7d")
+        } else {
+            $(this).find("td[class='difference']").css("background", "#ffffff")
+        };
+    });
 };
 
 
@@ -659,5 +679,29 @@ $(document).ready(function() {
             },
         });
         return false;
+    });
+});
+
+
+//checks if guidelines are fulfilled
+$(document).ready(function() {
+    $("td[id^='event-']").change(function() {
+        row = $(this).closest("tr")
+        let inWork = 0
+        row.find("select[name='event']").each(function(){
+            if ($(this).val() === "in_work") {
+                    inWork +=1
+                };
+        });
+        let guideline = row.find("td[class='guideline']").text()
+        let diff = inWork - guideline
+        row.find("td[class='difference']").text(diff)
+        if (diff < 0) {
+            row.find("td[class='difference']").css("background", "#ff0000")
+        } else if (diff > 0) {
+            row.find("td[class='difference']").css("background", "#00ff7d")
+        } else {
+            row.find("td[class='difference']").css("background", "#ffffff")
+        };
     });
 });

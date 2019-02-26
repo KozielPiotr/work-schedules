@@ -201,6 +201,7 @@
                     <th class="worker-name" rowspan="2" colspan="4">{{ worker | replace("_", " ") }}</th>
                 {% endfor %}
                 <th rowspan="3">Wytyczne</th>
+                <th rowspan="3">Różnica</th>
             </tr>
             <tr>
                 <th>{{ month_name }}</th>
@@ -219,7 +220,7 @@
             <tbody>
             {% for day in cal.itermonthdays2(year, month) %}
                 {% if day[0] > 0 %}
-                    <tr class="days">
+                    <tr class="main-tr days">
                         <th class="dayname-th">{{ wdn[day[1]] }}</th>  <!-- day of the week (name) -->
                         <th class="daynumber-th">{{ day[0] }}</th>  <!-- day of the week (number) -->
                         <th class="weekday-number-th"> {{ day[1] }}</th> <!-- number of weekday (for JS) -->
@@ -253,6 +254,9 @@
                             {% if loop.last %}
                                 <td class="guideline">
                                     {{ Guidelines.query.filter_by(year=year, month=month, day=day[0], guide=Shop.query.filter_by(shopname=workplace).first()).first().no_of_workers }}
+                                </td>
+                                <td class="difference">
+
                                 </td>
                             {% endif %}
                             <td id="to-json-{{ worker }}-{{ year }}-{{ month }}-{{ day[0] }}">
