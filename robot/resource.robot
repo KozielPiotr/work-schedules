@@ -40,3 +40,7 @@ Submit Credentials
 Welcome Page Should Be Open
     Location Should Be    ${WELCOME URL}
     Title Should Be    Grafiki
+
+Logout
+	Click Link   xpath=//*[@href="/logout"]
+

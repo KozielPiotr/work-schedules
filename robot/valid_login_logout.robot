@@ -9,4 +9,7 @@ Valid Login
     Input Password    a
     Submit Credentials
     Welcome Page Should Be Open
+    
+Logout Try
+    Logout
     [Teardown]    Close Browser
