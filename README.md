@@ -1,5 +1,41 @@
-# grafiki
+# Overviev
+It's web app that lets user to create and manage work schedules. It also checks if schedule is compatibile with work law.
 
-Access to database:
-user: admin
+## Funcionalities:
+- creating users accounts;
+- creating workplaces;
+- connecting users with workplaces;
+- creating schedules for workplaces for chosen year, month and workplace;
+- schedules includes workers connected to chosen workplace;
+- editing existing schedules;
+- creating guidelines with info how many workers should be in work each day;
+- loading schedule from xlsx file;
+- exporting schedules to xlsx file;
+
+Please mind that project is not yet finished and final list will have few more positions.
+
+## Requirements:
+- Linux (preferred) or Windows
+- Python 3.6
+- Google Chrome (for testing)
+- pip
+
+## Starting app:
+1. Setup virtualenv
+2. install Python libraries
+```
+$ pip install -r requirements.txt
+```
+3. Set up database
+```
+$ flask db upgrade
+```
+4. Run app
+```
+$ python manage.py runserver
+```
+
+## Login data
+user: admin admin
+
 password: a
