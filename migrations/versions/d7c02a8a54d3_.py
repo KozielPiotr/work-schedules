@@ -1,8 +1,8 @@
-"""DB init
+"""empty message
 
-Revision ID: 46593ada116c
+Revision ID: d7c02a8a54d3
 Revises: 
-Create Date: 2019-03-03 19:21:34.339262
+Create Date: 2019-03-04 13:36:39.318773
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '46593ada116c'
+revision = 'd7c02a8a54d3'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -99,7 +99,7 @@ def upgrade():
     sa.ForeignKeyConstraint(['worker'], ['user.id'], ),
     sa.ForeignKeyConstraint(['workplace'], ['shop.id'], )
     )
-
+	
     op.execute('INSERT INTO "user" VALUES (1, "admin admin", "pbkdf2:sha256:50000$Fv8pGxVC$f13556c64ea24875a6a550a827d1e769d332bd58a4d996c561af581727ca333f", "0");')
     # ### end Alembic commands ###
 

@@ -3,3 +3,4 @@ app.db
 .idea/
 BACK_app.db
 app/xlsx_files/
+venv/
