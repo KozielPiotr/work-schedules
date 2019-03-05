@@ -4,3 +4,4 @@ app.db
 BACK_app.db
 app/xlsx_files/
 venv/
+robot/results/
