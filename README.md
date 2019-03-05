@@ -1,5 +1,5 @@
 # Overviev
-It's web app that lets user to create and manage work schedules. It also checks if schedule is compatibile with work law.
+It's web app that lets user to create and manage work schedules. Also checks if schedule is compatibile with work law.
 
 ## Funcionalities:
 - creating users accounts;
@@ -39,3 +39,10 @@ $ python manage.py runserver
 user: admin admin
 
 password: a
+
+## Run tests
+With app running:
+```
+$ pybot -d robot/results robot
+```
+Google Chrome and [Chromedriver](http://chromedriver.chromium.org/getting-started?fbclid=IwAR3CPyq8Yr3-omfEVIHQ4X9TCJKe3bzYFGd8zbODELDSHngr04mhiuxW9hc) required.
