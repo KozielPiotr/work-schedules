@@ -9,18 +9,17 @@ Creates xlsx files based on accepted versions of schedule and loads xlsx files t
 
 import os
 import calendar
-import datetime
 from openpyxl import Workbook, load_workbook
 from openpyxl.styles import PatternFill, Alignment
 from openpyxl.styles.borders import Border, Side
 from openpyxl.utils import column_index_from_string as cifs
-from flask import request, redirect, url_for, current_app, send_from_directory, render_template, flash, abort
+from flask import request, redirect, url_for, current_app, send_from_directory, render_template, flash
 from flask_login import login_required
 from werkzeug.utils import secure_filename
 from app import schedules
 from app.xlsx import bp
 from app.xlsx.forms import UploadFile
-from app.models import User, Shop, Billing_period, Schedule, Personal_schedule
+from app.models import Shop, Billing_period
 
 
 @bp.route("/xlsx", methods=["GET", "POST"])
@@ -451,3 +450,4 @@ def create_dict_from_file():
                            Billing_period=Billing_period, shdict=shdict, hours=hours, prev_shdict=prev["prev_shdict"],
                            prev_month=prev["month"], prev_hours=prev["hours"], prev_month_name=prev["month_name"],
                            prev_year=prev["year"], prev_workers=prev["workers"], workers_hours=prev["workers_hours"])
+
