@@ -17,7 +17,7 @@ Please mind that project is not yet finished and final list will have few more p
 ## Requirements:
 - Linux (preferred) or Windows
 - Python 3.6
-- Google Chrome (for testing)
+- Google Chrome and [Chromedriver](https://l.facebook.com/l.php?u=http%3A%2F%2Fchromedriver.chromium.org%2Fgetting-started%3Ffbclid%3DIwAR3CPyq8Yr3-omfEVIHQ4X9TCJKe3bzYFGd8zbODELDSHngr04mhiuxW9hc&h=AT2yXbVr3mm4sddG9u1QunB1tWCsmjilKJXKpBRtf17Qlpce5BFkwkzUQ49u6jjayLPOVyuFiAhYgE5Gs8ksSM9MoNFG1TOMkSXL328fcRP1p_fyS-LsTjkwkYQeTg) (for testing)
 - pip
 
 ## Starting app:
