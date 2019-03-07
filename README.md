@@ -40,7 +40,7 @@ user: admin admin
 
 password: a
 
-## Run tests
+## Run Robot tests
 With app running:
 ```
 $ pybot -d robot/results robot
