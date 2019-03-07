@@ -12,9 +12,10 @@ Managing users accounts, workplaces and connections between them
 from flask import flash, redirect, url_for, render_template, jsonify, request
 from flask_login import login_required, current_user
 from app import db
+from app.models import User, Shop
 from app.acc_man import bp
 from app.acc_man.forms import NewUserForm, NewWorkplaceForm, UserToShopForm
-from app.models import User, Shop, Guidelines
+from app.acc_man.assign_worker import assign_worker
 
 
 # New user
@@ -72,19 +73,9 @@ def worker_to_workplace():
         return redirect(url_for("main.index"))
 
     form = UserToShopForm()
+    assign_worker(form)
     workplaces = Shop.query.order_by(Shop.shopname).all()
-    workplaces_list = []
-    for workplace in workplaces:
-        workplaces_list.append((str(workplace), str(workplace)))
-    form.workplace.choices = workplaces_list
 
-    workers = User.query.order_by(User.username).all()
-    workers_list = []
-    for worker in workers:
-        workers_list.append((str(worker), str(worker)))
-    form.worker.choices = workers_list
-
-    users_number = len(workers_list)
     if form.validate_on_submit():
         worker = User.query.filter_by(username=form.worker.data).first()
         workplace = Shop.query.filter_by(shopname=form.workplace.data).first()
@@ -97,7 +88,7 @@ def worker_to_workplace():
             flash("%s był już przypisany do %s" % (worker, workplace))
         return redirect(url_for("acc.worker_to_workplace"))
     return render_template("acc_man/worker_to_workplace.html", title="Grafiki - przydzielanie użytkownika do sklepu",
-                           form=form, workplaces=workplaces, users_number=users_number)
+                           form=form, workplaces=workplaces)
 
 
 # Jsonifies data for dynamically generated checkboxes in worker_to_workplace()

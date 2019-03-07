@@ -16,14 +16,14 @@ from app import db
 from app.models import User
 from app.auth import bp
 from app.auth.forms import LoginForm, PasswordChangeForm, AdminPasswordChangeForm
+from app.auth.workers_for_admin_pswd_change import users_for_admin
 
 
-# Login page. Checks if user is logged in and if not redirects to log in  page
+# Login page. Checks if user is logged in and if not redirects to log in page
 @bp.route("/login", methods=["GET", "POST"])
 def login():
-    """
-    Logs user in.
-    """
+    """Logs user in."""
+
     if current_user.is_authenticated:
         return redirect(url_for("main.index"))
     form = LoginForm()
@@ -44,9 +44,8 @@ def login():
 @bp.route("/logout")
 @login_required
 def logout():
-    """
-    Logs out current user.
-    """
+    """Logs out current user."""
+
     logout_user()
     return redirect(url_for("main.index"))
 
@@ -83,11 +82,7 @@ def admin_password_change():
     :return: main page, password for current user changed
     """
     form = AdminPasswordChangeForm()
-    workers = []
-
-    for user in User.query.all():
-        workers.append((str(user), str(user)))
-    form.worker.choices = workers
+    form.worker.choices = users_for_admin()
 
     if form.validate_on_submit():
         print("dupa")

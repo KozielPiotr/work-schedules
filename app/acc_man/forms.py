@@ -35,4 +35,3 @@ class UserToShopForm(FlaskForm):
     workplace = SelectField("Wybierz sklep")
     worker = SelectField("Wybierz użytkownika")
     submit = SubmitField("Przydziel")
-
