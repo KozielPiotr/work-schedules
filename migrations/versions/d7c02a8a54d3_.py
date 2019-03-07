@@ -101,6 +101,11 @@ def upgrade():
     )
 	
     op.execute('INSERT INTO "user" VALUES (1, "admin admin", "pbkdf2:sha256:50000$Fv8pGxVC$f13556c64ea24875a6a550a827d1e769d332bd58a4d996c561af581727ca333f", "0");')
+    op.execute('INSERT INTO "user" VALUES (2, "Example worker", "pbkdf2:sha256:50000$Fv8pGxVC$f13556c64ea24875a6a550a827d1e769d332bd58a4d996c561af581727ca333f", "4");')
+    op.execute('INSERT INTO "shop" VALUES (1, "Example Workplace");')
+    op.execute('INSERT INTO "workplaces" VALUES (1, 1);')
+    op.execute('INSERT INTO "workplaces" VALUES (2, 1);')
+    op.execute('INSERT INTO "billing_period" VALUES (1, "2018-01-01 00:00:00.000000", 3);')
     # ### end Alembic commands ###
 
 

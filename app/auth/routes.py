@@ -45,7 +45,7 @@ def login():
 @login_required
 def logout():
     """Logs out current user."""
-
+    
     logout_user()
     return redirect(url_for("main.index"))
 
