@@ -6,10 +6,9 @@ Library           SeleniumLibrary
 ${SERVER}         localhost:5000
 ${BROWSER}        Chrome
 ${DELAY}          0
-${VALID USER}     admin admin
-${VALID PASSWORD} 	a
 ${LOGIN URL}      http://${SERVER}/
 ${WELCOME URL}    http://${SERVER}/
+${NEW USER URL}   http://${SERVER}/new-user
 ${ERROR URL}      http://${SERVER}/
 
 *** Keywords ***
@@ -41,6 +40,38 @@ Welcome Page Should Be Open
     Location Should Be    ${WELCOME URL}
     Title Should Be    Grafiki
 
+New User Page Should Be Open
+    Location Should Be    ${NEW USER URL}
+    Title Should Be    Grafiki - nowy użytkownik
+
+Go To New User Creation
+    Go To    ${NEW USER URL}
+    Title Should Be    Grafiki - nowy użytkownik
+
+Input New User Username
+    [Arguments]    ${new user username}
+    Input Text    username    ${new user username}
+
+Input New User Password
+    [Arguments]    ${new user password}
+    Input Text    password    ${new user password}
+    Input Text    password2    ${new user password}
+
 Logout
-	Click Link   xpath=//*[@href="/logout"]
+    Click Link   xpath=//*[@href="/logout"]
+
+Input Current Password
+    [Arguments]    ${current password}
+    Input Text    old_password    ${current password}
+
+Input New Password
+    [Arguments]    ${new password}
+    Input Text    new_password1    ${new password}
+    Input Text    new_password2    ${new password}
+
+Go To Password Change
+    Click Link    change-password
+    Title Should Be    Grafiki - zmiana hasła
+    
+    
 
