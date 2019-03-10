@@ -26,16 +26,8 @@ def billing_period():
         return redirect(url_for("main.index"))
 
     form = BillingPeriod()
-
-    if not Billing_period.query.all():
-        cur_begin = datetime(2018, 1, 1)
-        cur_duration = 3
-        b_p = Billing_period(begin=cur_begin, duration=cur_duration)
-        db.session.add(b_p)
-        db.session.commit()
-    else:
-        cur_begin = "{: %d - %m - %Y}".format(Billing_period.query.filter_by(id=1).first().begin)
-        cur_duration = Billing_period.query.filter_by(id=1).first().duration
+    cur_begin = "{: %d - %m - %Y}".format(Billing_period.query.filter_by(id=1).first().begin)
+    cur_duration = Billing_period.query.filter_by(id=1).first().duration
 
     if form.validate_on_submit():
         begin = datetime(int(form.begin_year.data), int(form.begin_month.data), 1)

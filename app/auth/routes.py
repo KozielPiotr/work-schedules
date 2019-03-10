@@ -45,7 +45,7 @@ def login():
 @login_required
 def logout():
     """Logs out current user."""
-    
+
     logout_user()
     return redirect(url_for("main.index"))
 
@@ -85,9 +85,7 @@ def admin_password_change():
     form.worker.choices = users_for_admin()
 
     if form.validate_on_submit():
-        print("dupa")
         worker = User.query.filter_by(username=form.worker.data).first()
-        print(worker)
         worker.set_password(form.new_password1.data)
         db.session.commit()
         flash("Hasło zmienione")

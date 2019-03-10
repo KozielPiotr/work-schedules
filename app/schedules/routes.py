@@ -1,8 +1,5 @@
 """
 Routes for whole schedules part of project.
-- prev_schedule(): prepers dict with data to show schedule for previous month
-- list_of_schedules_acc_mod(): prepares list of schedules aviable for current user to accept or modify
-- find_latest_version_schd(): finds latest version of schedule
 - new_schedule_find_workers(): jsonifies data for dynamicly generated checkboxes in new_schedule()
 - new_schedule_to_db(): adds schedule to database
 - unaccepted_schedules(): makes list of unaccepted schedule for current user
@@ -16,137 +13,22 @@ Routes for whole schedules part of project.
 - show_schedule_helper(): creates dictionary with all data from chosen schedule
 - show_schedule() : generates uneditable template with chosen schedule
 - select_guideline(): form to select for which year, month and workplace guideline would be created
-- create_guieline(): creates guideline
+- create_guideline(): creates guideline
+- guidelines_to_db(): sends guidelines to db
 """
 
 #-*- coding: utf-8 -*-
-# pylint: disable=no-member
 
-import calendar
-from datetime import datetime, date
+from calendar import Calendar
 from flask import flash, redirect, url_for, render_template, jsonify, request
 from flask_login import current_user, login_required
-from app import db
+from app import MONTH_NAMES, WEEKDAY_NAMES
 from app.schedules import bp
-from app.models import User, Shop, Billing_period, Schedule, Personal_schedule, Guidelines
+from app.models import Shop, Billing_period, Schedule, Guidelines
 from app.schedules.forms import NewScheduleForm, SelectGuideline
-
-
-# prepers dict with data to show schedule for previous month
-def prev_schedule(month, year, month_names, cal, workplace):
-    """
-    Makes dictionary with all data needed to create template that shows existing schedule
-    :param month: month of schedule
-    :param year: year of schedule
-    :param month_names: names of month in apps language
-    :param cal: calendar module
-    :param workplace: workplace for which schedule has to be create
-    :return: dictionary with all needed data
-    """
-    if month == 1:
-        prev_month = 12
-        prev_year = year - 1
-    else:
-        prev_month = month - 1
-        prev_year = year
-    prev_month_name = month_names[prev_month - 1]
-
-    try:
-        prev_month_last_version = Schedule.query.filter_by(year=prev_year, month=prev_month, workplace=workplace,
-                                                           accepted=True).order_by(Schedule.version.desc()).first().\
-                                                                                   version
-        prev_month_shd = Schedule.query.filter_by(year=prev_year, month=prev_month, workplace=workplace,
-                                                  version=prev_month_last_version).first()
-    except AttributeError:
-        prev_month_shd = None
-
-    if prev_month_shd is not None:
-        prev_schd_id = prev_month_shd.id
-        prev_workers = []
-        for pers_schedule in prev_month_shd.ind:
-            if str(pers_schedule.worker).replace(" ", "_") not in prev_workers:
-                prev_workers.append(str(pers_schedule.worker).replace(" ", "_"))
-
-        prev_hours = prev_month_shd.hrs_to_work
-        prev_shdict = {}
-        workers_hours = {}
-        for worker in prev_workers:
-            worker_hours = 0
-            for p_schedule in prev_month_shd.ind:
-                if p_schedule.worker == str(worker).replace("_", " "):
-                    worker_hours += p_schedule.hours_sum
-                workers_hours[worker] = worker_hours
-
-        for worker in prev_workers:
-            for day in cal.itermonthdays(prev_year, prev_month):
-                if day > 0:
-                    begin = Personal_schedule.query.filter_by(date=datetime(prev_year, prev_month, day),
-                                                              includes_id=prev_schd_id,
-                                                              worker=worker.replace("_", " ")).first().begin_hour
-                    end = Personal_schedule.query.filter_by(date=datetime(prev_year, prev_month, day),
-                                                            includes_id=prev_schd_id,
-                                                            worker=worker.replace("_", " ")).first().end_hour
-                    event = Personal_schedule.query.filter_by(date=datetime(prev_year, prev_month, day),
-                                                              includes_id=prev_schd_id,
-                                                              worker=worker.replace("_", " ")).first().event
-                    h_sum = Personal_schedule.query.filter_by(date=datetime(prev_year, prev_month, day),
-                                                              includes_id=prev_schd_id,
-                                                              worker=worker.replace("_", " ")).first().hours_sum
-                    billing_week = Personal_schedule.query.filter_by(date=datetime(prev_year, prev_month, day),
-                                                                     includes_id=prev_schd_id,
-                                                                     worker=worker.replace("_",
-                                                                                           " ")).first().billing_week
-
-                    prev_shdict["begin-%s-%d-%02d-%02d" % (worker, prev_year, prev_month, day)] = begin
-                    prev_shdict["end-%s-%d-%02d-%02d" % (worker, prev_year, prev_month, day)] = end
-                    prev_shdict["event-%s-%d-%02d-%02d" % (worker, prev_year, prev_month, day)] = event
-                    prev_shdict["sum-%s-%d-%02d-%02d" % (worker, prev_year, prev_month, day)] = h_sum
-                    prev_shdict["billing-week-%s-%d-%02d-%02d" % (worker, prev_year, prev_month, day)] = billing_week
-    else:
-        prev_shdict = None
-        prev_hours = None
-        prev_workers = None
-        workers_hours = None
-    prev = {"prev_shdict": prev_shdict, "hours": prev_hours, "workers": prev_workers, "workers_hours": workers_hours,
-            "year": prev_year, "month": prev_month, "month_name": prev_month_name}
-    return prev
-
-
-# prepares list of schedules aviable for current user to accept or modify
-def list_of_schedules_acc_mod(mod_acc):
-    """
-    Prepares list of schedules aviable for current user to accept or modify.
-    :param mod_acc: Defines if function looks for accepted or unaccepted schedules
-    :return: list of schedules that match to 'mod_acc' criteria
-    """
-    schedules = []
-    for schedule in Schedule.query.filter_by(accepted=mod_acc).order_by(Schedule.workplace, Schedule.year,
-                                                                        Schedule.month, Schedule.version).all():
-        for assigned_workplaces in current_user.workers_shop:
-            if str(schedule.workplace) == str(assigned_workplaces):
-                schedules.append(schedule)
-
-    number_of_schedules = len(schedules)
-    schedules_list = {"schedules": schedules, "nos": number_of_schedules}
-
-    return schedules_list
-
-
-# finds latest version of schedule
-def find_latest_version_schd(schedules, workplace, year, month):
-    """
-    Only latest version can be modified.
-    :param schedules: all schedules for chosen workplace
-    :param workplace: chosen workplace
-    """
-    versions = []
-    for schedule in schedules:
-        versions.append(schedule.version)
-
-    highest_version = max(versions)
-    filtered = Schedule.query.filter_by(year=int(year), month=int(month), workplace=workplace,
-                                        version=highest_version, accepted=True).first()
-    return filtered
+from app.schedules import list_of_schedules, new_schedule_funcs, find_workers, new_schd_to_db, filter_sched_to_modify,\
+    accept_or_modify_schedule, remove_sched, add_user_to_sched, show_schedule_helper, select_guidelines_funcs,\
+    guideline_to_database
 
 
 # gets data for new schedule and creates new schedule template
@@ -156,59 +38,17 @@ def new_schedule():
     """
     Creates template with empty, modifiable schedule for chosen year, month and workplace and with unmodifiable
     schedule for previous month.
-    I'm not using calendar module's names for months and days because whole app has to be in polish,
-    so the code is little more complicated.
     :return: template with all necessary data for new schedule
     """
     if current_user.access_level != "0" and current_user.access_level != "1" and current_user.access_level != "2":
         flash("Użytkownik nie ma uprawnień do wyświetlenia tej strony")
         return redirect(url_for("main.index"))
 
-    workplaces = []
-    workers_list = []
     form = NewScheduleForm()
-    c_user = User.query.filter_by(username=str(current_user)).first()
-    for workplace in c_user.workers_shop:
-        workplaces.append((str(workplace), str(workplace)))
-    form.workplace.choices = workplaces
-
-    for worker in User.query.order_by(User.access_level).all():
-        workers_list.append((str(worker), str(worker)))
-    form.workers.choices = workers_list
+    new_schedule_funcs.ns_choices(form)
 
     if form.validate_on_submit():
-        workplace = form.workplace.data
-        year = int(form.year.data)
-        month = int(form.month.data)
-        hours = form.hours.data
-        month_names = ["Styczeń", "Luty", "Marzec", "Kwiecień", "Maj", "Czerwiec", "Lipiec", "Sierpień",
-                       "Wrzesień", "Październik", "Listopad", "Grudzień"]
-        month_name = month_names[month - 1]
-        cal = calendar.Calendar()
-        weekday_names = ["Poniedziałek", "Wtorek", "Środa", "Czwartek", "Piątek", "Sobota", "Niedziela"]
-
-        schedule_name = "%s-%s-%s" % (year, month, workplace)
-        check_schedule = Schedule.query.filter_by(name=schedule_name).first()
-        if check_schedule is not None:
-            flash("Taki grafik już istnieje")
-            redirect(url_for("main.index"))
-        else:
-            workers_to_schd = []
-            for worker in form.workers.data:
-                workers_to_schd.append(str(worker).replace(" ", "_"))
-
-            prev = prev_schedule(month, year, month_names, cal, workplace)
-            try:
-                return render_template("schedules/empty_schedule.html", title="Grafiki - nowy grafik",
-                                       workers=workers_to_schd, shop=workplace, year=year, month=month, mn=month_name,
-                                       cal=cal, wdn=weekday_names, hours=hours, Billing_period=Billing_period,
-                                       prev_shdict=prev["prev_shdict"], prev_month=prev["month"],
-                                       prev_month_name=prev["month_name"], prev_year=prev["year"],
-                                       prev_hours=prev["hours"], prev_workers=prev["workers"],
-                                       workers_hours=prev["workers_hours"], Shop=Shop, Guidelines=Guidelines)
-            except:
-                flash("Sprawdź, czy jest ustawiony początek okresu rozliczeniowego")
-                redirect(url_for("schedules.new_schedule"))
+        return new_schedule_funcs.ns_form_validate(form)
 
     return render_template("schedules/new_schedule.html", title="Grafiki - nowy grafik", form=form)
 
@@ -227,16 +67,7 @@ def new_schedule_find_workers(workplace):
         flash("Użytkownik nie ma uprawnień do wyświetlenia tej strony")
         return redirect(url_for("main.index"))
 
-    shop = Shop.query.filter_by(shopname=workplace).first()
-    workers = shop.works.all()
-    jsondict = []
-    for worker in shop.works.all():
-        workers_list = {}
-        if worker.access_level == "0" or worker.access_level == "1":
-            workers.remove(worker)
-        else:
-            workers_list["name"] = worker.username
-            jsondict.append(workers_list)
+    jsondict = find_workers.find_workers(workplace)
     return jsonify({"workers": jsondict})
 
 
@@ -252,132 +83,9 @@ def new_schedule_to_db(action):
         flash("Użytkownik nie ma uprawnień do wyświetlenia tej strony")
         return redirect(url_for("main.index"))
 
-    def changes(old, new):
-        changes_list = {}
-        old_workers = []
-        for old_p_schedule in old.ind:
-            if old_p_schedule.worker not in old_workers:
-                old_workers.append(str(old_p_schedule.worker))
-        new_workers = []
-        for new_p_schedule in new.ind:
-            if new_p_schedule.worker not in new_workers:
-                new_workers.append(str(new_p_schedule.worker))
-        for worker in old_workers:
-            if worker not in new_workers:
-                changes_list[worker] = "Usunięto z grafiku"
-
-        # Looking for changes in individual schedules
-        for worker in new_workers:
-            worker_changes = [worker]
-            if worker not in old_workers:
-                worker_changes.append("Dodano do grafiku")
-            for pschedule in Personal_schedule.query.filter_by(worker=worker, includes_id=new.id):
-                old_pschedule = Personal_schedule.query.filter_by(name=pschedule.name, includes_id=old.id).first()
-                if old_pschedule is not None:
-                    if pschedule.begin_hour != old_pschedule.begin_hour or pschedule.end_hour != old_pschedule.end_hour \
-                            or pschedule.event != old_pschedule.event:
-                        change_date = pschedule.date.strftime("%d.%m.%Y")
-                        n_b_hour = pschedule.begin_hour
-                        o_b_hour = old_pschedule.begin_hour
-                        n_e_hour = pschedule.end_hour
-                        o_e_hour = old_pschedule.end_hour
-                        n_event = pschedule.event
-                        if n_event == "off":
-                            n_event = "wolne"
-                        elif n_event == "in_work":
-                            n_event = "w pracy"
-                        o_event = old_pschedule.event
-                        if o_event == "off":
-                            o_event = "wolne"
-                        elif o_event == "in_work":
-                            o_event = "w pracy"
-                        msg = "%s było %s-%s %s, a ma być %s-%s %s" % (change_date, o_b_hour, o_e_hour, o_event,
-                                                                       n_b_hour, n_e_hour, n_event)
-                        worker_changes.append(msg)
-            changes_list[worker] = worker_changes
-        for i in changes_list:
-            for j in changes_list[i]:
-                print(j)
-
-    # adds individual schedules to db
-    def ind_schedules_to_db(data, schedule, billing_period):
-        """
-        Adds individual schedule to database.
-        :param data: json with all information for every individual schedule
-        :param schedule:
-        :param billing_period:
-        """
-        for element in data["ind_schedules"]:
-            schd_date = date(int(element["year"]), int(element["month"]), int(element["day"]))
-            worker = element["worker"].replace("_", " ")
-            b_hour = element["from"]
-            e_hour = element["to"]
-            h_sum = element["sum"]
-            event = element["event"]
-            workplace = element["workplace"]
-            psname = "%s-%s-%s" % (schd_date, worker, workplace)
-            billing_week = element["billing_week"]
-            pschedule = Personal_schedule(name=psname, date=schd_date, worker=worker, begin_hour=b_hour,
-                                          end_hour=e_hour, hours_sum=h_sum, event=event, workplace=workplace,
-                                          includes=schedule, billing_period=billing_period, billing_week=billing_week)
-            db.session.add(pschedule)
-
     data = request.json
-    unaccepted_schedule = Schedule.query.filter_by(
-        name="%s-%s-%s" % (data["main_data"]["year"], data["main_data"]["month"],
-                           data["main_data"]["workplace"]), accepted=False).first()
 
-    # Creates new unaccepted schedule or unaccepted version of existing schedule
-    if action in ("send_v_0", "modify_existing"):
-        name = "%s-%s-%s" % (data["main_data"]["year"], data["main_data"]["month"], data["main_data"]["workplace"])
-        year = int(data["main_data"]["year"])
-        month = int(data["main_data"]["month"])
-        workplace = data["main_data"]["workplace"]
-        hours = data["main_data"]["hours"]
-        billing_period = int(data["main_data"]["billing_period"])
-        version = int(data["main_data"]["version"])
-        schedule = Schedule(name=name, year=year, month=month, workplace=workplace, hrs_to_work=hours,
-                            accepted=False, version=version, billing_period=billing_period)
-        db.session.add(schedule)
-
-        ind_schedules_to_db(data, schedule, billing_period)
-        db.session.commit()
-
-        old = Schedule.query.filter_by(name=name, version=version, accepted=True).first()
-        new = schedule
-        if old is not None:
-            changes(old, new)
-
-    # Accepts schedule and increase it's version number, deletes unaccepted version from db
-    elif action == "accept_new_v":
-        if current_user.access_level != "0" and current_user.access_level != "1":
-            flash("Użytkownik nie ma uprawnień do wyświetlenia tej strony")
-            return redirect(url_for("main.index"))
-
-        name = unaccepted_schedule.name
-        year = unaccepted_schedule.year
-        month = unaccepted_schedule.month
-        workplace = unaccepted_schedule.workplace
-        hours = unaccepted_schedule.hrs_to_work
-        accepted = True
-        version = unaccepted_schedule.version + 1
-        billing_period = unaccepted_schedule.billing_period
-        schedule = Schedule(name=name, year=year, month=month, workplace=workplace, hrs_to_work=hours,
-                            accepted=accepted, version=version, billing_period=billing_period)
-        db.session.add(schedule)
-
-        ind_schedules_to_db(data, schedule, billing_period)
-        db.session.commit()
-
-        old = unaccepted_schedule
-        new = schedule
-        if old is not None:
-            changes(old, new)
-
-        for ind_schedule in unaccepted_schedule.ind:
-            db.session.delete(ind_schedule)
-        db.session.delete(unaccepted_schedule)
-        db.session.commit()
+    new_schd_to_db.add_schedule_to_db(action, data)
 
     return url_for("main.index")
     # except AttributeError:
@@ -397,7 +105,7 @@ def unaccepted_schedules():
         flash("Użytkownik nie ma uprawnień do wyświetlenia tej strony")
         return redirect(url_for("main.index"))
 
-    los = list_of_schedules_acc_mod(mod_acc=False)
+    los = list_of_schedules.list_of_schedules_acc_mod(mod_acc=False)
 
     return render_template("schedules/schedules-to-accept.html", title="Grafiki - niezaakceptowane grafiki",
                            ua=los["schedules"], sn=los["nos"], Schedule=Schedule)
@@ -413,70 +121,18 @@ def accept_modify_schedule():
     """
     action = request.args.get("action")
     schedule = None
-    title = "Grafiki"
+    cal = Calendar()
+    to_render = accept_or_modify_schedule.acc_mod_schd(action)
+    prev = to_render["prev"]
 
-    if action == "to_accept":
-        if (current_user.access_level != "0") and (current_user.access_level != "1"):
-            flash("Użytkownik nie ma uprawnień do wyświetlenia tej strony")
-            return redirect(url_for("main.index"))
-        schedule = Schedule.query.filter_by(name=request.args.get("schd"), version=int(request.args.get("v")),
-                                            accepted=False).first()
-        title = "Grafiki - akceptacja grafiku"
-    elif action == "to_modify":
-        if (current_user.access_level != "0") and (current_user.access_level != "1") and\
-                (current_user.access_level != "2"):
-            flash("Użytkownik nie ma uprawnień do wyświetlenia tej strony")
-            return redirect(url_for("main.index"))
-        schedule = Schedule.query.filter_by(name=request.args.get("schd"), version=int(request.args.get("v")),
-                                            accepted=True).first()
-        title = "Grafiki - modyfikacja grafiku"
-    if not schedule:
-        flash("Nie ma takiego grafiku")
-        return redirect(url_for("schedules.accept_modify_schedule"))
-    schedule_id = schedule.id
-    workplace = schedule.workplace
-    year = schedule.year
-    month = schedule.month
-    hours = schedule.hrs_to_work
-    version = schedule.version
-    workers = []
-    for pers_schedule in schedule.ind:
-        if str(pers_schedule.worker).replace(" ", "_") not in workers:
-            workers.append(str(pers_schedule.worker).replace(" ", "_"))
-
-    month_names = ["Styczeń", "Luty", "Marzec", "Kwiecień", "Maj", "Czerwiec", "Lipiec", "Sierpień",
-                   "Wrzesień", "Październik", "Listopad", "Grudzień"]
-    weekday_names = ["Poniedziałek", "Wtorek", "Środa", "Czwartek", "Piątek", "Sobota", "Niedziela"]
-    month_name = month_names[month - 1]
-    cal = calendar.Calendar()
-
-    prev = prev_schedule(month, year, month_names, cal, workplace)
-
-    shdict = {}
-    for worker in workers:
-        for day in cal.itermonthdays(year, month):
-            if day > 0:
-                begin = Personal_schedule.query.filter_by(date=datetime(year, month, day), includes_id=schedule_id,
-                                                          worker=worker.replace("_", " ")).first().begin_hour
-                end = Personal_schedule.query.filter_by(date=datetime(year, month, day), includes_id=schedule_id,
-                                                        worker=worker.replace("_", " ")).first().end_hour
-                event = Personal_schedule.query.filter_by(date=datetime(year, month, day), includes_id=schedule_id,
-                                                          worker=worker.replace("_", " ")).first().event
-                if begin == 0:
-                    begin = ""
-                shdict["begin-%s-%d-%02d-%02d" % (worker, year, month, day)] = begin
-                if end == 0:
-                    end = ""
-                shdict["end-%s-%d-%02d-%02d" % (worker, year, month, day)] = end
-                shdict["event-%s-%d-%02d-%02d" % (worker, year, month, day)] = event
-
-    return render_template("schedules/accept-schedule.html", action=action, title=title, schedule=schedule,
-                           workplace=workplace, year=year, month=month, workers=workers, month_name=month_name,
-                           wdn=weekday_names, cal=cal, Billing_period=Billing_period, version=version, shdict=shdict,
-                           hours=hours, prev_shdict=prev["prev_shdict"], prev_month=prev["month"],
+    return render_template("schedules/accept-schedule.html", action=action, title=to_render["title"], schedule=schedule,
+                           workplace=to_render["workplace"], year=to_render["year"], month=to_render["month"],
+                           workers=to_render["workers"], month_name=to_render["month_name"], wdn=WEEKDAY_NAMES,
+                           Billing_period=Billing_period, version=to_render["version"], shdict=to_render["shdict"],
+                           hours=to_render["hours"], prev_shdict=prev["prev_shdict"], prev_month=prev["month"],
                            prev_hours=prev["hours"], prev_month_name=prev["month_name"], prev_year=prev["year"],
-                           prev_workers=prev["workers"], workers_hours=prev["workers_hours"], id=schedule.id,
-                           Guidelines=Guidelines, Shop=Shop)
+                           prev_workers=prev["workers"], workers_hours=prev["workers_hours"], cal=cal,
+                           id=to_render["schedule_id"], Guidelines=Guidelines, Shop=Shop)
 
 
 # makes list of schedules modifiable by current user
@@ -490,11 +146,8 @@ def modifiable_schedules():
         flash("Użytkownik nie ma uprawnień do wyświetlenia tej strony")
         return redirect(url_for("main.index"))
 
-    month_names = ["Styczeń", "Luty", "Marzec", "Kwiecień", "Maj", "Czerwiec", "Lipiec", "Sierpień",
-                   "Wrzesień", "Październik", "Listopad", "Grudzień"]
-
     return render_template("schedules/schedules-to-modify.html", title="Grafiki - modyfikowalne grafiki",
-                           mn=month_names, Schedule=Schedule)
+                           mn=MONTH_NAMES, Schedule=Schedule)
 
 
 # jsonifies data for dynamically generated filtered list of schedules in modifiable_schedules()
@@ -506,54 +159,14 @@ def filter_schedules_to_modify(year, month, workplace, action):
     :param year: year of schedule
     :param month: month of schedule
     :param workplace: workplace of schedule
+    :param action: action to take
     :return: matching schedule
     """
-    if action == "modify" and current_user.access_level != "0" and current_user.access_level != "1"\
+    if action == "modify" and current_user.access_level != "0" and current_user.access_level != "1" \
             and current_user.access_level != "2":
         flash("Użytkownik nie ma uprawnień do wyświetlenia tej strony")
         return redirect(url_for("main.index"))
-
-    schedules = Schedule.query.filter_by(year=int(year), month=int(month), workplace=workplace, accepted=True).all()
-
-
-    if workplace != "0":
-        if not schedules:
-            return jsonify({"option": 0})
-        filtered = find_latest_version_schd(schedules, workplace, year, month)
-        uri = "#"
-        if action == "modify":
-            uri = url_for("schedules.accept_modify_schedule", schd=filtered.name, v=filtered.version,
-                          action="to_modify")
-        elif action == "show":
-            uri = url_for("schedules.show_schedule", schd=filtered.name, version=filtered.version, action=action)
-        elif action == "xlsx":
-            uri = url_for("xlsx.to_xlsx", schd=filtered.name, v=filtered.version, action=action)
-        return jsonify({"option": 1, "schedules": [{"url": uri, "name": filtered.name, "year": filtered.year,
-                                                    "month": filtered.month, "workplace": filtered.workplace,
-                                                    "version": filtered.version}]})
-
-    workplaces = current_user.workers_shop
-    json_schedules = []
-    for users_workplace in workplaces:
-        schedules = Schedule.query.filter_by(year=int(year), month=int(month), workplace=users_workplace.shopname,
-                                             accepted=True).all()
-        if schedules:
-            filtered = find_latest_version_schd(schedules, users_workplace.shopname, year, month)
-            if filtered is not None:
-                uri = "#"
-                if action == "modify":
-                    uri = url_for("schedules.accept_modify_schedule", schd=filtered.name, v=filtered.version,
-                                  action="to_modify")
-                elif action == "show":
-                    uri = url_for("schedules.show_schedule", schd=filtered.name, version=filtered.version, action=action)
-                elif action == "xlsx":
-                    uri = url_for("xlsx.to_xlsx", schd=filtered.name, v=filtered.version, action=action)
-                json_schedules.append({"url": uri, "name": filtered.name, "year": filtered.year,
-                                       "month": filtered.month, "workplace": filtered.workplace,
-                                       "version": filtered.version})
-    if not json_schedules:
-        return jsonify({"option": 0})
-    return jsonify({"option": 1, "schedules": json_schedules})
+    return jsonify(filter_sched_to_modify.find_schedule(year, month, workplace, action))
 
 
 # removes schedule from db
@@ -562,26 +175,13 @@ def filter_schedules_to_modify(year, month, workplace, action):
 def remove_schedule(schedule):
     """
     Removes schedule with passed id from db
+    :param schedule: schedule's id
     """
     if current_user.access_level != "0" and current_user.access_level != "1" and current_user.access_level != "2":
         flash("Użytkownik nie ma uprawnień do wyświetlenia tej strony")
         return redirect(url_for("main.index"))
 
-    schedule_to_remove = Schedule.query.filter_by(id=schedule).first()
-
-    if schedule_to_remove is not None:
-        for pers_schedule in schedule_to_remove.ind:
-            db.session.delete(pers_schedule)
-        db.session.delete(schedule_to_remove)
-        db.session.commit()
-        flash("Usunięto niezaakceptowaną propozycję grafiku %s na %s.%s v_%s" % (schedule_to_remove.workplace,
-                                                                                 schedule_to_remove.month,
-                                                                                 schedule_to_remove.year,
-                                                                                 schedule_to_remove.version))
-        return redirect(url_for("main.index"))
-
-    flash("Nie ma takiego grafiku")
-    return redirect(url_for("main.index"))
+    return remove_sched.remove_sched(schedule)
 
 
 # adds user to existing schedule
@@ -596,33 +196,7 @@ def add_user_to_schedule(schedule_id, worker, action):
     """
 
     schedule = Schedule.query.filter_by(id=schedule_id).first()
-    worker = worker
-    cal = calendar.Calendar()
-    workplace = schedule.workplace
-
-    schedule_workers = []
-    for ind_schedule in schedule.ind:
-        if ind_schedule.worker not in schedule_workers:
-            schedule_workers.append(ind_schedule.worker)
-
-    workers = []
-    for employee in Shop.query.filter_by(shopname=workplace).first().works.all():
-        workers.append(str(employee))
-
-    if worker in workers and worker not in schedule_workers:
-        for day in cal.itermonthdays(schedule.year, schedule.month):
-            if day > 0:
-                schedule_date = date(schedule.year, schedule.month, day)
-                name = "%s-%s-%s" % (schedule_date, worker, schedule.workplace)
-                pers_schedule = Personal_schedule(name=name, date=schedule_date, worker=worker, begin_hour=0, end_hour=0,
-                                                  hours_sum=0, event="off", workplace=workplace,
-                                                  includes_id=schedule.id)
-                db.session.add(pers_schedule)
-        db.session.commit()
-    elif worker not in workers:
-        flash("Taki pracownik nie jest przypisany do tego miejsa pracy")
-    elif worker in schedule_workers:
-        flash("Taki pracownik jest już w tym grafiku")
+    add_user_to_sched.add_user_to_sched(schedule, worker)
 
     return redirect(url_for("schedules.accept_modify_schedule", action=action, schd=schedule.name,
                             v=schedule.version))
@@ -637,64 +211,8 @@ def choose_show_schedule():
     """
     action = request.args.get("action")
     title = "Grafiki - podgląd grafiku"
-    month_names = ["Styczeń", "Luty", "Marzec", "Kwiecień", "Maj", "Czerwiec", "Lipiec", "Sierpień",
-                   "Wrzesień", "Październik", "Listopad", "Grudzień"]
 
-    return render_template("schedules/choose_show_schedule.html", title=title, mn=month_names, action=action)
-
-
-def show_schedule_helper(schd, version):
-    """
-    Creates dictionary with data for chosen schedule
-    :param schd: name of schedule
-    :param version: version of schedule
-    :return: dict with schedule data
-    """
-    cal = calendar.Calendar()
-
-    schedule = Schedule.query.filter_by(name=schd, version=version, accepted=True).first()
-
-    schd_id = schedule.id
-    year = schedule.year
-    month = schedule.month
-    workplace = schedule.workplace
-    hours = schedule.hrs_to_work
-    version = schedule.version
-    schd_dict = {"year": year, "month": month, "workplace": workplace, "hours": hours, "version": version}
-
-    workers = []
-    for ind_sched in schedule.ind:
-        if str(ind_sched.worker) not in workers:
-            workers.append(str(ind_sched.worker))
-    schd_dict["workers"] = workers
-
-    workers_hours = {}
-    for worker in workers:
-        worker_hours = 0
-        for ind_sched in schedule.ind:
-            if ind_sched.worker == str(worker).replace("_", " "):
-                worker_hours += ind_sched.hours_sum
-            workers_hours[worker] = worker_hours
-        for day in cal.itermonthdays(year, month):
-            if day > 0:
-                begin = Personal_schedule.query.filter_by(date=datetime(year, month, day), includes_id=schd_id,
-                                                          worker=worker.replace("_", " ")).first().begin_hour
-                end = Personal_schedule.query.filter_by(date=datetime(year, month, day), includes_id=schd_id,
-                                                        worker=worker.replace("_", " ")).first().end_hour
-                event = Personal_schedule.query.filter_by(date=datetime(year, month, day), includes_id=schd_id,
-                                                          worker=worker.replace("_", " ")).first().event
-                h_sum = Personal_schedule.query.filter_by(date=datetime(year, month, day), includes_id=schd_id,
-                                                          worker=worker.replace("_", " ")).first().hours_sum
-                billing_week = Personal_schedule.query.filter_by(date=datetime(year, month, day), includes_id=schd_id,
-                                                                 worker=worker.replace("_", " ")).first().billing_week
-
-                schd_dict["begin-%s-%d-%02d-%02d" % (worker, year, month, day)] = begin
-                schd_dict["end-%s-%d-%02d-%02d" % (worker, year, month, day)] = end
-                schd_dict["event-%s-%d-%02d-%02d" % (worker, year, month, day)] = event
-                schd_dict["sum-%s-%d-%02d-%02d" % (worker, year, month, day)] = h_sum
-                schd_dict["billing-week-%s-%d-%02d-%02d" % (worker, year, month, day)] = billing_week
-    schd_dict["workers_hours"] = workers_hours
-    return schd_dict
+    return render_template("schedules/choose_show_schedule.html", title=title, mn=MONTH_NAMES, action=action)
 
 
 # generates uneditable template with chosen schedule
@@ -704,14 +222,10 @@ def show_schedule(schd, version):
     """
     :return: template with view of chosen schedule
     """
-    cal = calendar.Calendar()
-    schd_dict = show_schedule_helper(schd, version)
-    month_names = ["Styczeń", "Luty", "Marzec", "Kwiecień", "Maj", "Czerwiec", "Lipiec", "Sierpień",
-                   "Wrzesień", "Październik", "Listopad", "Grudzień"]
-    weekday_names = ["Poniedziałek", "Wtorek", "Środa", "Czwartek", "Piątek", "Sobota", "Niedziela"]
+    schd_dict = show_schedule_helper.show_schedule_helper(schd, version)
 
-    return render_template("schedules/show_schedule.html", schd_dict=schd_dict, mn=month_names, cal=cal,
-                           wdn=weekday_names)
+    return render_template("schedules/show_schedule.html", schd_dict=schd_dict, mn=MONTH_NAMES, cal=Calendar(),
+                           wdn=WEEKDAY_NAMES)
 
 
 # form to select for which year, month and workplace guideline would be created
@@ -727,22 +241,13 @@ def select_guideline():
         return redirect(url_for("main.index"))
 
     title = "Grafiki - wytyczne"
-    month_names = ["Styczeń", "Luty", "Marzec", "Kwiecień", "Maj", "Czerwiec", "Lipiec", "Sierpień",
-                   "Wrzesień", "Październik", "Listopad", "Grudzień"]
-
     form = SelectGuideline()
-    workplaces = []
-    for workplace in current_user.workers_shop:
-        workplaces.append((str(workplace), str(workplace)))
-    form.workplace.choices = workplaces
 
+    form.workplace.choices = select_guidelines_funcs.select_guidelines_choices()
     if form.validate_on_submit():
-        year = form.year.data
-        month = form.month.data
-        workplace = form.workplace.data
-        return redirect(url_for("schedules.create_guideline", y=year, m=month, w=workplace))
+        return select_guidelines_funcs.select_guideline_validate(form)
 
-    return render_template("schedules/select-guideline.html", title=title, mn=month_names, form=form)
+    return render_template("schedules/select-guideline.html", title=title, mn=MONTH_NAMES, form=form)
 
 
 # creating guideline
@@ -759,15 +264,10 @@ def create_guideline():
 
     year = int(request.args.get("y"))
     month = int(request.args.get("m"))
-    #workplace = request.args.get("w")
     workplace = Shop.query.filter_by(shopname=request.args.get("w")).first()
-    month_names = ["Styczeń", "Luty", "Marzec", "Kwiecień", "Maj", "Czerwiec", "Lipiec", "Sierpień",
-                   "Wrzesień", "Październik", "Listopad", "Grudzień"]
-    weekday_names = ["Poniedziałek", "Wtorek", "Środa", "Czwartek", "Piątek", "Sobota", "Niedziela"]
-    cal = calendar.Calendar()
 
     return render_template("schedules/create-guideline.html", year=year, month=month, workplace=workplace,
-                           mn=month_names, wdn=weekday_names, cal=cal, Guidelines=Guidelines)
+                           mn=MONTH_NAMES, wdn=WEEKDAY_NAMES, cal=Calendar(), Guidelines=Guidelines)
 
 
 # sends guidelines to db
@@ -781,21 +281,6 @@ def guidelines_to_db():
         flash("Użytkownik nie ma uprawnień do wyświetlenia tej strony")
         return redirect(url_for("main.index"))
 
-    cal = calendar.Calendar()
-    data = request.json
-    year = int(data["year"])
-    month = int(data["month"])
-    workplace = Shop.query.filter_by(shopname=data["workplace"]).first()
-    for day in cal.itermonthdays(year, month):
-        if day > 0:
-            guideline = Guidelines.query.filter_by(guide=workplace, year=year, month=month, day=day).first()
-            if guideline:
-                guideline.no_of_workers = data[str(day)]
-                db.session.add(guideline)
-            else:
-                guideline = Guidelines(guide=workplace, year=year, month=month, day=day,
-                                       no_of_workers=data[str(day)])
-                db.session.add(guideline)
-    db.session.commit()
+    guideline_to_database.add_guideline()
 
     return url_for("main.index")

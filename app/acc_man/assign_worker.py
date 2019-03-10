@@ -5,7 +5,7 @@
 from app.models import Shop, User
 
 def assign_worker(form):
-    """Fills forms selectfield choices"""
+    """Fills form's selectfield choices"""
 
     workplaces = Shop.query.order_by(Shop.shopname).all()
     workplaces_list = []
