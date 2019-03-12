@@ -7,8 +7,9 @@ Allows to set beginning of counting billing periods and length of it in months.
 
 from datetime import datetime
 from flask import flash, redirect, url_for, render_template
-from flask_login import login_required, current_user
+from flask_login import login_required
 from app import db
+from app.access_test import acc_test
 from app.billing_period.forms import BillingPeriod
 from app.billing_period import bp
 from app.models import Billing_period
@@ -21,8 +22,7 @@ def billing_period():
     """
     Allows to set beginning of counting billing periods and length of it in months.
     """
-    if (current_user.access_level != "0") and (current_user.access_level != "1"):
-        flash("Użytkownik nie ma uprawnień do wyświetlenia tej strony")
+    if acc_test.check_access(0) is False:
         return redirect(url_for("main.index"))
 
     form = BillingPeriod()

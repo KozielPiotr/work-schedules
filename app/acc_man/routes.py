@@ -7,12 +7,12 @@ Managing users accounts, workplaces and connections between them
 """
 
 #-*- coding: utf-8 -*-
-# pylint: disable=no-member
 
 from flask import flash, redirect, url_for, render_template, jsonify, request
-from flask_login import login_required, current_user
+from flask_login import login_required
 from app import db
 from app.models import User, Shop
+from app.access_test import acc_test
 from app.acc_man import bp
 from app.acc_man.forms import NewUserForm, NewWorkplaceForm, UserToShopForm
 from app.acc_man.assign_worker import assign_worker
@@ -25,8 +25,7 @@ def new_user():
     """
     Adds new user to database.
     """
-    if current_user.access_level != "0" and current_user.access_level != "1":
-        flash("Użytkownik nie ma uprawnień do wyświetlenia tej strony")
+    if acc_test.check_access(0) is False:
         return redirect(url_for("main.index"))
 
     form = NewUserForm()
@@ -47,8 +46,7 @@ def new_workplace():
     """
     Adds new workplace to database.
     """
-    if current_user.access_level != "0" and current_user.access_level != "1":
-        flash("Użytkownik nie ma uprawnień do wyświetlenia tej strony")
+    if acc_test.check_access(0) is False:
         return redirect(url_for("main.index"))
 
     form = NewWorkplaceForm()
@@ -68,8 +66,7 @@ def worker_to_workplace():
     """
     Allows to manage connections between workers and workplaces.
     """
-    if current_user.access_level != "0" and current_user.access_level != "1":
-        flash("Użytkownik nie ma uprawnień do wyświetlenia tej strony")
+    if acc_test.check_access(0) is False:
         return redirect(url_for("main.index"))
 
     form = UserToShopForm()
@@ -100,9 +97,9 @@ def worker_to_workplace_workers(workplace):
     :param workplace: chosen workplace
     :return: list of workers
     """
-    if current_user.access_level != "0" and current_user.access_level != "1":
-        flash("Użytkownik nie ma uprawnień do wyświetlenia tej strony")
+    if acc_test.check_access(0) is False:
         return redirect(url_for("main.index"))
+
     shop = Shop.query.filter_by(shopname=workplace).first()
     workers_appended = shop.works.all()
     workers_all = User.query.order_by(User.username).all()
@@ -124,8 +121,7 @@ def remove_from_shop():
     """
     Removes link between worker and workplace.
     """
-    if (current_user.access_level != "0") and (current_user.access_level != "1"):
-        flash("Użytkownik nie ma uprawnień do wyświetlenia tej strony")
+    if acc_test.check_access(0) is False:
         return redirect(url_for("main.index"))
 
     user = request.args.get("user")

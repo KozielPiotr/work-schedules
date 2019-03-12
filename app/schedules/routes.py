@@ -20,9 +20,10 @@ Routes for whole schedules part of project.
 #-*- coding: utf-8 -*-
 
 from calendar import Calendar
-from flask import flash, redirect, url_for, render_template, jsonify, request
-from flask_login import current_user, login_required
+from flask import redirect, url_for, render_template, jsonify, request
+from flask_login import login_required
 from app import MONTH_NAMES, WEEKDAY_NAMES
+from app.access_test import acc_test
 from app.schedules import bp
 from app.models import Shop, Billing_period, Schedule, Guidelines
 from app.schedules.forms import NewScheduleForm, SelectGuideline
@@ -31,7 +32,6 @@ from app.schedules import list_of_schedules, new_schedule_funcs, find_workers, n
     guideline_to_database
 
 
-# gets data for new schedule and creates new schedule template
 @bp.route("/new-schedule", methods=["GET", "POST"])
 @login_required
 def new_schedule():
@@ -40,8 +40,7 @@ def new_schedule():
     schedule for previous month.
     :return: template with all necessary data for new schedule
     """
-    if current_user.access_level != "0" and current_user.access_level != "1" and current_user.access_level != "2":
-        flash("Użytkownik nie ma uprawnień do wyświetlenia tej strony")
+    if acc_test.check_access(2) is False:
         return redirect(url_for("main.index"))
 
     form = NewScheduleForm()
@@ -53,7 +52,6 @@ def new_schedule():
     return render_template("schedules/new_schedule.html", title="Grafiki - nowy grafik", form=form)
 
 
-# jsonifies data for dynamicly generated checkboxes in new_schedule()
 @bp.route("/new-schedule/<workplace>")
 @login_required
 def new_schedule_find_workers(workplace):
@@ -63,24 +61,21 @@ def new_schedule_find_workers(workplace):
     :param workplace: chosen workplace
     :return: jsonified list of workers assigned to chosen workplace
     """
-    if current_user.access_level != "0" and current_user.access_level != "1" and current_user.access_level != "2":
-        flash("Użytkownik nie ma uprawnień do wyświetlenia tej strony")
+    if acc_test.check_access(2) is False:
         return redirect(url_for("main.index"))
 
     jsondict = find_workers.find_workers(workplace)
     return jsonify({"workers": jsondict})
 
 
-# adds schedule to db
 @bp.route('/schedule-to-db/<action>', methods=['POST'])
 @login_required
 def new_schedule_to_db(action):
     """
-    Adds new (unaccepted) schedule do database or replaces unaccepted version with accepted one
+    Adds new (unaccepted) schedule do database or replaces unaccepted version with accepted one.
     :param action: tells function if it has to add new version to db or replace existing one with it's accepted version.
     """
-    if current_user.access_level != "0" and current_user.access_level != "1" and current_user.access_level != "2":
-        flash("Użytkownik nie ma uprawnień do wyświetlenia tej strony")
+    if acc_test.check_access(2) is False:
         return redirect(url_for("main.index"))
 
     data = request.json
@@ -94,15 +89,13 @@ def new_schedule_to_db(action):
     # return "2"
 
 
-# makes list of unaccepted schedule for current user
 @bp.route("/unaccepted_schedules", methods=["GET", "POST"])
 @login_required
 def unaccepted_schedules():
     """
-    :return: shows list of every unaccepted schedules which current user can accept
+    :return: shows list of every unaccepted schedules which current user can accept.
     """
-    if (current_user.access_level != "0") and (current_user.access_level != "1"):
-        flash("Użytkownik nie ma uprawnień do wyświetlenia tej strony")
+    if acc_test.check_access(1) is False:
         return redirect(url_for("main.index"))
 
     los = list_of_schedules.list_of_schedules_acc_mod(mod_acc=False)
@@ -111,14 +104,16 @@ def unaccepted_schedules():
                            ua=los["schedules"], sn=los["nos"], Schedule=Schedule)
 
 
-# creates modifiable template with schedule
 @bp.route("/accept-schedule", methods=["GET", "POST"])
 @login_required
 def accept_modify_schedule():
     """
-    :return: creates template with modifiable version of chosen unaccepted schedule and unmodifiable look
+    :return: creates template with modifiable version of chosen unaccepted schedule and unmodifiable view.
     at previous month schedule
     """
+    if acc_test.check_access(1) is False:
+        return redirect(url_for("main.index"))
+
     action = request.args.get("action")
     schedule = None
     cal = Calendar()
@@ -135,22 +130,20 @@ def accept_modify_schedule():
                            id=to_render["schedule_id"], Guidelines=Guidelines, Shop=Shop)
 
 
-# makes list of schedules modifiable by current user
 @bp.route("/modifiable-schedules", methods=["GET", "POST"])
 @login_required
 def modifiable_schedules():
     """
+    Makes list of schedules modifiable by current user.
     :return: renders template with form that allows to filter all accepted schedules and chose one to modify
     """
-    if (current_user.access_level != "0") and (current_user.access_level != "1") and (current_user.access_level != "2"):
-        flash("Użytkownik nie ma uprawnień do wyświetlenia tej strony")
+    if acc_test.check_access(2) is False:
         return redirect(url_for("main.index"))
 
     return render_template("schedules/schedules-to-modify.html", title="Grafiki - modyfikowalne grafiki",
                            mn=MONTH_NAMES, Schedule=Schedule)
 
 
-# jsonifies data for dynamically generated filtered list of schedules in modifiable_schedules()
 @bp.route("/filter-schedules/<year>/<month>/<workplace>/<action>")
 @login_required
 def filter_schedules_to_modify(year, month, workplace, action):
@@ -162,33 +155,30 @@ def filter_schedules_to_modify(year, month, workplace, action):
     :param action: action to take
     :return: matching schedule
     """
-    if action == "modify" and current_user.access_level != "0" and current_user.access_level != "1" \
-            and current_user.access_level != "2":
-        flash("Użytkownik nie ma uprawnień do wyświetlenia tej strony")
+    if acc_test.check_access(2) is False:
         return redirect(url_for("main.index"))
+
     return jsonify(filter_sched_to_modify.find_schedule(year, month, workplace, action))
 
 
-# removes schedule from db
 @bp.route('/remove-schedule/<schedule>', methods=["GET", "POST"])
 @login_required
 def remove_schedule(schedule):
     """
-    Removes schedule with passed id from db
+    Removes schedule with passed id from db.
     :param schedule: schedule's id
     """
-    if current_user.access_level != "0" and current_user.access_level != "1" and current_user.access_level != "2":
-        flash("Użytkownik nie ma uprawnień do wyświetlenia tej strony")
+    if acc_test.check_access(2) is False:
         return redirect(url_for("main.index"))
 
     return remove_sched.remove_sched(schedule)
 
 
-# adds user to existing schedule
 @bp.route('/add-user-to-schedule/<schedule_id>/<worker>/<action>', methods=["GET", "POST"])
 @login_required
 def add_user_to_schedule(schedule_id, worker, action):
     """
+    Adds user to schedule.
     :param schedule_id: schedule, to which worker should be appended
     :param worker: worker that will be added to schedule
     :param action: determines if modifying or accepting schedule
@@ -202,12 +192,11 @@ def add_user_to_schedule(schedule_id, worker, action):
                             v=schedule.version))
 
 
-# generates form to choose schedule to show
 @bp.route('/choose_show_schedule', methods=["GET", "POST"])
 @login_required
 def choose_show_schedule():
     """
-    :return: generates form to choose schedule to show
+    :return: generates form to choose schedule to show.
     """
     action = request.args.get("action")
     title = "Grafiki - podgląd grafiku"
@@ -215,11 +204,11 @@ def choose_show_schedule():
     return render_template("schedules/choose_show_schedule.html", title=title, mn=MONTH_NAMES, action=action)
 
 
-# generates uneditable template with chosen schedule
 @bp.route('/show_schedule/<schd>/<version>', methods=["GET", "POST"])
 @login_required
 def show_schedule(schd, version):
     """
+    Generates uneditable template with chosen schedule.
     :return: template with view of chosen schedule
     """
     schd_dict = show_schedule_helper.show_schedule_helper(schd, version)
@@ -228,16 +217,14 @@ def show_schedule(schd, version):
                            wdn=WEEKDAY_NAMES)
 
 
-# form to select for which year, month and workplace guideline would be created
 @bp.route('/select-guideline', methods=["GET", "POST"])
 @login_required
 def select_guideline():
     """
-    Allows to select for which schedule guidelines will be created
+    Allows to select for which schedule guidelines will be created.
     :return: template for choose year, month and workplace
     """
-    if (current_user.access_level != "0") and (current_user.access_level != "1"):
-        flash("Użytkownik nie ma uprawnień do wyświetlenia tej strony")
+    if acc_test.check_access(1) is False:
         return redirect(url_for("main.index"))
 
     title = "Grafiki - wytyczne"
@@ -250,16 +237,14 @@ def select_guideline():
     return render_template("schedules/select-guideline.html", title=title, mn=MONTH_NAMES, form=form)
 
 
-# creating guideline
 @bp.route('/create-guideline', methods=["GET", "POST"])
 @login_required
 def create_guideline():
     """
-    Template with calendar where user can input guidelines
+    Template with calendar where user can input guidelines.
     :return: template for guidelines
     """
-    if (current_user.access_level != "0") and (current_user.access_level != "1"):
-        flash("Użytkownik nie ma uprawnień do wyświetlenia tej strony")
+    if acc_test.check_access(1) is False:
         return redirect(url_for("main.index"))
 
     year = int(request.args.get("y"))
@@ -270,15 +255,13 @@ def create_guideline():
                            mn=MONTH_NAMES, wdn=WEEKDAY_NAMES, cal=Calendar(), Guidelines=Guidelines)
 
 
-# sends guidelines to db
 @bp.route('/guidelines-to-db', methods=["GET", "POST"])
 @login_required
 def guidelines_to_db():
     """
-    Adds records with guidelines to db
+    Adds records with guidelines to db.
     """
-    if (current_user.access_level != "0") and (current_user.access_level != "1"):
-        flash("Użytkownik nie ma uprawnień do wyświetlenia tej strony")
+    if acc_test.check_access(1) is False:
         return redirect(url_for("main.index"))
 
     guideline_to_database.add_guideline()

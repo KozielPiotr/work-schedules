@@ -5,3 +5,4 @@ BACK_app.db
 app/xlsx_files/
 venv/
 robot/results/
+.pytest_cache/

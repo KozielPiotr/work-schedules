@@ -7,16 +7,14 @@ Routes for logging user in and out
 """
 
 #-*- coding: utf-8 -*-
-# pylint: disable=no-member
 
 from flask import url_for, redirect, flash, request, render_template
-from flask_login import login_user, logout_user, current_user, login_required
-from werkzeug.urls import url_parse
+from flask_login import logout_user, current_user, login_required
 from app import db
 from app.models import User
 from app.auth import bp
 from app.auth.forms import LoginForm, PasswordChangeForm, AdminPasswordChangeForm
-from app.auth.workers_for_admin_pswd_change import users_for_admin
+from app.auth import workers_for_admin_pswd_change, log_in
 
 
 # Login page. Checks if user is logged in and if not redirects to log in page
@@ -28,15 +26,11 @@ def login():
         return redirect(url_for("main.index"))
     form = LoginForm()
     if form.validate_on_submit():
-        user = User.query.filter_by(username=form.username.data).first()
-        if user is None or not user.check_password(form.password.data):
-            flash("Nieprawidłowa nazwa użytkownika lub hasło")
-            return redirect(url_for("main.index"))
-        login_user(user, remember=form.remember_me.data)
-        next_page = request.args.get("next")
-        if not next_page or url_parse(next_page).netloc != "":
-            next_page = url_for("main.index")
-        return redirect(next_page)
+        user_name = form.username.data
+        user_password = form.password.data
+        remember = form.remember_me.data
+        return redirect(log_in.login_to_page(remember, user_name, user_password))
+
     return render_template("auth/login.html", title="Grafiki - logowanie", form=form)
 
 
@@ -82,7 +76,7 @@ def admin_password_change():
     :return: main page, password for current user changed
     """
     form = AdminPasswordChangeForm()
-    form.worker.choices = users_for_admin()
+    form.worker.choices = workers_for_admin_pswd_change.users_for_admin()
 
     if form.validate_on_submit():
         worker = User.query.filter_by(username=form.worker.data).first()
