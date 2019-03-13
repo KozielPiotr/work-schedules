@@ -9,14 +9,14 @@ from app import db
 from app.errors import bp
 
 @bp.app_errorhandler(404)
-def not_found_error():
+def not_found_error(error):
     """
     404 error
     """
     return render_template('errors/404.html'), 404
 
 @bp.app_errorhandler(500)
-def internal_error():
+def internal_error(error):
     """
     404 error
     """
