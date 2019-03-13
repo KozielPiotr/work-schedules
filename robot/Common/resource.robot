@@ -72,6 +72,12 @@ Input New Password
 Go To Password Change
     Click Link    change-password
     Title Should Be    Grafiki - zmiana hasła
+
+Check Wrong Login
+    Page Should Contain    Nieprawidłowa nazwa użytkownika lub hasło
+
+No User Or Password
+    Page Should Contain    Pole wymagane
     
     
 

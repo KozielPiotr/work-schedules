@@ -1,6 +1,6 @@
 *** Settings ***
 Documentation     A test suite with a test for changing password.
-Resource          resource.robot
+Resource          ../Common/resource.robot
 
 *** Test Cases ***
 Change Password
@@ -13,6 +13,9 @@ Change Password
     Input New Password    b
     Submit Credentials
     Logout
+
+
+Change Password Back
     Go To Login Page
     Input Username    admin admin
     Input Password    b
@@ -22,4 +25,5 @@ Change Password
     Input Current Password    b
     Input New Password    a
     Submit Credentials
+    Logout
     [Teardown]    Close Browser
