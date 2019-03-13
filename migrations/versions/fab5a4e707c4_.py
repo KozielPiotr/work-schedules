@@ -1,8 +1,8 @@
 """empty message
 
-Revision ID: d7c02a8a54d3
+Revision ID: fab5a4e707c4
 Revises: 
-Create Date: 2019-03-04 13:36:39.318773
+Create Date: 2019-03-13 21:38:00.244578
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = 'd7c02a8a54d3'
+revision = 'fab5a4e707c4'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -35,6 +35,7 @@ def upgrade():
     sa.Column('accepted', sa.Boolean(), nullable=False),
     sa.Column('billing_period', sa.Integer(), nullable=False),
     sa.Column('version', sa.Integer(), nullable=False),
+    sa.Column('timestamp', sa.DateTime(), nullable=False),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_index(op.f('ix_schedule_accepted'), 'schedule', ['accepted'], unique=False)
@@ -42,6 +43,7 @@ def upgrade():
     op.create_index(op.f('ix_schedule_hrs_to_work'), 'schedule', ['hrs_to_work'], unique=False)
     op.create_index(op.f('ix_schedule_id'), 'schedule', ['id'], unique=True)
     op.create_index(op.f('ix_schedule_name'), 'schedule', ['name'], unique=False)
+    op.create_index(op.f('ix_schedule_timestamp'), 'schedule', ['timestamp'], unique=False)
     op.create_index(op.f('ix_schedule_version'), 'schedule', ['version'], unique=False)
     op.create_table('shop',
     sa.Column('id', sa.Integer(), nullable=False),
@@ -99,7 +101,6 @@ def upgrade():
     sa.ForeignKeyConstraint(['worker'], ['user.id'], ),
     sa.ForeignKeyConstraint(['workplace'], ['shop.id'], )
     )
-	
     op.execute('INSERT INTO "user" VALUES (1, "admin admin", "pbkdf2:sha256:50000$Fv8pGxVC$f13556c64ea24875a6a550a827d1e769d332bd58a4d996c561af581727ca333f", "0");')
     op.execute('INSERT INTO "user" VALUES (2, "Example worker", "pbkdf2:sha256:50000$Fv8pGxVC$f13556c64ea24875a6a550a827d1e769d332bd58a4d996c561af581727ca333f", "4");')
     op.execute('INSERT INTO "shop" VALUES (1, "Example Workplace");')
@@ -129,6 +130,7 @@ def downgrade():
     op.drop_index(op.f('ix_shop_shopname'), table_name='shop')
     op.drop_table('shop')
     op.drop_index(op.f('ix_schedule_version'), table_name='schedule')
+    op.drop_index(op.f('ix_schedule_timestamp'), table_name='schedule')
     op.drop_index(op.f('ix_schedule_name'), table_name='schedule')
     op.drop_index(op.f('ix_schedule_id'), table_name='schedule')
     op.drop_index(op.f('ix_schedule_hrs_to_work'), table_name='schedule')

@@ -1,9 +1,9 @@
 #-*- coding: utf-8 -*-
 
+from datetime import datetime
 from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
 from app import db, login
-
 
 
 workplaces = db.Table("workplaces",
@@ -56,6 +56,7 @@ class Schedule(db.Model):
     accepted = db.Column(db.Boolean, index=True, nullable=False, default=False)
     billing_period = db.Column(db.Integer, index=True, nullable=False, default=0)
     version = db.Column(db.Integer, index=True, nullable=False, default=0)
+    timestamp = db.Column(db.DateTime, index=True, nullable=False, default=datetime.now())
     ind = db.relationship("Personal_schedule", backref="includes")
 
 

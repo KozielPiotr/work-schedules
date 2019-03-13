@@ -7,6 +7,7 @@ from datetime import datetime
 from flask import redirect, url_for, flash, request
 from flask_login import current_user
 from app import MONTH_NAMES
+from app.access_test import acc_test
 from app.models import Schedule, Personal_schedule
 from app.schedules import prev_schedule
 
@@ -19,16 +20,13 @@ def acc_mod_schd(action):
     title = "Grafiki"
     schedule = None
     if action == "to_accept":
-        if (current_user.access_level != "0") and (current_user.access_level != "1"):
-            flash("Użytkownik nie ma uprawnień do wyświetlenia tej strony")
+        if acc_test.check_access(1) is False:
             return redirect(url_for("main.index"))
         schedule = Schedule.query.filter_by(name=request.args.get("schd"), version=int(request.args.get("v")),
                                             accepted=False).first()
         title = "Grafiki - akceptacja grafiku"
     elif action == "to_modify":
-        if (current_user.access_level != "0") and (current_user.access_level != "1") and \
-                (current_user.access_level != "2"):
-            flash("Użytkownik nie ma uprawnień do wyświetlenia tej strony")
+        if acc_test.check_access(2) is False:
             return redirect(url_for("main.index"))
         schedule = Schedule.query.filter_by(name=request.args.get("schd"), version=int(request.args.get("v")),
                                             accepted=True).first()
