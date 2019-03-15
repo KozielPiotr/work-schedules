@@ -1,0 +1,19 @@
+{% extends "main/base.html" %}
+
+{% block content %}
+
+{% if changes %}
+    <h1>Zmiany:</h1>
+    {% for worker in changes %}
+        {% if changes[worker] %}
+            {{ "%s:" % worker }}</br>
+            {% for change in changes[worker] %}
+                {{ change }}<br>
+            {% endfor %}
+        {% endif %}
+    {% endfor %}
+{% else %}
+    <h1>Nic się nie zmieniło?</h1>
+    <a>Sprawdź jeszcze godziny do przepracowania.</a>>
+{% endif %}
+{% endblock %}

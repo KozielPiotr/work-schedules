@@ -14,7 +14,7 @@ from app.schedules import prev_schedule
 
 def acc_mod_schd(action):
     """
-    :param action: action
+    :param action: modify schedule or accept modifications
     :return: dictionary with data to render template in route
     """
     title = "Grafiki"

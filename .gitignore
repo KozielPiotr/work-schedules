@@ -7,3 +7,4 @@ venv/
 robot/results/
 .pytest_cache/
 test_app.py
+docs/

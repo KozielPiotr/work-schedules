@@ -3,10 +3,10 @@
 #-*- coding: utf-8 -*-
 
 from datetime import date
-from flask import redirect, url_for, flash
-from flask_login import current_user
+from flask import redirect, url_for
 from app import db
 from app.models import Personal_schedule, Schedule
+from app.access_test import acc_test
 
 
 def ind_schedules_to_db(data, schedule, billing_period):
@@ -57,8 +57,7 @@ def create_new_unaccepted_version(data):
     Creates unaccepted version of existing schedule
     :param data: json with all information for every individual schedule
     """
-    if current_user.access_level != "0" and current_user.access_level != "1":
-        flash("Użytkownik nie ma uprawnień do wyświetlenia tej strony")
+    if acc_test.check_access(1) is False:
         return redirect(url_for("main.index"))
 
     unaccepted_schedule = Schedule.query.filter_by(

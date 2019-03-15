@@ -21,7 +21,6 @@ def to_xlsx():
     Creates xlsx file with schedule
     :return: redirects to template with generated link to created xlsx file with schedule
     """
-
     return create_xlsx.create_file()
 
 

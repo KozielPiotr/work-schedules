@@ -1,12 +1,10 @@
-"""
-Routes for whole schedules part of project.
+"""Routes for whole schedules part of project.
 - new_schedule_find_workers(): jsonifies data for dynamicly generated checkboxes in new_schedule()
 - new_schedule_to_db(): adds schedule to database
 - unaccepted_schedules(): makes list of unaccepted schedule for current user
 - accept_modify_schedule(): creates modifiable template with schedule
 - modifiable_schedules(): makes list of schedules modifiable by current user
-- filter_schedules_to_modify(): jsonifies data for dynamically generated filtered list of schedules in
-  modifiable_schedules()
+- filter_schedules_to_modify(): jsonifies data for dynamically generated filtered list of schedules in modifiable_schedules()
 - remove_schedule(): removes schedule from db
 - add_user_to_schedule(): adds user to existing schedule
 - choose_show_schedule(): generates form to choose schedule to show
@@ -14,8 +12,7 @@ Routes for whole schedules part of project.
 - show_schedule() : generates uneditable template with chosen schedule
 - select_guideline(): form to select for which year, month and workplace guideline would be created
 - create_guideline(): creates guideline
-- guidelines_to_db(): sends guidelines to db
-"""
+- guidelines_to_db(): sends guidelines to db"""
 
 #-*- coding: utf-8 -*-
 
@@ -29,7 +26,7 @@ from app.models import Shop, Billing_period, Schedule, Guidelines
 from app.schedules.forms import NewScheduleForm, SelectGuideline
 from app.schedules import list_of_schedules, new_schedule_funcs, find_workers, new_schd_to_db, filter_sched_to_modify,\
     accept_or_modify_schedule, remove_sched, add_user_to_sched, show_schedule_helper, select_guidelines_funcs,\
-    guideline_to_database
+    guideline_to_database, differences
 
 
 @bp.route("/new-schedule", methods=["GET", "POST"])
@@ -109,18 +106,16 @@ def unaccepted_schedules():
 def accept_modify_schedule():
     """
     :return: creates template with modifiable version of chosen unaccepted schedule and unmodifiable view.
-    at previous month schedule
     """
     if acc_test.check_access(1) is False:
         return redirect(url_for("main.index"))
 
     action = request.args.get("action")
-    schedule = None
     cal = Calendar()
     to_render = accept_or_modify_schedule.acc_mod_schd(action)
     prev = to_render["prev"]
 
-    return render_template("schedules/accept-schedule.html", action=action, title=to_render["title"], schedule=schedule,
+    return render_template("schedules/accept-schedule.html", action=action, title=to_render["title"],
                            workplace=to_render["workplace"], year=to_render["year"], month=to_render["month"],
                            workers=to_render["workers"], month_name=to_render["month_name"], wdn=WEEKDAY_NAMES,
                            Billing_period=Billing_period, version=to_render["version"], shdict=to_render["shdict"],
@@ -128,6 +123,28 @@ def accept_modify_schedule():
                            prev_hours=prev["hours"], prev_month_name=prev["month_name"], prev_year=prev["year"],
                            prev_workers=prev["workers"], workers_hours=prev["workers_hours"], cal=cal,
                            id=to_render["schedule_id"], Guidelines=Guidelines, Shop=Shop)
+
+
+@bp.route("/show-changes/<id>", methods=["GET", "POST"])
+@login_required
+def show_changes(id):
+    """
+    Shows changes between last accepted and unaccepted version of schedule.
+    :param changes: changes between last accepted and unaccepted version of schedule
+    :return: renders template with changes
+    """
+    if acc_test.check_access(1) is False:
+        return redirect(url_for("main.index"))
+
+    changes = None
+    schedule_id = id
+    schedule = Schedule.query.filter_by(id=schedule_id).first()
+    if schedule.version > 0:
+        diff = differences.Differences()
+        changes = diff.get_diff(schedule_id)
+
+
+    return render_template("schedules/changes.html", changes=changes)
 
 
 @bp.route("/modifiable-schedules", methods=["GET", "POST"])

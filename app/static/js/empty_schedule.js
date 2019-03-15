@@ -255,7 +255,6 @@ function restTime(currentSelector, worker, year, month, day) {
             restHours = 11;
         } else {
             restHours = (restStop-restStart)/3600000;
-            console.log(restHours)
         };
     };
     return restHours
