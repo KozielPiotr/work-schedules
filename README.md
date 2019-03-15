@@ -9,6 +9,7 @@ It's web app that lets user to create and manage work schedules. Also checks if 
 - schedules includes workers connected to chosen workplace;
 - editing existing schedules;
 - creating guidelines with info how many workers should be in work each day;
+- schowing changes between unaccepted and accepted versions of schedule
 - loading schedule from xlsx file;
 - exporting schedules to xlsx file;
 
