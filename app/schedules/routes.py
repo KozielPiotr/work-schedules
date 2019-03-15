@@ -3,6 +3,7 @@
 - new_schedule_to_db(): adds schedule to database
 - unaccepted_schedules(): makes list of unaccepted schedule for current user
 - accept_modify_schedule(): creates modifiable template with schedule
+- show_changes(): shows changes between last accepted and unaccepted version of schedule.
 - modifiable_schedules(): makes list of schedules modifiable by current user
 - filter_schedules_to_modify(): jsonifies data for dynamically generated filtered list of schedules in modifiable_schedules()
 - remove_schedule(): removes schedule from db
@@ -130,7 +131,7 @@ def accept_modify_schedule():
 def show_changes(id):
     """
     Shows changes between last accepted and unaccepted version of schedule.
-    :param changes: changes between last accepted and unaccepted version of schedule
+    :param id: id of unaccepted schedule
     :return: renders template with changes
     """
     if acc_test.check_access(1) is False:
