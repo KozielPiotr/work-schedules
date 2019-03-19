@@ -5,7 +5,7 @@
 from calendar import Calendar
 from datetime import datetime
 from flask import redirect, url_for, flash, request
-from flask_login import current_user
+
 from app import MONTH_NAMES
 from app.access_test import acc_test
 from app.models import Schedule, Personal_schedule
