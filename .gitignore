@@ -6,5 +6,4 @@ app/xlsx_files/
 venv/
 robot/results/
 .pytest_cache/
-test_app.py
 docs/
