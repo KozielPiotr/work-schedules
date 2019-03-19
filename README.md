@@ -47,3 +47,10 @@ With app running:
 $ pybot -d robot/results robot
 ```
 Google Chrome and [Chromedriver](http://chromedriver.chromium.org/getting-started?fbclid=IwAR3CPyq8Yr3-omfEVIHQ4X9TCJKe3bzYFGd8zbODELDSHngr04mhiuxW9hc) required.
+
+## Run unit tests
+With app running:
+```
+$ py.test
+```
+Google Chrome and [Chromedriver](http://chromedriver.chromium.org/getting-started?fbclid=IwAR3CPyq8Yr3-omfEVIHQ4X9TCJKe3bzYFGd8zbODELDSHngr04mhiuxW9hc) required.
