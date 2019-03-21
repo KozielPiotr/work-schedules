@@ -9,8 +9,8 @@ def get_usernames():
     return users
 
 
-def add_user(username, password):
-    worker = User(username=username, access_level="0")
+def add_user(username, password, access):
+    worker = User(username=username, access_level=access)
     worker.set_password(password)
     db.session.add(worker)
     db.session.commit()
