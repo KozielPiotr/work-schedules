@@ -3,7 +3,6 @@ Main functions of project
 """
 
 #-*- coding: utf-8 -*-
-# pylint: disable=no-member
 
 from flask import render_template
 from flask_login import login_required
@@ -11,7 +10,6 @@ from app import app
 from app.main import bp
 
 
-# main page
 @bp.route("/")
 @bp.route("/index")
 @login_required

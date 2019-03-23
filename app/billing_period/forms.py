@@ -4,6 +4,7 @@ from flask_wtf import FlaskForm
 from wtforms import SubmitField, SelectField, IntegerField
 from wtforms.validators import DataRequired
 
+
 class BillingPeriod(FlaskForm):
     begin_month = SelectField("Początek okresu rozliczeniowego", choices=(("1", "Styczeń"), ("2", "Luty"),
                                                                           ("3", "Marzec"), ("4", "Kwiecień"),

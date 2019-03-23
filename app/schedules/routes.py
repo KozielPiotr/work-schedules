@@ -128,22 +128,21 @@ def accept_modify_schedule():
 
 @bp.route("/show-changes/<id>", methods=["GET", "POST"])
 @login_required
-def show_changes(id):
+def show_changes(sch_id):
     """
     Shows changes between last accepted and unaccepted version of schedule.
-    :param id: id of unaccepted schedule
+    :param sch_id: id of unaccepted schedule
     :return: renders template with changes
     """
     if acc_test.check_access(1) is False:
         return redirect(url_for("main.index"))
 
     changes = None
-    schedule_id = id
+    schedule_id = sch_id
     schedule = Schedule.query.filter_by(id=schedule_id).first()
     if schedule.version > 0:
         diff = differences.Differences()
         changes = diff.get_diff(schedule_id)
-
 
     return render_template("schedules/changes.html", changes=changes)
 
