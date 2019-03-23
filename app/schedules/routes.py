@@ -126,7 +126,7 @@ def accept_modify_schedule():
                            id=to_render["schedule_id"], Guidelines=Guidelines, Shop=Shop)
 
 
-@bp.route("/show-changes/<id>", methods=["GET", "POST"])
+@bp.route("/show-changes/<sch_id>", methods=["GET", "POST"])
 @login_required
 def show_changes(sch_id):
     """
@@ -141,8 +141,7 @@ def show_changes(sch_id):
     schedule_id = sch_id
     schedule = Schedule.query.filter_by(id=schedule_id).first()
     if schedule.version > 0:
-        diff = differences.Differences()
-        changes = diff.get_diff(schedule_id)
+        changes = differences.get_diff(schedule_id)
 
     return render_template("schedules/changes.html", changes=changes)
 

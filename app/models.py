@@ -1,4 +1,5 @@
 #-*- coding: utf-8 -*-
+# pylint: disable=missing-docstring, too-few-public-methods
 
 from datetime import datetime
 from flask_login import UserMixin
@@ -29,8 +30,8 @@ class User(UserMixin, db.Model):
         return check_password_hash(self.password_hash, password)
 
 @login.user_loader
-def load_user(id):
-    return User.query.get(int(id))
+def load_user(u_id):
+    return User.query.get(int(u_id))
 
 class Shop(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -39,6 +40,7 @@ class Shop(db.Model):
 
     def __repr__(self):
         return "{}".format(self.shopname)
+
 
 class Billing_period(db.Model):
     id = db.Column(db.Integer, primary_key=True)

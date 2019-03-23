@@ -1,8 +1,10 @@
 #-*- coding: utf-8 -*-
+# pylint: disable=missing-docstring
 
-from wtforms import StringField, PasswordField, BooleanField, SubmitField, SelectField
 from flask_wtf import FlaskForm
+from wtforms import StringField, PasswordField, BooleanField, SubmitField, SelectField
 from wtforms.validators import DataRequired, EqualTo
+
 
 class LoginForm(FlaskForm):
     username = StringField("Użytkownik", validators=[DataRequired(message="Pole wymagane")])

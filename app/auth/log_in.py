@@ -1,13 +1,16 @@
-"""Logs user in"""
+"""Function is called when user tries to log in"""
+
+#-*- coding: utf-8 -*-
 
 from flask import url_for, request, flash
 from flask_login import login_user
 from werkzeug.urls import url_parse
+
 from app.models import User
 
-#-*- coding: utf-8 -*-
 
 def login_to_page(remember, user_name, user_password):
+    """Logs user in"""
     user = User.query.filter_by(username=user_name).first()
     if user is None or not user.check_password(user_password):
         flash("Nieprawidłowa nazwa użytkownika lub hasło")

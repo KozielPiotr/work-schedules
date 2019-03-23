@@ -1,3 +1,5 @@
+# pylint: disable=missing-docstring, wrong-import-position
+
 from flask import Blueprint
 
 bp = Blueprint("acc", __name__)

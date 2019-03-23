@@ -1,4 +1,5 @@
 #-*- coding: utf-8 -*-
+# pylint: disable=missing-docstring, wrong-import-position
 
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy

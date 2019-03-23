@@ -1,10 +1,11 @@
 #-*- coding: utf-8 -*-
-
+# pylint: disable=missing-docstring
 
 from flask_wtf import FlaskForm
 from wtforms import SubmitField, SelectField, IntegerField, SelectMultipleField
 from wtforms.validators import DataRequired
 from wtforms.widgets import ListWidget, CheckboxInput
+
 
 class MultiCheckboxField(SelectMultipleField):
     widget = ListWidget(prefix_label=False)

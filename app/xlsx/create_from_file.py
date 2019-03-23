@@ -58,7 +58,7 @@ def create_sched():
     for row in range(int(sh.max_row)):
         for col in range(int(sh.max_column)):
             current_cell = sh.cell(row=row + 1, column=col + 1)
-            if type(current_cell.value) is str and current_cell.value.lower().replace(" ", "") == month_name.lower():
+            if isinstance(current_cell.value, str) and current_cell.value.lower().replace(" ", "") == month_name.lower():
                 month_cell = current_cell
     if month_cell is None:
         return wrong_file("miesiąca", month, year, workplace)
@@ -68,7 +68,7 @@ def create_sched():
     for row in range(int(sh.max_row)):
         for col in range(int(sh.max_column)):
             current_cell = sh.cell(row=row + 1, column=col + 1)
-            if type(current_cell.value) is int and current_cell.value == year:
+            if isinstance(current_cell.value, int) and current_cell.value == year:
                 year_cell = current_cell
     if year_cell is None:
         return wrong_file("roku", month, year, workplace)
@@ -78,7 +78,7 @@ def create_sched():
     for row in range(int(sh.max_row)):
         for col in range(int(sh.max_column)):
             current_cell = sh.cell(row=row + 1, column=col + 1)
-            if type(current_cell.value) is str and current_cell.value.lower() == workplace.lower():
+            if isinstance(current_cell.value, str) and current_cell.value.lower() == workplace.lower():
                 workplace_cell = current_cell
     if workplace_cell is None:
         return wrong_file("sklepu", month, year, workplace)
