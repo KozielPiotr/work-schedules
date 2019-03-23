@@ -20,6 +20,7 @@
 from calendar import Calendar
 from flask import redirect, url_for, render_template, jsonify, request
 from flask_login import login_required
+
 from app import MONTH_NAMES, WEEKDAY_NAMES
 from app.access_test import acc_test
 from app.schedules import bp

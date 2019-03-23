@@ -4,6 +4,7 @@
 
 from calendar import Calendar
 from flask import request
+
 from app import db
 from app.models import Shop, Guidelines
 

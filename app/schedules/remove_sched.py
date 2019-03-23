@@ -3,6 +3,7 @@
 #-*- coding: utf-8 -*-
 
 from flask import redirect, url_for, flash
+
 from app import db
 from app.models import Schedule
 

@@ -4,7 +4,9 @@
 # pylint: disable=no-member
 
 from flask_login import current_user
+
 from app.models import Schedule
+
 
 def list_of_schedules_acc_mod(mod_acc):
     """

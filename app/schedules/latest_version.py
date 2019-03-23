@@ -4,6 +4,7 @@
 
 from app.models import Schedule
 
+
 def find_latest_version_schd(schedules, workplace, year, month):
     """
     Only latest version can be modified.

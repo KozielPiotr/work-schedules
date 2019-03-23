@@ -4,6 +4,7 @@
 
 from app.models import User
 
+
 def users_for_admin():
     """changes chosen user's password. Admin only"""
     workers = []

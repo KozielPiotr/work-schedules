@@ -4,6 +4,7 @@
 
 from app.models import Shop, User
 
+
 def assign_worker(form):
     """Fills form's selectfield choices"""
 

@@ -10,6 +10,7 @@ Routes for logging user in and out
 
 from flask import url_for, redirect, flash, request, render_template
 from flask_login import logout_user, current_user, login_required
+
 from app import db
 from app.models import User
 from app.auth import bp

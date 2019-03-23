@@ -4,6 +4,7 @@
 
 from flask import url_for
 from flask_login import current_user
+
 from app.models import Schedule
 from app.schedules import latest_version
 

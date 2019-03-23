@@ -10,6 +10,7 @@ Managing users accounts, workplaces and connections between them
 
 from flask import flash, redirect, url_for, render_template, jsonify, request
 from flask_login import login_required
+
 from app import db
 from app.models import User, Shop
 from app.access_test import acc_test

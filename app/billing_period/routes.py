@@ -8,6 +8,7 @@ Allows to set beginning of counting billing periods and length of it in months.
 from datetime import datetime
 from flask import flash, redirect, url_for, render_template
 from flask_login import login_required
+
 from app import db
 from app.access_test import acc_test
 from app.billing_period.forms import BillingPeriod

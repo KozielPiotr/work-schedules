@@ -9,6 +9,7 @@ from openpyxl import Workbook
 from openpyxl.styles import PatternFill, Alignment
 from openpyxl.styles.borders import Border, Side
 from openpyxl.utils import column_index_from_string as cifs
+
 from app import MONTH_NAMES, WEEKDAY_NAMES
 from app.schedules import show_schedule_helper
 
