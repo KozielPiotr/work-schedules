@@ -1,8 +1,11 @@
 """Fixtures for pytest"""
 
 import pytest
+from selenium import webdriver
+
 from app import app, db
 from app.models import User
+from app.tests.units.selenium.funcs import login_logout, get_users
 
 
 @pytest.fixture(scope="function")
@@ -24,3 +27,13 @@ def init_database():
     db.session.commit()
     yield db
     db.drop_all()
+
+
+@pytest.fixture(scope="function")
+def sel_log_admin():
+    driver = webdriver.Chrome()
+    get_users.add_user("a", "a", "0")
+    login_logout.log_in("a", "a", driver)
+    yield driver
+    get_users.remove_user("a")
+    driver.close()

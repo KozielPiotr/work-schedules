@@ -1,5 +1,6 @@
 
 from selenium import webdriver
+
 from app.tests.units.selenium.funcs import login_logout, get_users
 
 
@@ -57,7 +58,6 @@ def test_access_levels():
             assert '<h5 class="card-title">Kierownik</h5>' in driver.page_source
             assert '<h5 class="card-title">Użytkownik</h5>' in driver.page_source
             assert '<h5 class="card-title">Administrator</h5>' not in driver.page_source
-
         elif level == "2":
             assert '<h5 class="card-title">Kierownik</h5>' in driver.page_source
             assert '<h5 class="card-title">Użytkownik</h5>' in driver.page_source
