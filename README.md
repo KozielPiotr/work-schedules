@@ -1,4 +1,4 @@
-# Overviev
+# Overview
 It's web app that lets user to create and manage work schedules. Also checks if schedule is compatibile with work law.
 
 ## Funcionalities:
